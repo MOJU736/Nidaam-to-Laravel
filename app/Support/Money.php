@@ -115,6 +115,7 @@ class Money
                 'date_format' => explode('|', (string) ($row->date_format ?? ''))[0] ?: 'd-M-Y',
                 'vehicles' => $row === null || ! isset($row->vehicles_enabled) ? true : (bool) $row->vehicles_enabled,
                 'billable' => (bool) ($row->billable_expenses_enabled ?? false),
+                'construction' => (bool) ($row->construction_enabled ?? false),
             ];
         }
 
@@ -124,6 +125,11 @@ class Money
     public static function vehiclesEnabled(): bool
     {
         return self::settings()['vehicles'];
+    }
+
+    public static function constructionEnabled(): bool
+    {
+        return self::settings()['construction'];
     }
 
     public static function billableExpensesEnabled(): bool

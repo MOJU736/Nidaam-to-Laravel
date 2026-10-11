@@ -31,7 +31,7 @@ class SettingsController extends Controller
             'date_format' => ['required', 'string'], 'fy_start' => ['required', 'date_format:Y-m-d'],
         ]);
         $this->settings->saveCompany($d + ['vehicles_enabled' => $request->boolean('vehicles_enabled'), 'commissions_enabled' => $request->boolean('commissions_enabled'),
-            'billable_expenses_enabled' => $request->boolean('billable_expenses_enabled')]);
+            'billable_expenses_enabled' => $request->boolean('billable_expenses_enabled'), 'construction_enabled' => $request->boolean('construction_enabled')]);
 
         return redirect()->route('settings.company')->with('message', 'Company settings saved.');
     }

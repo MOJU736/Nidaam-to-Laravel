@@ -44,7 +44,17 @@ class PayrollService
             'group_prefix' => '02', 'group_patterns' => ['current liab', 'other current', 'payable'], 'name' => 'Salaries Payable', 'dc' => 'C', 'notes' => 'Net pay approved in pay runs and not paid yet'],
         'staff_advances' => ['root' => 'asset', 'patterns' => ['staff advance', 'employee advance', 'salary advance', 'staff loan', 'employee loan'], 'exclude' => [],
             'group_prefix' => '01', 'group_patterns' => ['other current', 'current asset', 'receivable'], 'name' => 'Staff Advances and Loans', 'dc' => 'D', 'notes' => 'Salary advances and loans to staff, taken back from pay runs'],
+        // Construction (same mechanism, same app_flags keys as the legacy app): progress claims and wage sheets post to these
+        'retention' => ['root' => 'asset', 'patterns' => ['retention receivable', 'retention'], 'exclude' => ['payable'],
+            'group_prefix' => '01', 'group_patterns' => ['current asset', 'receivable'], 'name' => 'Retention Receivable', 'dc' => 'D', 'notes' => 'Retention held back by construction clients until handover'],
+        'wages_expense' => ['root' => 'expense', 'patterns' => ['site labour', 'site labor', 'site wages', 'wages', 'salaries', 'salary'], 'exclude' => ['payable', 'accrued'],
+            'group_prefix' => '04', 'group_patterns' => ['direct cost', 'cost of sales', 'cost of goods'], 'name' => 'Site Wages', 'dc' => 'D', 'notes' => 'Wages of site workers from wage sheets'],
+        'wages_payable' => ['root' => 'liability', 'patterns' => ['wages payable', 'salaries payable', 'salary payable', 'accrued wages'], 'exclude' => [],
+            'group_prefix' => '02', 'group_patterns' => ['current liab', 'payable'], 'name' => 'Wages Payable', 'dc' => 'C', 'notes' => 'Wages on wage sheets not paid yet'],
     ];
+
+    /** The accounts a pay run posts to (the rest of LEDGERS belong to Construction). */
+    protected const PAYROLL_KEYS = ['salary_expense', 'salary_payable', 'staff_advances'];
 
     public function __construct(protected ChartOfAccounts $chart, protected EntryService $entries) {}
 
@@ -288,7 +298,7 @@ class PayrollService
         $l = Ledger::create(['group_id' => $g->id, 'name' => $sp['name'], 'code' => $code, 'op_balance' => '0.00', 'op_balance_dc' => $sp['dc'], 'type' => 0,
             'reconciliation' => 0, 'notes' => $sp['notes'].' (created automatically)']);
         $this->setFlag($flag, (string) $l->id);
-        ActivityLog::add('Automatic setup: created the account "'.$sp['name'].'" ('.$code.') for Payroll');
+        ActivityLog::add('Automatic setup: created the account "'.$sp['name'].'" ('.$code.')');
 
         return $l;
     }
@@ -297,7 +307,7 @@ class PayrollService
     protected function accounts(): array
     {
         $out = [];
-        foreach (array_keys(self::LEDGERS) as $k) {
+        foreach (self::PAYROLL_KEYS as $k) {
             $out[$k] = (int) $this->ledgerFor($k)->id;
         }
 

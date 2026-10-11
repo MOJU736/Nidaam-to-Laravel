@@ -22,6 +22,7 @@
         <div><label for="method">Method</label><select id="method" name="method"><option value="">—</option>@foreach ($methods as $m)<option value="{{ $m }}" @selected(old('method') === $m)>{{ $m }}</option>@endforeach</select></div>
         <div><label for="reference">Reference</label><input id="reference" name="reference" maxlength="100" value="{{ old('reference') }}"></div>
     </div>
+    @if ($projects)<label for="project">Project <span class="muted">(optional - counts as a cost of the project)</span></label><select id="project" name="project"><option value="">None</option>@foreach ($projects as $group => $opts)<optgroup label="{{ $group }}">@foreach ($opts as $v => $tx)<option value="{{ $v }}" @selected(old('project') === $v)>{{ $tx }}</option>@endforeach</optgroup>@endforeach</select>@endif
     <label for="notes">Notes</label><input id="notes" name="notes" maxlength="500" value="{{ old('notes') }}">
     <div class="actions" style="margin-top:20px"><button>Record expense</button><button name="save_and_new" value="1" class="ghost">Save &amp; new</button><a class="btn ghost" href="{{ route('expenses.index') }}">Cancel</a></div>
 </form>

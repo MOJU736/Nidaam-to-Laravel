@@ -43,7 +43,7 @@
     <p class="muted" style="font-size:13px;margin:4px 0 0">A financial year is always twelve months, so only its first day is asked for.</p>
 
     <h2>Features</h2>
-    @foreach ([['vehicles_enabled', 'Vehicles', 'A Vehicles section on customers, quotations and invoices (for an auto service business).'], ['commissions_enabled', 'Commissions', 'Record and settle money received on a client\'s behalf.'], ['billable_expenses_enabled', 'Billable expenses', 'Mark money out as billable to a customer.']] as [$f, $label, $hint])
+    @foreach ([['vehicles_enabled', 'Vehicles', 'A Vehicles section on customers, quotations and invoices (for an auto service business).'], ['commissions_enabled', 'Commissions', 'Record and settle money received on a client\'s behalf.'], ['billable_expenses_enabled', 'Billable expenses', 'Mark money out as billable to a customer.'], ['construction_enabled', 'Construction (Projects)', 'Projects with contract, variations, budgets, progress claims, retention, site workers and wage sheets; a Project picker on bills, expenses, journal lines and invoices.']] as [$f, $label, $hint])
         <label style="font-weight:400"><input type="checkbox" name="{{ $f }}" value="1" @checked(old($f, $s->{$f} ?? false))> <strong>{{ $label }}</strong> <span class="muted">{{ $hint }}</span></label>
     @endforeach
     <div class="actions" style="margin-top:20px"><button @disabled($locked)>Save settings</button></div>

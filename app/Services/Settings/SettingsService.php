@@ -5,6 +5,7 @@ namespace App\Services\Settings;
 use App\Models\Tenant\Setting;
 use App\Services\Accounting\ActivityLog;
 use App\Support\Money;
+use App\Support\Tables;
 use App\Tenancy\TenantManager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -105,7 +106,7 @@ class SettingsService
             'fy_start' => $start, 'fy_end' => $end,
             'vehicles_enabled' => ! empty($d['vehicles_enabled']) ? 1 : 0, 'commissions_enabled' => ! empty($d['commissions_enabled']) ? 1 : 0,
             'billable_expenses_enabled' => ! empty($d['billable_expenses_enabled']) ? 1 : 0,
-        ]);
+        ] + (Tables::has('settings', 'construction_enabled') && array_key_exists('construction_enabled', $d) ? ['construction_enabled' => ! empty($d['construction_enabled']) ? 1 : 0] : []));
         // the "Choose company" page reads the year from the master list
         if ($account = app(TenantManager::class)->current()) {
             DB::connection('master')->table('accounts')->where('id', $account->id)->update(['fy_start' => $start, 'fy_end' => $end]);

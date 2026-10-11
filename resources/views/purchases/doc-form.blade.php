@@ -5,14 +5,24 @@
     $word = $isBill ? 'Bill' : 'Purchase order';
     $route = $isBill ? 'bills' : 'purchase-orders';
     $label = $editing ? ($isBill ? $purchases->billLabel($doc->number) : $purchases->poLabel($doc->number)) : '';
-    $blankItem = ['item_id' => '', 'description' => '', 'qty' => '1', 'unit_price' => '', 'ledger_id' => '', 'discount_type' => '', 'discount_value' => ''];
+    $blankItem = ['item_id' => '', 'description' => '', 'qty' => '1', 'unit_price' => '', 'ledger_id' => '', 'discount_type' => '', 'discount_value' => '', 'project' => ''];
     $oldItems = old('items');
     $itemLines = is_array($oldItems) ? array_values($oldItems) : ($editing ? $doc->items->whereNotNull('item_id')->map(fn ($i) => ['item_id' => $i->item_id, 'description' => $i->description, 'qty' => rtrim(rtrim((string) $i->qty, '0'), '.'),
-        'unit_price' => $i->unit_price, 'ledger_id' => $i->ledger_id, 'discount_type' => $i->discount_type ?? '', 'discount_value' => $i->discount_value ?? ''])->values()->all() : []);
+        'unit_price' => $i->unit_price, 'ledger_id' => $i->ledger_id, 'discount_type' => $i->discount_type ?? '', 'discount_value' => $i->discount_value ?? '', 'project' => ($i->project_id ?? null) ? $i->project_id.':'.$i->cost_type : ''])->values()->all() : []);
     $oldAcc = old('accounts');
-    $accLines = is_array($oldAcc) ? array_values($oldAcc) : ($editing ? $doc->items->whereNull('item_id')->map(fn ($i) => ['ledger_id' => $i->ledger_id, 'description' => $i->description, 'amount' => $i->amount])->values()->all() : []);
+    $accLines = is_array($oldAcc) ? array_values($oldAcc) : ($editing ? $doc->items->whereNull('item_id')->map(fn ($i) => ['ledger_id' => $i->ledger_id, 'description' => $i->description, 'amount' => $i->amount, 'project' => ($i->project_id ?? null) ? $i->project_id.':'.$i->cost_type : ''])->values()->all() : []);
     if (! $itemLines) { $itemLines = [$blankItem]; }
-    if (! $accLines) { $accLines = [['ledger_id' => '', 'description' => '', 'amount' => '']]; }
+    if (! $accLines) { $accLines = [['ledger_id' => '', 'description' => '', 'amount' => '', 'project' => '']]; }
+    $projectOptions = $projectOptions ?? null;
+    $projectSelect = function ($name, $selected) use ($projectOptions) {
+        $h = '<select name="'.$name.'" style="min-width:150px"><option value="">None</option>';
+        foreach ($projectOptions as $group => $opts) {
+            $h .= '<optgroup label="'.e($group).'">';
+            foreach ($opts as $v => $t) { $h .= '<option value="'.e($v).'"'.((string) $selected === (string) $v ? ' selected' : '').'>'.e($t).'</option>'; }
+            $h .= '</optgroup>';
+        }
+        return new \Illuminate\Support\HtmlString($h.'</select>');
+    };
     $d = fn ($f, $default = '') => old($f, $doc->{$f} ?? $default);
 @endphp
 @section('title', ($editing ? 'Edit ' : 'New ').$word)
@@ -39,7 +49,7 @@
 
     <h2>Item details <span class="muted" style="font-weight:400;font-size:13px">(stock and catalog items; stock goes to Inventory Asset)</span></h2>
     <div class="tbl"><table id="items">
-        <thead><tr><th style="min-width:190px">Item</th><th style="min-width:130px">Description</th><th style="min-width:170px">Account</th><th class="num" style="width:80px">Qty</th><th class="num" style="width:110px">Unit cost</th>@if ($isBill)<th style="width:140px">Discount</th>@endif<th class="num" style="width:100px">Amount</th><th></th></tr></thead>
+        <thead><tr><th style="min-width:190px">Item</th><th style="min-width:130px">Description</th><th style="min-width:170px">Account</th><th class="num" style="width:80px">Qty</th><th class="num" style="width:110px">Unit cost</th>@if ($isBill)<th style="width:140px">Discount</th>@endif @if ($projectOptions)<th style="min-width:150px">Project</th>@endif<th class="num" style="width:100px">Amount</th><th></th></tr></thead>
         <tbody>
         @foreach ($itemLines as $i => $l)
             @php $l = array_merge($blankItem, (array) $l); @endphp
@@ -50,6 +60,7 @@
                 <td><input name="items[{{ $i }}][qty]" class="qty num" inputmode="decimal" value="{{ $l['qty'] }}"></td>
                 <td><input name="items[{{ $i }}][unit_price]" class="up num" inputmode="decimal" value="{{ $l['unit_price'] }}"></td>
                 @if ($isBill)<td><div class="actions" style="flex-wrap:nowrap"><select name="items[{{ $i }}][discount_type]" class="dt" style="width:62px"><option value="">—</option><option value="percent" @selected($l['discount_type'] === 'percent')>%</option><option value="amount" @selected($l['discount_type'] === 'amount')>$</option></select><input name="items[{{ $i }}][discount_value]" class="dv num" inputmode="decimal" value="{{ $l['discount_value'] }}" style="width:70px"></div></td>@endif
+                @if ($projectOptions)<td>{!! $projectSelect("items[$i][project]", $l['project']) !!}</td>@endif
                 <td class="num amt">0.00</td>
                 <td><button type="button" class="ghost sm rm" title="Remove line">&times;</button></td>
             </tr>
@@ -60,14 +71,15 @@
 
     <h2>Account details <span class="muted" style="font-weight:400;font-size:13px">(a cost with no item, like rent - one amount)</span></h2>
     <div class="tbl"><table id="accts">
-        <thead><tr><th style="min-width:220px">Account</th><th>Description</th><th class="num" style="width:130px">Amount</th><th></th></tr></thead>
+        <thead><tr><th style="min-width:220px">Account</th><th>Description</th><th class="num" style="width:130px">Amount</th>@if ($projectOptions)<th style="min-width:150px">Project</th>@endif<th></th></tr></thead>
         <tbody>
         @foreach ($accLines as $i => $l)
-            @php $l = array_merge(['ledger_id' => '', 'description' => '', 'amount' => ''], (array) $l); @endphp
+            @php $l = array_merge(['ledger_id' => '', 'description' => '', 'amount' => '', 'project' => ''], (array) $l); @endphp
             <tr class="aline">
                 <td><select name="accounts[{{ $i }}][ledger_id]"><option value="">Choose an account...</option>@foreach ($accounts as $id => $n)<option value="{{ $id }}" @selected((string) $l['ledger_id'] === (string) $id)>{{ $n }}</option>@endforeach</select></td>
                 <td><input name="accounts[{{ $i }}][description]" value="{{ $l['description'] }}" maxlength="255"></td>
                 <td><input name="accounts[{{ $i }}][amount]" class="aamt num" inputmode="decimal" value="{{ $l['amount'] }}"></td>
+                @if ($projectOptions)<td>{!! $projectSelect("accounts[$i][project]", $l['project']) !!}</td>@endif
                 <td><button type="button" class="ghost sm rm" title="Remove line">&times;</button></td>
             </tr>
         @endforeach

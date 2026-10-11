@@ -24,6 +24,8 @@ use App\Http\Controllers\ItemSettingsController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\WorkforceController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseSettingsController;
 use App\Http\Controllers\QuotationController;
@@ -242,6 +244,31 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/templates/preview', [DocumentTemplatesController::class, 'preview'])->name('settings.templates.preview');
         Route::get('/settings/email', [EmailSettingsController::class, 'edit'])->name('settings.email');
         Route::put('/settings/email', [EmailSettingsController::class, 'update'])->name('settings.email.update');
+
+        // Construction (a company with it switched on): projects, claims, workers and wage sheets.
+        Route::middleware('construction')->group(function () {
+            Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+            Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+            Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+            Route::get('/projects/{id}', [ProjectController::class, 'show'])->whereNumber('id')->name('projects.show');
+            Route::get('/projects/{id}/edit', [ProjectController::class, 'edit'])->whereNumber('id')->name('projects.edit');
+            Route::put('/projects/{id}', [ProjectController::class, 'update'])->whereNumber('id')->name('projects.update');
+            Route::delete('/projects/{id}', [ProjectController::class, 'destroy'])->whereNumber('id')->name('projects.destroy');
+            Route::post('/projects/{id}/variations', [ProjectController::class, 'variationStore'])->whereNumber('id')->name('projects.variations.store');
+            Route::delete('/projects/variations/{variationId}', [ProjectController::class, 'variationDestroy'])->whereNumber('variationId')->name('projects.variations.destroy');
+            Route::post('/projects/{id}/claims', [ProjectController::class, 'claimStore'])->whereNumber('id')->name('projects.claims.store');
+            Route::post('/projects/{id}/retention', [ProjectController::class, 'retentionRelease'])->whereNumber('id')->name('projects.retention');
+            Route::post('/projects/{id}/advances', [ProjectController::class, 'advanceStore'])->whereNumber('id')->name('projects.advances.store');
+            Route::get('/construction/workers', [WorkforceController::class, 'workers'])->name('construction.workers');
+            Route::post('/construction/workers', [WorkforceController::class, 'workerSave'])->name('construction.workers.store');
+            Route::put('/construction/workers/{id}', [WorkforceController::class, 'workerSave'])->whereNumber('id')->name('construction.workers.update');
+            Route::get('/construction/wages', [WorkforceController::class, 'sheets'])->name('construction.wages');
+            Route::get('/construction/wages/create', [WorkforceController::class, 'sheetCreate'])->name('construction.wages.create');
+            Route::post('/construction/wages', [WorkforceController::class, 'sheetStore'])->name('construction.wages.store');
+            Route::get('/construction/wages/{id}', [WorkforceController::class, 'sheetShow'])->whereNumber('id')->name('construction.wages.show');
+            Route::post('/construction/wages/{id}/pay', [WorkforceController::class, 'sheetPay'])->whereNumber('id')->name('construction.wages.pay');
+            Route::post('/construction/wages/{id}/void', [WorkforceController::class, 'sheetVoid'])->whereNumber('id')->name('construction.wages.void');
+        });
 
         // Company settings: home, details and financial year, close / lock the books, and the small lists.
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

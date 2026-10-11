@@ -31,7 +31,7 @@ class ExpenseController extends Controller
     {
         return view('purchases.expense-form', [
             'accounts' => $this->accountChoices(), 'banks' => $this->entries->accountOptions(4), 'methods' => DB::connection('tenant')->table('payment_methods')->orderBy('name')->pluck('name')->all(),
-            'items' => Item::where('status', 1)->where('type', '!=', 'inventory')->whereNotNull('expense_ledger_id')->orderBy('name')->get(['id', 'name']), 'next' => $this->purchases->expenseLabel($this->purchases->nextNumber('expenses')),
+            'items' => Item::where('status', 1)->where('type', '!=', 'inventory')->whereNotNull('expense_ledger_id')->orderBy('name')->get(['id', 'name']), 'next' => $this->purchases->expenseLabel($this->purchases->nextNumber('expenses')), 'projects' => $this->entries->projectOptions(),
         ]);
     }
 
@@ -56,6 +56,7 @@ class ExpenseController extends Controller
             return back()->withInput()->withErrors(['purchases' => 'Choose the expense or asset account.']);
         }
         $d['item_id'] = $itemId;
+        [$d['project_id'], $d['cost_type']] = \App\Services\Construction\ConstructionService::enabled() && \App\Support\Tables::has('projects') ? app(\App\Services\Construction\ConstructionService::class)->parseTag($request->input('project')) : [null, null];
         $id = $this->purchases->recordExpense($d);
 
         return redirect($request->has('save_and_new') ? route('expenses.create') : route('expenses.show', $id))->with('message', 'Expense recorded and posted to the books.');

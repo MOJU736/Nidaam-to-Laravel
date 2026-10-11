@@ -19,7 +19,7 @@
 <form class="card" method="POST" action="{{ $action }}" id="docForm">
     @csrf
     @if ($editing) @method('PUT') @endif
-    @foreach (['number', 'date', 'customer_id'] as $k)@if ($errors->has($k))<p class="error">{{ $errors->first($k) }}</p>@endif @endforeach
+    @foreach (['number', 'date', 'customer_id', 'project_id'] as $k)@if ($errors->has($k))<p class="error">{{ $errors->first($k) }}</p>@endif @endforeach
 
     <div class="row2" style="grid-template-columns:2fr 1fr 1fr 1fr">
         <div><label for="customer_id" style="margin-top:0">Customer *</label>
@@ -32,6 +32,17 @@
         </div>
     </div>
 
+    @if ($isInv && $projectOptions)
+        <div style="margin-top:12px;max-width:420px"><label for="project_id" style="margin-top:0">Project <span class="muted" style="font-weight:400">(optional - counts as billed to the project)</span></label>
+            <select id="project_id" name="project_id"><option value="" data-customer="">None</option>@foreach ($projectOptions as $po)<option value="{{ $po['id'] }}" data-customer="{{ $po['customer_id'] }}" @selected((string) old('project_id', $selectedProject) === (string) $po['id'])>{{ $po['label'] }}</option>@endforeach</select></div>
+        <script>
+        (function () {
+            var cust = document.getElementById('customer_id'), sel = document.getElementById('project_id');
+            function filter() { Array.prototype.forEach.call(sel.options, function (o) { var ok = o.value === '' || o.getAttribute('data-customer') === cust.value; o.hidden = !ok; o.disabled = !ok; if (!ok && o.selected) { sel.value = ''; } }); }
+            cust.addEventListener('change', filter); filter();
+        })();
+        </script>
+    @endif
     @if ($vehiclesOn)
         <div id="vehicleBox" style="margin-top:12px" hidden>
             <label style="margin-top:0">Vehicles <span class="muted" style="font-weight:400">(optional - prices follow the vehicle model)</span></label>

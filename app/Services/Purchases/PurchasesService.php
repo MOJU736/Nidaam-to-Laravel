@@ -147,7 +147,8 @@ class PurchasesService
             foreach (array_values($t['items']) as $i => $l) {
                 $this->db()->table($itemTable)->insert([$fk => $id, 'item_id' => $l['item_id'] ?: null, 'ledger_id' => $l['ledger_id'], 'description' => $l['description'], 'qty' => $l['qty'],
                     'unit_price' => $l['unit_price'], 'amount' => $l['amount'], 'sort_order' => $i]
-                    + ($table === 'bills' ? ['discount_type' => $l['discount_type'], 'discount_value' => $l['discount_value'], 'discount_amount' => $l['discount_amount']] : []));
+                    + ($table === 'bills' ? ['discount_type' => $l['discount_type'], 'discount_value' => $l['discount_value'], 'discount_amount' => $l['discount_amount']] : [])
+                    + ($table === 'bills' && Tables::has('bill_items', 'project_id') ? ['project_id' => $l['project_id'] ?? null, 'cost_type' => ! empty($l['project_id']) ? ($l['cost_type'] ?? null) : null] : []));
             }
 
             return $id;
@@ -243,7 +244,8 @@ class PurchasesService
             $lines = [];
             foreach ($b->items as $l) {
                 $ledger = $postLedger[$l->id] ?? $l->ledger_id;
-                $lines[] = ['ledger_id' => $ledger, 'amount' => $l->amount, 'dc' => 'D', 'narration' => "$note - {$l->description}"];
+                $lines[] = ['ledger_id' => $ledger, 'amount' => $l->amount, 'dc' => 'D', 'narration' => "$note - {$l->description}"]
+                    + (! empty($l->project_id) ? ['project_id' => $l->project_id, 'cost_type' => $l->cost_type] : []); // a project cost: the tag follows the line into the books
                 if ((int) $ledger !== (int) $l->ledger_id) {
                     $this->db()->table('bill_items')->where('id', $l->id)->update(['ledger_id' => $ledger]);
                 }
@@ -255,7 +257,8 @@ class PurchasesService
             if ($discountLedger) {
                 $lines[] = ['ledger_id' => $discountLedger, 'amount' => $discount, 'dc' => 'C', 'narration' => "$note - Discount"];
             }
-            $this->db()->table('entryitems')->insert(array_map(fn ($l) => $l + ['entry_id' => $entryId], $lines));
+            $tagged = Tables::has('entryitems', 'project_id') ? ['project_id' => null, 'cost_type' => null] : [];
+            $this->db()->table('entryitems')->insert(array_map(fn ($l) => $l + $tagged + ['entry_id' => $entryId], $lines)); // every row needs the same columns for one insert
 
             foreach ($stock as $itemId => $u) {
                 $this->db()->table('items')->where('id', $itemId)->update(['quantity_on_hand' => $u['qty'], 'purchase_cost' => $u['cost']]);
@@ -606,9 +609,10 @@ class PurchasesService
             $entryId = $this->db()->table('entries')->insertGetId(['entrytype_id' => $type->id, 'tag_id' => null, 'number' => $this->entries->nextNumber($type->id), 'date' => $d['date'],
                 'dr_total' => $amount, 'cr_total' => $amount, 'notes' => "Expense $label - {$expense->name}"]);
             $project = ! empty($d['project_id']) && Tables::has('entryitems', 'project_id') ? ['project_id' => (int) $d['project_id'], 'cost_type' => $d['cost_type']] : [];
+            $blank = Tables::has('entryitems', 'project_id') ? ['project_id' => null, 'cost_type' => null] : []; // one insert needs the same columns on every row
             $this->db()->table('entryitems')->insert([
-                ['entry_id' => $entryId, 'ledger_id' => $expense->id, 'amount' => $amount, 'dc' => 'D', 'narration' => "Expense $label - {$expense->name}"] + $project,
-                ['entry_id' => $entryId, 'ledger_id' => $d['ledger_id'], 'amount' => $amount, 'dc' => 'C', 'narration' => "Expense $label"],
+                ['entry_id' => $entryId, 'ledger_id' => $expense->id, 'amount' => $amount, 'dc' => 'D', 'narration' => "Expense $label - {$expense->name}"] + $project + $blank,
+                ['entry_id' => $entryId, 'ledger_id' => $d['ledger_id'], 'amount' => $amount, 'dc' => 'C', 'narration' => "Expense $label"] + $blank,
             ]);
             $id = $this->db()->table('expenses')->insertGetId([
                 'expense_ledger_id' => $expense->id, 'item_id' => $d['item_id'] ?: null, 'ledger_id' => $d['ledger_id'], 'entry_id' => $entryId, 'number' => $number, 'date' => $d['date'],

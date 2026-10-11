@@ -161,11 +161,17 @@ class SalesService
         if ($table === 'invoices' && array_key_exists('quotation_id', $d)) {
             $row['quotation_id'] = $d['quotation_id'];
         }
+        if ($table === 'invoices' && array_key_exists('project_id', $d) && Tables::has('invoices', 'project_id')) {
+            $row['project_id'] = $d['project_id'] ?: null; // the Construction project the invoice is billed under
+        }
         if (! empty($d['number'])) {
             $row['number'] = (int) $d['number'];
         }
 
         if ($id) {
+            if ($table === 'invoices' && $this->isClaimInvoice($id)) {
+                $this->fail('This invoice is a progress claim or retention release. It can only be voided, not edited.');
+            }
             $this->db()->table($table)->where('id', $id)->update($row);
             $this->db()->table($itemTable)->where($fk, $id)->delete();
         } else {
@@ -184,6 +190,12 @@ class SalesService
         }
 
         return $id;
+    }
+
+    /** A Construction progress claim / retention release invoice: voided, never edited, reverted or deleted. */
+    public function isClaimInvoice(int $id): bool
+    {
+        return Tables::has('project_claims') && $this->db()->table('project_claims')->where('invoice_id', $id)->exists();
     }
 
     /** The customer's own vehicles a document is for, in the order picked. */
@@ -508,6 +520,9 @@ class SalesService
     {
         $inv = $this->invoice($id) ?? $this->fail('Invoice not found.');
         $this->guardBooks($inv->date);
+        if ($this->isClaimInvoice($id)) {
+            $this->fail('This invoice is a progress claim or retention release. It can only be voided, not reverted to draft.');
+        }
         if ($inv->status !== 'issued') {
             $this->fail('Only issued invoices can be reverted to draft.');
         }
@@ -524,6 +539,9 @@ class SalesService
     public function deleteInvoice(int $id): ?int
     {
         $inv = $this->invoice($id) ?? $this->fail('Invoice not found.');
+        if ($this->isClaimInvoice($id)) {
+            $this->fail('This invoice belongs to a progress claim of a project, so it cannot be deleted. Void it instead.');
+        }
         if ($inv->status === 'issued') {
             $this->fail("An issued invoice can't be deleted. Void it first (it stays on record as Void), or revert it to draft to fix it - then it can be deleted.");
         }

@@ -79,7 +79,8 @@ trait HandlesPurchaseDocuments
             }
             $price = $price === '' ? '0' : $price;
             $lines[] = ['item_id' => $itemId, 'ledger_id' => $ledgerId, 'description' => mb_substr($desc ?: $item->name, 0, 255), 'qty' => $qty, 'unit_price' => $price,
-                'amount' => $sales->lineAmount($qty, $price), 'discount_type' => $discounts ? ($row['discount_type'] ?? null) : null, 'discount_value' => $discounts ? ($row['discount_value'] ?? null) : null];
+                'amount' => $sales->lineAmount($qty, $price), 'discount_type' => $discounts ? ($row['discount_type'] ?? null) : null, 'discount_value' => $discounts ? ($row['discount_value'] ?? null) : null]
+                + $this->projectTag($row);
         }
         if ($typed) {
             throw ValidationException::withMessages(['lines' => 'Every Item details line needs an item from your list - typed lines are not accepted. No item on: "'.implode('", "', $typed).'". Pick the item, or add it under Items first. (For a cost with no item, like rent, use Account details.)']);
@@ -97,13 +98,24 @@ trait HandlesPurchaseDocuments
                 throw ValidationException::withMessages(['lines' => 'One of the accounts on the Account details lines is not valid.']);
             }
             $lines[] = ['item_id' => null, 'ledger_id' => $ledgerId, 'description' => mb_substr($desc, 0, 255), 'qty' => '1', 'unit_price' => $amount, 'amount' => $sales->lineAmount(1, $amount),
-                'discount_type' => null, 'discount_value' => null];
+                'discount_type' => null, 'discount_value' => null] + $this->projectTag($row);
         }
         if (! $lines) {
             throw ValidationException::withMessages(['lines' => 'Add at least one line item.']);
         }
 
         return $lines;
+    }
+
+    /** The Construction project a posted line is tagged to: ['project_id' => .., 'cost_type' => ..] (nulls when none or Construction is off). */
+    protected function projectTag(array $row): array
+    {
+        if (! \App\Services\Construction\ConstructionService::enabled() || ! \App\Support\Tables::has('projects')) {
+            return ['project_id' => null, 'cost_type' => null];
+        }
+        [$pid, $type] = app(\App\Services\Construction\ConstructionService::class)->parseTag($row['project'] ?? '');
+
+        return ['project_id' => $pid, 'cost_type' => $type];
     }
 
     protected function validateBillDoc(Request $request, string $table, ?int $exceptId, SalesService $sales): array
@@ -135,6 +147,7 @@ trait HandlesPurchaseDocuments
             'vendors' => Vendor::where(fn ($q) => $q->where('status', 1)->when($doc, fn ($x) => $x->orWhere('id', $doc->vendor_id)))->orderBy('name')->get(['id', 'name']),
             'selectedVendor' => $doc->vendor_id ?? $vendorId, 'nextNumber' => $doc ? null : $purchases->nextNumber($kind === 'bill' ? 'bills' : 'purchase_orders'),
             'methods' => DB::connection('tenant')->table('payment_methods')->orderBy('name')->pluck('name')->all(), 'inventoryLedger' => $inv,
+            'projectOptions' => $kind === 'bill' ? app(\App\Services\Accounting\EntryService::class)->projectOptions($doc ? $doc->items->pluck('project_id')->filter()->all() : []) : null,
         ];
     }
 }
