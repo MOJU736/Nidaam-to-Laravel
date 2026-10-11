@@ -26,7 +26,7 @@ class ActivityReportController extends ReportController
     /** One generic list page: $cols = [header, key, kind (text|money|qty|int), route name for a link or null]. */
     protected function listPage(Request $request, string $title, string $file, array $cols, array $rows, ?array $totals, string $mode, array $extra = [])
     {
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $out = [[$this->company()], [$title], [$extra['subtitle'] ?? ''], [], array_column($cols, 0)];
             foreach ($rows as $r) {
                 $out[] = array_map(fn ($c) => in_array($c[2], ['money'], true) ? $this->plain($r[$c[1]] ?? null) : ($r[$c[1]] ?? ''), $cols);
@@ -35,7 +35,7 @@ class ActivityReportController extends ReportController
                 $out[] = array_map(fn ($c, $i) => $i === 0 ? 'TOTAL' : (isset($totals[$c[1]]) ? ($c[2] === 'money' ? $this->plain($totals[$c[1]]) : $totals[$c[1]]) : ''), $cols, array_keys($cols));
             }
 
-            return $this->csv($file.'.csv', $out);
+            return $this->file($request, $file.'.csv', $out);
         }
 
         return view('reports.simple', ['title' => $title, 'cols' => $cols, 'rows' => $rows, 'totals' => $totals, 'mode' => $mode] + $extra);
@@ -47,7 +47,7 @@ class ActivityReportController extends ReportController
         $od = $this->activity->openDocs($side);
         $title = $side === 'ar' ? 'Open Invoices' : 'Unpaid Bills';
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $rows = [[$this->company()], [$title], ['As of '.$this->reports->longDate(now()->toDateString())], [], [$side === 'ar' ? 'Customer' : 'Vendor', 'Number', 'Date', 'Due date', 'Days overdue', 'Total', 'Paid', 'Balance due']];
             foreach ($od['groups'] as $g) {
                 foreach ($g['docs'] as $d) {
@@ -56,7 +56,7 @@ class ActivityReportController extends ReportController
             }
             $rows[] = ['TOTAL', '', '', '', '', $this->plain($od['grand']['total']), $this->plain($od['grand']['paid']), $this->plain($od['grand']['due'])];
 
-            return $this->csv($title.' '.now()->toDateString().'.csv', $rows);
+            return $this->file($request, $title.' '.now()->toDateString().'.csv', $rows);
         }
 
         return view('reports.open-docs', ['od' => $od, 'side' => $side, 'title' => $title]);
@@ -99,7 +99,7 @@ class ActivityReportController extends ReportController
         [$from, $to] = $this->range($request);
         $tax = $this->activity->taxSummary($from, $to);
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $rows = [[$this->company()], ['Tax Summary'], [$this->reports->longDate($from).' through '.$this->reports->longDate($to)], [], ['Rate', 'Taxable sales', 'Tax on sales', 'Taxable purchases', 'Tax on purchases', 'Net']];
             foreach ($tax['rates'] as $r) {
                 $rows[] = [$r['label'], $this->plain($r['sales_taxable']), $this->plain($r['sales_tax']), $this->plain($r['purch_taxable']), $this->plain($r['purch_tax']), $this->plain(\App\Support\Money::sub($r['sales_tax'], $r['purch_tax']))];
@@ -112,7 +112,7 @@ class ActivityReportController extends ReportController
                 $rows[] = [$d->label, $d->number, $d->date, $d->party, $this->plain($d->taxable), $this->plain($d->tax)];
             }
 
-            return $this->csv("Tax Summary $from to $to.csv", $rows);
+            return $this->file($request, "Tax Summary $from to $to.csv", $rows);
         }
 
         return view('reports.tax-summary', ['tax' => $tax, 'from' => $from, 'to' => $to, 'reports' => $this->reports]);
@@ -139,7 +139,7 @@ class ActivityReportController extends ReportController
         [$from, $to] = $this->range($request);
         $pl = $this->activity->plByMonth($from, $to);
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $head = ['', ...array_values($pl['months']), 'Total'];
             $rows = [[$this->company()], ['Profit & Loss by Month'], [$this->reports->longDate($from).' through '.$this->reports->longDate($to)], [], $head];
             $line = fn ($label, $vals) => [$label, ...array_map(fn ($k) => $this->plain($vals[$k] ?? null), array_keys($pl['months'])), $this->plain($vals['_total'] ?? null)];
@@ -164,7 +164,7 @@ class ActivityReportController extends ReportController
             }
             $rows[] = $line('Net Income', $pl['net_income']);
 
-            return $this->csv("Profit and Loss by Month $from to $to.csv", $rows);
+            return $this->file($request, "Profit and Loss by Month $from to $to.csv", $rows);
         }
 
         return view('reports.pl-by-month', ['pl' => $pl, 'from' => $from, 'to' => $to, 'reports' => $this->reports]);

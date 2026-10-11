@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ActivityReportController;
+use App\Http\Controllers\BankingController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ChartController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\EmailSettingsController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
@@ -20,6 +23,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseSettingsController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\RecurringInvoiceController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesSettingsController;
 use App\Http\Controllers\StockController;
@@ -198,6 +202,30 @@ Route::middleware('auth')->group(function () {
         Route::post('/vendor-payments/{id}/refund', [CreditNoteController::class, 'refundPayment'])->defaults('side', 'ap')->whereNumber('id')->name('vendor-payments.refund');
         Route::get('/invoices/{id}/write-off', [CreditNoteController::class, 'writeOffForm'])->whereNumber('id')->name('invoices.write-off');
         Route::post('/invoices/{id}/write-off', [CreditNoteController::class, 'writeOff'])->whereNumber('id');
+
+        // PDFs and email of documents; the company's email (SMTP) settings.
+        Route::get('/documents/{type}/{id}/pdf', [DocumentController::class, 'pdf'])->whereNumber('id')->name('documents.pdf');
+        Route::post('/documents/{type}/{id}/email', [DocumentController::class, 'email'])->whereNumber('id')->name('documents.email');
+        Route::get('/settings/email', [EmailSettingsController::class, 'edit'])->name('settings.email');
+        Route::put('/settings/email', [EmailSettingsController::class, 'update']);
+
+        // Recurring invoices (created as drafts).
+        Route::get('/recurring', [RecurringInvoiceController::class, 'index'])->name('recurring.index');
+        Route::get('/recurring/create', [RecurringInvoiceController::class, 'create'])->name('recurring.create');
+        Route::post('/recurring', [RecurringInvoiceController::class, 'store'])->name('recurring.store');
+        Route::get('/recurring/{id}/edit', [RecurringInvoiceController::class, 'edit'])->whereNumber('id')->name('recurring.edit');
+        Route::put('/recurring/{id}', [RecurringInvoiceController::class, 'update'])->whereNumber('id')->name('recurring.update');
+        Route::post('/recurring/{id}/toggle', [RecurringInvoiceController::class, 'toggle'])->whereNumber('id')->name('recurring.toggle');
+        Route::post('/recurring/{id}/run', [RecurringInvoiceController::class, 'runNow'])->whereNumber('id')->name('recurring.run');
+        Route::delete('/recurring/{id}', [RecurringInvoiceController::class, 'destroy'])->whereNumber('id')->name('recurring.destroy');
+
+        // Banking: reconcile an account against a bank statement.
+        Route::get('/banking', [BankingController::class, 'index'])->name('banking.index');
+        Route::match(['get', 'post'], '/banking/reconcile/{id}', [BankingController::class, 'reconcile'])->whereNumber('id')->name('banking.reconcile');
+        Route::match(['get', 'post'], '/banking/rec/{id}', [BankingController::class, 'rec'])->whereNumber('id')->name('banking.rec');
+        Route::get('/banking/history/{id}', [BankingController::class, 'history'])->whereNumber('id')->name('banking.history');
+        Route::get('/banking/report/{id}', [BankingController::class, 'report'])->whereNumber('id')->name('banking.report');
+        Route::post('/banking/undo/{id}', [BankingController::class, 'undo'])->whereNumber('id')->name('banking.undo');
 
         // Reports (read-only; dates come from the address, ?download=csv repeats the page as a file)
         Route::prefix('reports')->group(function () {

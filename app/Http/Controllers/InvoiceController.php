@@ -19,6 +19,7 @@ class InvoiceController extends Controller
 
     public function index(Request $request)
     {
+        app(\App\Services\Sales\RecurringService::class)->runDueAndNotify();
         $rows = DB::connection('tenant')->table('invoices')->join('customers', 'customers.id', '=', 'invoices.customer_id')
             ->when($request->query('status') === 'draft', fn ($q) => $q->where('invoices.status', 'draft'))
             ->orderByDesc('invoices.date')->orderByDesc('invoices.id')->get(['invoices.*', 'customers.name as customer_name']);

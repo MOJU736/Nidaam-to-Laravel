@@ -6,6 +6,7 @@
 <div class="bar">
     <div><h1 style="margin:0">Payment {{ $label }} <span class="pill {{ $p->status === 'void' ? 'overdue' : '' }}">{{ $p->status === 'void' ? 'Void' : 'Received' }}</span></h1><a class="muted" href="{{ route('payments.index') }}">&larr; Payments</a></div>
     <div class="actions">
+        @include('documents._actions', ['type' => 'receipt', 'id' => $p->id])
         @if ($p->status === 'received')
             <a class="btn ghost" href="{{ route('payments.edit', $p->id) }}">Edit</a>
             <form class="inline" method="POST" action="{{ route('payments.void', $p->id) }}" onsubmit="return confirm('Void this payment? Its journal entry is reversed and the invoices it paid become unpaid again.')">@csrf<button class="danger">Void</button></form>
@@ -61,4 +62,5 @@
 @if ($p->status === 'received' && Money::positive($unapplied))
     @include('credits._refund-form', ['action' => route('payments.refund', $p->id), 'remaining' => $unapplied, 'heading' => 'Refund the unapplied '.Money::format($unapplied).' to the customer'])
 @endif
+@include('documents._email-box', ['type' => 'receipt', 'id' => $p->id])
 @endsection

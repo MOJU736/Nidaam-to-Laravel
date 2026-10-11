@@ -6,6 +6,7 @@
 <div class="bar">
     <div><h1 style="margin:0">{{ $word }} {{ $cn->label }} <span class="pill {{ $cn->status === 'void' ? 'overdue' : '' }}">{{ ucfirst($cn->status) }}</span></h1><a class="muted" href="{{ route($ui['route'].'.index') }}">&larr; {{ $ui['names'] }}</a></div>
     <div class="actions">
+        @include('documents._actions', ['type' => $ui['side'] === 'ar' ? 'credit-note' : 'supplier-credit', 'id' => $cn->id])
         @if ($cn->status === 'draft')
             <form class="inline" method="POST" action="{{ route($ui['route'].'.issue', $cn->id) }}">@csrf<button>Issue</button></form>
             <a class="btn ghost" href="{{ route($ui['route'].'.edit', $cn->id) }}">Edit</a>
@@ -75,4 +76,5 @@
 @if ($canRefund)
     @include('credits._refund-form', ['action' => route($ui['route'].'.refund', $cn->id), 'remaining' => $remaining, 'heading' => $ui['side'] === 'ar' ? 'Refund the customer in cash' : 'Record cash received from the supplier'])
 @endif
+@include('documents._email-box', ['type' => $ui['side'] === 'ar' ? 'credit-note' : 'supplier-credit', 'id' => $cn->id])
 @endsection

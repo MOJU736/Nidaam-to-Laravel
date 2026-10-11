@@ -17,6 +17,7 @@
     <div><h1 style="margin:0">{{ $title }}</h1><div class="muted">{{ $subtitle }}</div></div>
     <div class="actions noprint">
         <button type="button" class="ghost" onclick="window.print()">Print</button>
+        <a class="btn ghost" href="{{ request()->fullUrlWithQuery(['download' => 'pdf']) }}">PDF</a>
         <a class="btn ghost" href="{{ request()->fullUrlWithQuery(['download' => 'csv']) }}">Excel / CSV</a>
         <a class="btn ghost" href="{{ route('reports.index') }}">All reports</a>
     </div>

@@ -14,6 +14,7 @@ class DashboardController extends Controller
 {
     public function __invoke()
     {
+        app(\App\Services\Sales\RecurringService::class)->runDueAndNotify();
         return view('dashboard', [
             'company' => Setting::first(),
             'counts' => [

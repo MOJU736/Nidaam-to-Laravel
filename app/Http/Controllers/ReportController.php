@@ -32,6 +32,26 @@ class ReportController extends Controller
         }, $name, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
+    /** The request asks for a file download: ?download=csv (Excel) or ?download=pdf. */
+    protected function wantsFile(Request $request): bool
+    {
+        return in_array($request->query('download'), ['csv', 'pdf'], true);
+    }
+
+    /** The report's rows as the file the request asked for. A PDF with many columns is printed sideways. */
+    protected function file(Request $request, string $name, array $rows)
+    {
+        $name = preg_replace('/\.csv$/', '', $name);
+        if ($request->query('download') === 'pdf') {
+            $docs = app(\App\Services\Documents\DocumentService::class);
+            $wide = max(array_map('count', $rows) ?: [1]) > 7;
+
+            return app(\App\Services\Documents\PdfService::class)->response($docs->tablePdf($rows, $wide ? 'landscape' : 'portrait'), "$name.pdf", true);
+        }
+
+        return $this->csv("$name.csv", $rows);
+    }
+
     protected function plain($v): string
     {
         return $v === null || $v === '' ? '' : number_format((float) $v, 2, '.', '');
@@ -58,11 +78,11 @@ class ReportController extends Controller
         $asof = $this->reports->readDate($request->query('asof'), $this->reports->defaultAsOf());
         $bs = $this->reports->balanceSheet($asof);
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $rows = [[$this->company()], ['Balance Sheet'], ['As of '.$this->reports->longDate($asof)], [], ['ASSETS'], ...$this->csvRows($bs['asset_rows']), ['TOTAL ASSETS', $this->plain($bs['assets_total'])], [],
                 ['LIABILITIES & EQUITY'], ...$this->csvRows($bs['liab_rows']), ['TOTAL LIABILITIES & EQUITY', $this->plain($bs['liab_eq_total'])]];
 
-            return $this->csv("Balance Sheet $asof.csv", $rows);
+            return $this->file($request, "Balance Sheet $asof.csv", $rows);
         }
 
         return view('reports.balance-sheet', ['bs' => $bs, 'asof' => $asof, 'reports' => $this->reports]);
@@ -77,7 +97,7 @@ class ReportController extends Controller
         }
         $pl = $this->reports->profitLoss($from, $to);
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $rows = [[$this->company()], ['Profit & Loss'], [$this->reports->longDate($from).' through '.$this->reports->longDate($to)], [],
                 ['Income'], ...$this->csvRows($pl['income_rows']), ['Total Income', $this->plain($pl['income_total'])]];
             if ($pl['has_cogs']) {
@@ -90,7 +110,7 @@ class ReportController extends Controller
             }
             $rows[] = ['Net Income', $this->plain($pl['net_income'])];
 
-            return $this->csv("Profit and Loss $from to $to.csv", $rows);
+            return $this->file($request, "Profit and Loss $from to $to.csv", $rows);
         }
 
         return view('reports.profit-loss', ['pl' => $pl, 'from' => $from, 'to' => $to, 'reports' => $this->reports]);
@@ -101,14 +121,14 @@ class ReportController extends Controller
         $asof = $this->reports->readDate($request->query('asof'), $this->reports->defaultAsOf());
         $tb = $this->reports->trialBalance($asof);
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $rows = [[$this->company()], ['Trial Balance'], ['As of '.$this->reports->longDate($asof)], [], ['Account', 'Debit', 'Credit']];
             foreach ($tb['rows'] as $r) {
                 $rows[] = [$r['label'], $this->plain($r['debit']), $this->plain($r['credit'])];
             }
             $rows[] = ['TOTAL', $this->plain($tb['debit']), $this->plain($tb['credit'])];
 
-            return $this->csv("Trial Balance $asof.csv", $rows);
+            return $this->file($request, "Trial Balance $asof.csv", $rows);
         }
 
         return view('reports.trial-balance', ['tb' => $tb, 'asof' => $asof, 'reports' => $this->reports]);
@@ -124,7 +144,7 @@ class ReportController extends Controller
         $ledger = ctype_digit((string) $request->query('account')) ? Ledger::find((int) $request->query('account')) : null;
         $st = $ledger ? $this->reports->statement($ledger, $from, $to) : null;
 
-        if ($st && $request->query('download') === 'csv') {
+        if ($st && $this->wantsFile($request)) {
             $n = $st['nature'];
             $rows = [[$this->company()], ['Account Statement: '.$ledger->name], [$this->reports->longDate($from).' through '.$this->reports->longDate($to)], [],
                 ['Date', 'Type', 'Num', 'Name', 'Memo', 'Split', $n['in'], $n['out'], 'Balance'], ['Opening balance', '', '', '', '', '', '', '', $this->plain($st['opening'])]];
@@ -133,7 +153,7 @@ class ReportController extends Controller
             }
             $rows[] = ['Total', '', '', '', '', '', $this->plain($st['total_in']), $this->plain($st['total_out']), $this->plain($st['closing'])];
 
-            return $this->csv("Account Statement {$ledger->name} $from to $to.csv", $rows);
+            return $this->file($request, "Account Statement {$ledger->name} $from to $to.csv", $rows);
         }
 
         $accounts = Ledger::orderBy('code')->orderBy('name')->get(['id', 'name', 'code'])->mapWithKeys(fn ($l) => [$l->id => trim(($l->code ? $l->code.' - ' : '').$l->name)])->all();
@@ -148,7 +168,7 @@ class ReportController extends Controller
         $ag = $this->reports->aging($side, $asof);
         $title = $side === 'ar' ? 'A/R Aging' : 'A/P Aging';
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $rows = [[$this->company()], [$title], ['As of '.$this->reports->longDate($asof)], [], [$side === 'ar' ? 'Customer' : 'Vendor', ...array_values(ReportService::BUCKETS), 'Credits & other', 'Total']];
             foreach ($ag['rows'] as $r) {
                 $rows[] = [$r['name'], ...array_map(fn ($b) => $this->plain($b), array_values($r['buckets'])), $this->plain($r['other']), $this->plain($r['total'])];
@@ -156,7 +176,7 @@ class ReportController extends Controller
             $t = $ag['totals'];
             $rows[] = ['TOTAL', ...array_map(fn ($k) => $this->plain($t[$k]), array_keys(ReportService::BUCKETS)), $this->plain($t['other']), $this->plain($t['total'])];
 
-            return $this->csv(str_replace('/', '', $title)." $asof.csv", $rows);
+            return $this->file($request, str_replace('/', '', $title)." $asof.csv", $rows);
         }
 
         return view('reports.aging', ['ag' => $ag, 'side' => $side, 'title' => $title, 'asof' => $asof]);
@@ -180,14 +200,14 @@ class ReportController extends Controller
         }
         $title = $side === 'ar' ? 'Customer Balance' : 'Vendor Balance';
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $out = [[$this->company()], [$title], ['As of '.$this->reports->longDate($asof)], [], [$c['one'], 'Balance']];
             foreach ($rows as $r) {
                 $out[] = [$r['name'], $this->plain($r['balance'])];
             }
             $out[] = ['TOTAL', $this->plain($total)];
 
-            return $this->csv("$title $asof.csv", $out);
+            return $this->file($request, "$title $asof.csv", $out);
         }
 
         return view('reports.party-balance', ['rows' => $rows, 'total' => $total, 'side' => $side, 'title' => $title, 'asof' => $asof, 'c' => $c, 'hideZero' => $hideZero]);
@@ -202,7 +222,7 @@ class ReportController extends Controller
         }
         $entries = $this->reports->journal($from, $to);
 
-        if ($request->query('download') === 'csv') {
+        if ($this->wantsFile($request)) {
             $rows = [[$this->company()], ['Journal'], [$this->reports->longDate($from).' through '.$this->reports->longDate($to)], [], ['Date', 'Type', 'Num', 'Name', 'Account', 'Memo', 'Debit', 'Credit']];
             foreach ($entries as $e) {
                 foreach ($e['lines'] as $l) {
@@ -210,7 +230,7 @@ class ReportController extends Controller
                 }
             }
 
-            return $this->csv("Journal $from to $to.csv", $rows);
+            return $this->file($request, "Journal $from to $to.csv", $rows);
         }
 
         return view('reports.journal', ['entries' => $entries, 'from' => $from, 'to' => $to]);

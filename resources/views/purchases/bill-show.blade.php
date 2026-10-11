@@ -9,6 +9,7 @@
         <h1 style="margin:0">Bill {{ $purchases->billLabel($b->number) }} <span class="pill {{ $badge[1] }}">{{ $badge[0] }}</span></h1><a class="muted" href="{{ route('bills.index') }}">&larr; Bills</a>
     </div>
     <div class="actions">
+        @include('documents._actions', ['type' => 'bill', 'id' => $b->id])
         @if ($status === 'draft')
             <form class="inline" method="POST" action="{{ route('bills.issue', $b->id) }}">@csrf<button>Issue</button></form>
             <a class="btn ghost" href="{{ route('bills.edit', $b->id) }}">Edit</a>
@@ -42,4 +43,5 @@
         @endforeach
     </tbody></table></div>
 @endif
+@include('documents._email-box', ['type' => 'bill', 'id' => $b->id])
 @endsection

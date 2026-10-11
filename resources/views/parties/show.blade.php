@@ -38,7 +38,7 @@
     </table></div>
 @endif
 
-<h2>Statement</h2>
+<div class="bar" style="margin-top:0"><h2 style="margin:0">Statement</h2><div class="actions">@include('documents._actions', ['type' => $cfg['side'] === 'ar' ? 'customer-statement' : 'vendor-statement', 'id' => $party->id, 'opts' => array_filter(['startdate' => $startdate ? date('Y-m-d', strtotime($startdate)) : null, 'enddate' => $enddate ? date('Y-m-d', strtotime($enddate)) : null])])</div></div>
 <form method="GET" class="actions" style="margin-bottom:12px;align-items:end">
     <div><label for="startdate" style="margin-top:0">From</label><input id="startdate" type="date" name="startdate" value="{{ $startdate ? date('Y-m-d', strtotime($startdate)) : '' }}"></div>
     <div><label for="enddate" style="margin-top:0">To</label><input id="enddate" type="date" name="enddate" value="{{ $enddate ? date('Y-m-d', strtotime($enddate)) : '' }}"></div>
@@ -68,4 +68,5 @@
         </tbody>
     </table>
 </div>
+@include('documents._email-box', ['type' => $cfg['side'] === 'ar' ? 'customer-statement' : 'vendor-statement', 'id' => $party->id, 'opts' => array_filter(['startdate' => $startdate ? date('Y-m-d', strtotime($startdate)) : null, 'enddate' => $enddate ? date('Y-m-d', strtotime($enddate)) : null])])
 @endsection

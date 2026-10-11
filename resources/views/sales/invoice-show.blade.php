@@ -11,6 +11,7 @@
         <a class="muted" href="{{ route('invoices.index') }}">&larr; Invoices</a>
     </div>
     <div class="actions">
+        @include('documents._actions', ['type' => 'invoice', 'id' => $inv->id])
         @if ($status === 'draft')
             <form class="inline" method="POST" action="{{ route('invoices.issue', $inv->id) }}" @if ($belowCost) onsubmit="return confirm('Some lines are sold below cost. Issue anyway?')" @endif>@csrf<button>Issue</button></form>
             <a class="btn ghost" href="{{ route('invoices.edit', $inv->id) }}">Edit</a>
@@ -21,6 +22,7 @@
                 <form class="inline" method="POST" action="{{ route('invoices.apply-credit', $inv->id) }}">@csrf<button class="ghost">Apply {{ Money::format($credit) }} credit</button></form>
             @endif
             <a class="btn ghost" href="{{ route('credit-notes.create', ['invoice' => $inv->id]) }}">Credit note</a>
+            <a class="btn ghost" href="{{ route('recurring.create', ['invoice' => $inv->id]) }}">Make recurring</a>
             @if (Money::positive($inv->balance_due ?? 0))<a class="btn ghost" href="{{ route('invoices.write-off', $inv->id) }}">Write off</a>@endif
             <a class="btn ghost" href="{{ route('invoices.edit', $inv->id) }}">Edit due date / notes</a>
             <form class="inline" method="POST" action="{{ route('invoices.revert', $inv->id) }}" onsubmit="return confirm('Revert to draft? Its journal entry is reversed and any payments applied to it become unapplied credit.')">@csrf<button class="ghost">Revert to draft</button></form>
@@ -59,4 +61,5 @@
         </tbody>
     </table></div>
 @endif
+@include('documents._email-box', ['type' => 'invoice', 'id' => $inv->id])
 @endsection
