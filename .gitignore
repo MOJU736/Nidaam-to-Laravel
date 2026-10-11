@@ -27,3 +27,4 @@ _public_html.zip
 
 # DB dumps contain company DB credentials
 *.sql
+/public/uploads

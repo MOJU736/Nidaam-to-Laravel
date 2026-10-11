@@ -71,7 +71,7 @@ class ProjectController extends Controller
         return redirect()->route('projects.show', $id)->with('message', 'Project saved.');
     }
 
-    public function show(int $id)
+    public function show(int $id, \App\Services\Construction\EstimateService $est, \App\Services\Construction\SiteService $site)
     {
         $project = $this->projects->project($id);
         abort_unless($project, 404);
@@ -79,7 +79,10 @@ class ProjectController extends Controller
 
         return view('construction.project', ['p' => $p, 'budgets' => $this->projects->budgets($id), 'variations' => $this->projects->variations($id), 'recent' => $this->projects->recentCosts($id),
             'invoices' => $this->projects->invoices($id), 'claims' => $this->projects->claims($id), 'ct' => $this->projects->claimTotals($id), 'advances' => $this->projects->advances($id),
-            'banks' => $this->projects->bankOptions(), 'projects' => $this->projects]);
+            'banks' => $this->projects->bankOptions(), 'projects' => $this->projects,
+            'progress' => $site->progress($id), 'approvedEstimate' => $approved = $est->approved($id), 'sectionBudgets' => $est->sectionBudgets($id), 'sectionDone' => $est->sectionProgress($id),
+            'measuredPrev' => $approved ? $est->measuredToDate($id) : [], 'measuredClaims' => DB::connection('tenant')->table('claim_items')->join('project_claims', 'project_claims.id', '=', 'claim_items.claim_id')
+                ->where('project_claims.project_id', $id)->distinct()->pluck('claim_items.claim_id')->flip()->all()]);
     }
 
     public function destroy(int $id)
@@ -105,7 +108,7 @@ class ProjectController extends Controller
 
     public function claimStore(Request $request, int $id)
     {
-        $this->projects->createClaim($id, $request->only(['date', 'percent', 'notes']));
+        $this->projects->createClaim($id, $request->only(['date', 'percent', 'notes']) + ['measured' => (array) $request->input('mq', [])]);
 
         return redirect()->to(route('projects.show', $id).'#claims')->with('message', 'Progress claim created and invoiced.');
     }

@@ -5,6 +5,7 @@
 @php
     use App\Support\Money; use App\Services\Construction\ConstructionService as C;
     $pct = fn ($x) => rtrim(rtrim((string) $x, '0'), '.') ?: '0';
+    $measured = $approvedEstimate && ($p->claim_method ?? 'percent') === 'measured';
     $margin = Money::positive($p->billed) ? round((float) $p->profit / (float) $p->billed * 100) : null;
 @endphp
 <div class="bar">
@@ -17,6 +18,7 @@
     </div>
 </div>
 @foreach ($errors->all() as $e)<div class="flash bad">{{ $e }}</div>@endforeach
+@include('construction._ptabs', ['p' => $p, 'on' => 'overview'])
 
 <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:16px">
     <div class="card"><div class="muted">Contract</div><div style="font-size:22px;font-weight:700">{{ Money::format($p->contract) }}</div><div class="muted" style="font-size:12px">{{ Money::isZero($p->variations) ? 'No variations' : 'Original '.Money::format($p->contract_amount).' · variations '.Money::format($p->variations) }}</div></div>
@@ -24,6 +26,28 @@
     <div class="card"><div class="muted">Billed (before tax)</div><div style="font-size:22px;font-weight:700">{{ Money::format($p->billed) }}</div><div class="muted" style="font-size:12px">{{ $p->billed_pct !== null ? $p->billed_pct.'% of contract · '.Money::format($p->left_to_bill).' left to bill' : '' }}</div></div>
     <div class="card"><div class="muted">Profit so far</div><div style="font-size:22px;font-weight:700;{{ Money::cmp($p->profit, 0) < 0 ? 'color:var(--danger)' : '' }}">{{ Money::format($p->profit) }}</div><div class="muted" style="font-size:12px">Client owes {{ Money::format($p->owed) }}{{ $margin !== null ? ' · margin '.$margin.'%' : '' }}</div></div>
 </div>
+
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));margin-bottom:16px">
+    <div class="card"><div class="muted"><strong>Schedule</strong></div>
+        @if ($progress['planned'] !== null)@php $behind = $progress['actual'] < $progress['planned'] - 5; @endphp
+            Planned <strong>{{ $progress['planned'] }}%</strong> · done <strong style="{{ $behind ? 'color:var(--danger)' : '' }}">{{ $progress['actual'] }}%</strong>
+            <div class="muted" style="font-size:13px">{{ $behind ? 'Behind the plan by '.round($progress['planned'] - $progress['actual'], 1).' points' : ($progress['actual'] > $progress['planned'] + 5 ? 'Ahead of the plan' : 'On plan') }} · <a href="{{ route('projects.schedule', $p->id) }}">Open schedule</a></div>
+        @else<div class="muted" style="font-size:13px">No schedule yet. <a href="{{ route('projects.schedule', $p->id) }}">Set up the stages</a> to see planned against done.</div>@endif</div>
+    <div class="card"><div class="muted"><strong>Estimate</strong></div>
+        @if ($approvedEstimate)<strong>{{ Money::format($approvedEstimate->subtotal) }}</strong> <span class="muted">before tax · estimate {{ $approvedEstimate->number }}, approved {{ Money::date($approvedEstimate->approved_at) }}</span>
+            <div class="muted" style="font-size:13px">Expected margin {{ $pct($approvedEstimate->margin_percent) }}% · <a href="{{ route('projects.estimate', $p->id) }}">Open estimate</a></div>
+        @else<div class="muted" style="font-size:13px">No approved estimate. <a href="{{ route('projects.estimate', $p->id) }}">Prepare the bill of quantities</a>: approving it sets the contract and the budgets.</div>@endif</div>
+</div>
+
+@if ($sectionBudgets->isNotEmpty())
+<div class="card tbl" style="margin-bottom:16px">
+    <h2 style="margin-top:0">Budget by section</h2>
+    <table>
+        <thead><tr><th>Section</th><th class="num">Estimate</th><th class="num">Budget</th><th class="num">Work done <span class="muted">(measured claims)</span></th></tr></thead>
+        <tbody>@foreach ($sectionBudgets as $sb)<tr><td>{{ $sb->name }}</td><td class="num">{{ Money::format($sb->estimate_amount) }}</td><td class="num">{{ Money::format($sb->budget) }}</td><td class="num">{{ isset($sectionDone[$sb->name]) ? Money::format($sectionDone[$sb->name]) : '' }}</td></tr>@endforeach</tbody>
+    </table>
+</div>
+@endif
 
 <div class="card tbl" style="margin-bottom:16px">
     <h2 style="margin-top:0">Budget against costs</h2>
@@ -61,20 +85,36 @@
                     <td>{{ $c->kind === 'retention' ? 'Retention release' : 'Claim '.$c->number }}</td><td>{{ Money::date($c->date) }}</td><td class="num">{{ $c->kind === 'claim' ? $pct($c->percent_to_date).'%' : '' }}</td>
                     <td class="num">{{ Money::format($c->gross) }}</td><td class="num">{{ $c->kind === 'claim' ? Money::format($c->retention) : '' }}</td><td class="num">{{ $c->kind === 'claim' ? Money::format($c->advance) : '' }}</td>
                     <td class="num"><strong>{{ Money::format($c->net) }}</strong></td>
-                    <td>@if ($c->invoice_id)<a href="{{ route('invoices.show', $c->invoice_id) }}">INV-{{ str_pad((string) $c->invoice_number, 4, '0', STR_PAD_LEFT) }}</a>{{ $c->live ? '' : ' (void)' }}@endif</td>
+                    <td>@if ($c->invoice_id)<a href="{{ route('invoices.show', $c->invoice_id) }}">INV-{{ str_pad((string) $c->invoice_number, 4, '0', STR_PAD_LEFT) }}</a>{{ $c->live ? '' : ' (void)' }}@endif @if (isset($measuredClaims[$c->id])) · <a href="{{ route('projects.claim-sheet', $c->id) }}" target="_blank">Sheet</a>@endif</td>
                 </tr>
             @endforeach
             </tbody>
         </table></div>
     @endif
     <div class="row2" style="margin-top:12px">
-        <form method="POST" action="{{ route('projects.claims.store', $p->id) }}" onsubmit="return confirm('Create this progress claim? It is issued as an invoice at once.')">
+        <form method="POST" action="{{ route('projects.claims.store', $p->id) }}" onsubmit="return confirm('Create this progress claim? It is issued as an invoice at once.')" @if ($measured) style="grid-column:1/-1" @endif>
             @csrf
-            <h3 style="margin:0 0 6px">New progress claim</h3>
-            <div class="row2"><div><label style="margin-top:0">% complete to date</label><input name="percent" inputmode="decimal" required placeholder="e.g. 30"></div><div><label style="margin-top:0">Date</label><input type="date" name="date" required value="{{ now()->toDateString() }}"></div></div>
-            <label>Notes <span class="muted">(optional)</span></label><input name="notes" maxlength="400">
+            <div class="actions" style="justify-content:space-between;margin-bottom:6px"><h3 style="margin:0">New progress claim</h3>
+                @if ($approvedEstimate)<span class="muted" style="font-size:13px">Claim by: <button type="submit" formaction="{{ route('projects.claim-method', $p->id) }}" name="method" value="{{ $measured ? 'percent' : 'measured' }}" formnovalidate class="ghost sm" onclick="return true">{{ $measured ? 'switch to % complete' : 'switch to measured quantities' }}</button></span>@endif</div>
+            @if ($measured)
+                <p class="muted" style="font-size:13px;margin:0 0 6px">Enter the quantity done <strong>to date</strong> for each line; leave a line alone to keep what was measured last time. Priced at the approved estimate's rates.</p>
+                <div class="tbl"><table>
+                    <thead><tr><th>Description</th><th>Unit</th><th class="num">BOQ qty</th><th class="num">Done before</th><th class="num" style="width:120px">Done to date</th></tr></thead>
+                    <tbody>
+                    @foreach ($approvedEstimate->sections as $sec)@continue ($sec->items->isEmpty())
+                        <tr style="background:var(--bg)"><td colspan="5"><strong>{{ $sec->name }}</strong></td></tr>
+                        @foreach ($sec->items as $it)<tr><td>{{ $it->description }}</td><td>{{ $it->unit }}</td><td class="num">{{ $pct($it->qty) }}</td><td class="num">{{ $pct($measuredPrev[$it->id]['qty'] ?? 0) }}</td>
+                            <td><input name="mq[{{ $it->id }}]" inputmode="decimal" class="num" placeholder="{{ $pct($measuredPrev[$it->id]['qty'] ?? 0) }}" style="width:110px"></td></tr>@endforeach
+                    @endforeach
+                    </tbody>
+                </table></div>
+                <div class="row2" style="max-width:520px"><div><label>Date</label><input type="date" name="date" required value="{{ now()->toDateString() }}"></div><div><label>Notes <span class="muted">(optional)</span></label><input name="notes" maxlength="400"></div></div>
+            @else
+                <div class="row2"><div><label style="margin-top:0">% complete to date</label><input name="percent" inputmode="decimal" required placeholder="e.g. 30"></div><div><label style="margin-top:0">Date</label><input type="date" name="date" required value="{{ now()->toDateString() }}"></div></div>
+                <label>Notes <span class="muted">(optional)</span></label><input name="notes" maxlength="400">
+            @endif
             <div class="actions" style="margin-top:10px"><button>Create claim &amp; invoice</button></div>
-            <p class="muted" style="font-size:12px;margin:6px 0 0">Bills the work done since the last claim ({{ Money::format($p->contract) }} × % to date, less what was claimed before), holds back {{ $pct($p->retention_percent) }}% retention and takes back the advance in proportion.</p>
+            <p class="muted" style="font-size:12px;margin:6px 0 0">Bills the work done since the last claim ({{ Money::format($p->contract) }} contract), holds back {{ $pct($p->retention_percent) }}% retention and takes back the advance in proportion.</p>
         </form>
         <div>
             <form method="POST" action="{{ route('projects.retention', $p->id) }}" style="margin-bottom:14px" onsubmit="return confirm('Invoice the retention held so far?')">

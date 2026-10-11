@@ -51,6 +51,8 @@ class PayrollService
             'group_prefix' => '04', 'group_patterns' => ['direct cost', 'cost of sales', 'cost of goods'], 'name' => 'Site Wages', 'dc' => 'D', 'notes' => 'Wages of site workers from wage sheets'],
         'wages_payable' => ['root' => 'liability', 'patterns' => ['wages payable', 'salaries payable', 'salary payable', 'accrued wages'], 'exclude' => [],
             'group_prefix' => '02', 'group_patterns' => ['current liab', 'payable'], 'name' => 'Wages Payable', 'dc' => 'C', 'notes' => 'Wages on wage sheets not paid yet'],
+        'materials_used' => ['root' => 'expense', 'patterns' => ['site materials used', 'materials used', 'construction materials', 'cost of materials'], 'exclude' => [],
+            'group_prefix' => '04', 'group_patterns' => ['direct cost', 'cost of sales', 'cost of goods'], 'name' => 'Site Materials Used', 'dc' => 'D', 'notes' => 'Stock issued to construction sites'],
     ];
 
     /** The accounts a pay run posts to (the rest of LEDGERS belong to Construction). */
