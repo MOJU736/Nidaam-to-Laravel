@@ -167,6 +167,11 @@ class SalesService
         if (! empty($d['number'])) {
             $row['number'] = (int) $d['number'];
         }
+        foreach (range(1, 5) as $i) { // the custom fields named under Settings → Templates
+            if (array_key_exists("cf{$i}_value", $d) && Tables::has($table, "cf{$i}_value")) {
+                $row["cf{$i}_value"] = $d["cf{$i}_value"] === null || $d["cf{$i}_value"] === '' ? null : mb_substr((string) $d["cf{$i}_value"], 0, 255);
+            }
+        }
 
         if ($id) {
             if ($table === 'invoices' && $this->isClaimInvoice($id)) {
@@ -276,6 +281,7 @@ class SalesService
             $invoiceId = $this->saveDoc('invoices', [
                 'customer_id' => $q->customer_id, 'vehicle_ids' => $q->vehicle_ids, 'quotation_id' => $id, 'date' => now()->toDateString(), 'due_date' => null,
                 'notes' => $q->notes, 'tax_total' => $q->tax_total, 'tax_percent' => $q->tax_percent, 'discount_type' => $q->discount_type, 'discount_value' => $q->discount_value,
+                'cf1_value' => $q->cf1_value ?? null, 'cf2_value' => $q->cf2_value ?? null, 'cf3_value' => $q->cf3_value ?? null, 'cf4_value' => $q->cf4_value ?? null, 'cf5_value' => $q->cf5_value ?? null,
             ], $lines, null);
             $this->db()->table('quotations')->where('id', $id)->update(['status' => 'converted']);
 

@@ -138,6 +138,20 @@ class DocumentService
         return ['to' => (string) $email, 'subject' => trim("$title $label")." from $co", 'message' => "Hello $name,\n\nPlease find attached $extra.\n\nThank you,\n$co", 'party_table' => $table, 'party_id' => $partyId, 'has_email' => (bool) $email];
     }
 
+    /** The custom fields (Settings → Templates) set to print on this kind of document and filled in on it, as meta rows. */
+    protected function customMeta(object $doc, string $kind): array
+    {
+        $rows = [];
+        foreach (app(DocumentStyle::class)->customFields() as $i => [$label, $docs]) {
+            $value = trim((string) ($doc->{"cf{$i}_value"} ?? ''));
+            if ($value !== '' && in_array($kind, $docs, true)) {
+                $rows[] = [$label, $value];
+            }
+        }
+
+        return $rows;
+    }
+
     public function invoice(int $id): ?array
     {
         $inv = $this->sales->invoice($id);
@@ -149,6 +163,7 @@ class DocumentService
         $d['party_label'] = 'Billed to';
         $d['party'] = $this->party($inv, 'customer');
         $d['meta'] = array_filter([['Invoice #', $label], ['Date', Money::date($inv->date)], $inv->due_date ? ['Due', Money::date($inv->due_date)] : null]);
+        $d['meta'] = array_merge(array_values($d['meta']), $this->customMeta($inv, 'invoice'));
         $d['columns'] = self::LINE_COLUMNS;
         $d['rows'] = $this->lineRows($inv->items);
         $d['totals'] = $this->totalRows($inv, 'Total');
@@ -183,6 +198,7 @@ class DocumentService
         $d['party_label'] = 'Prepared for';
         $d['party'] = $this->party($q, 'customer');
         $d['meta'] = array_filter([['Quotation #', $label], ['Date', Money::date($q->date)], $q->expiry_date ? ['Valid until', Money::date($q->expiry_date)] : null]);
+        $d['meta'] = array_merge(array_values($d['meta']), $this->customMeta($q, 'quotation'));
         $d['columns'] = self::LINE_COLUMNS;
         $d['rows'] = $this->lineRows($q->items);
         $d['totals'] = $this->totalRows($q, 'Total');

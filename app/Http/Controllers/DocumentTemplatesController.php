@@ -58,7 +58,20 @@ class DocumentTemplatesController extends Controller
             'footer_phone' => ['nullable', 'string', 'max:100'], 'footer_email' => ['nullable', 'string', 'max:150'], 'footer_website' => ['nullable', 'string', 'max:150'], 'qty_label' => ['nullable', 'string', 'max:30'],
             'price_label' => ['nullable', 'string', 'max:30'], 'payment_extra' => ['nullable', 'string', 'max:1000'], 'footer_note' => ['nullable', 'string', 'max:255']]);
 
-        return array_map(fn ($v) => ($v === null || trim((string) $v) === '') ? null : trim((string) $v), $d);
+        $row = array_map(fn ($v) => ($v === null || trim((string) $v) === '') ? null : trim((string) $v), $d);
+        if ($request->has('cf_form') && \App\Support\Tables::has('document_template_settings', 'cf1_label')) { // the custom-field boxes were on the page
+            foreach (range(1, 5) as $i) {
+                $label = trim((string) $request->input("cf{$i}_label"));
+                $docs = array_values(array_intersect(['invoice', 'quotation'], (array) $request->input("cf{$i}_docs")));
+                if (in_array('certificate', explode(',', (string) ($this->style->settings()->{"cf{$i}_docs"} ?? '')), true)) {
+                    $docs[] = 'certificate'; // certificates are not in this app yet; keep the old choice so nothing is lost
+                }
+                $row["cf{$i}_label"] = $label === '' ? null : mb_substr($label, 0, 100);
+                $row["cf{$i}_docs"] = $label === '' || ! $docs ? null : implode(',', $docs);
+            }
+        }
+
+        return $row;
     }
 
     public function update(Request $request)

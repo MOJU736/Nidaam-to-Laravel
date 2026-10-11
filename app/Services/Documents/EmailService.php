@@ -111,6 +111,27 @@ class EmailService
         return $summary;
     }
 
+    /** The sign-in emails (invite, reset link, new-device note): sent from the shared default account in the main settings, with no attachment. Returns true or an error text. */
+    public function sendSystem(string $to, string $subject, string $html): bool|string
+    {
+        $core = DB::connection('master')->table('settings')->first();
+        if (! $core || empty($core->smtp_host)) {
+            return 'No default email sender is set up (Admin → System settings).';
+        }
+        $port = (int) ($core->smtp_port ?: 587);
+        $from = $core->email_from ?: $core->smtp_username;
+        $site = trim((string) ($core->sitename ?? '')) ?: 'Nidaam';
+        try {
+            Mail::build(['transport' => 'smtp', 'host' => $core->smtp_host, 'port' => $port, 'username' => $core->smtp_username, 'password' => $core->smtp_password, 'scheme' => $port === 465 ? 'smtps' : null, 'timeout' => 20])
+                ->html($html, fn ($m) => $m->from($from, $site)->to($to)->subject($subject));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return 'The email could not be sent: '.substr($e->getMessage(), 0, 200);
+        }
+
+        return true;
+    }
     protected function fail(string $message): never
     {
         throw ValidationException::withMessages(['email' => $message]);

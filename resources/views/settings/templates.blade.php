@@ -83,6 +83,20 @@
     <label for="payment_extra">More payment details <span class="muted">(one per line, e.g. mobile money numbers)</span></label><textarea id="payment_extra" name="payment_extra" rows="3" maxlength="1000">{{ $co('payment_extra') }}</textarea>
     <label for="footer_note">Thank-you line at the bottom</label><input id="footer_note" name="footer_note" maxlength="255" placeholder="We appreciate your business and look forward to serving you!" value="{{ $co('footer_note') }}">
 
+    <h3 style="margin-bottom:4px">Custom fields</h3>
+    <div class="muted" style="margin-bottom:6px">Up to five extra boxes (for example "PO number" or "Vehicle plate") on every quotation and invoice form. A box with a name shows on the form; tick where its value also prints.</div>
+    <input type="hidden" name="cf_form" value="1">
+    @foreach (range(1, 5) as $i)
+        @php $docs = array_filter(explode(',', (string) ($s->{"cf{$i}_docs"} ?? ''))); @endphp
+        <div class="row2" style="grid-template-columns:2fr 1fr;align-items:end;margin-bottom:6px">
+            <div><label for="cf{{ $i }}_label">Field {{ $i }} name</label><input id="cf{{ $i }}_label" name="cf{{ $i }}_label" maxlength="100" value="{{ old("cf{$i}_label", $s->{"cf{$i}_label"} ?? '') }}"></div>
+            <div class="actions" style="flex-wrap:nowrap;padding-bottom:8px">
+                <label style="margin:0"><input type="checkbox" name="cf{{ $i }}_docs[]" value="invoice" @checked(in_array('invoice', old("cf{$i}_docs", array_values($docs))))> prints on invoices</label>
+                <label style="margin:0"><input type="checkbox" name="cf{{ $i }}_docs[]" value="quotation" @checked(in_array('quotation', old("cf{$i}_docs", array_values($docs))))> prints on quotations</label>
+            </div>
+        </div>
+    @endforeach
+
     <div class="actions" style="margin-top:22px">
         <button name="then" value="default">Save &amp; use design {{ $design }}</button>
         <button name="then" value="save" class="ghost">Save only</button>

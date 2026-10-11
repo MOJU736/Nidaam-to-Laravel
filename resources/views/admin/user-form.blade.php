@@ -15,7 +15,7 @@
         <div><label for="company">Company / role</label><input id="company" name="company" maxlength="25" value="{{ old('company', $u->company ?? '') }}"></div>
         <div><label for="phone">Phone (digits)</label><input id="phone" name="phone" inputmode="numeric" maxlength="15" value="{{ old('phone', $u->phone ?? '') }}"></div>
     </div>
-    <div class="row2" style="margin-top:8px"><div><label for="password">{{ $u ? 'New password' : 'Password *' }} <span class="muted">(at least 8 characters{{ $u ? '; leave blank to keep the current one' : '' }})</span></label><input id="password" type="password" name="password" autocomplete="new-password" @if (! $u) required @endif></div>
+    <div class="row2" style="margin-top:8px"><div><label for="password">{{ $u ? 'New password' : 'Password' }} <span class="muted">(8+ characters, letters and numbers{{ $u ? '; leave blank to keep the current one' : '' }})</span></label><input id="password" type="password" name="password" autocomplete="new-password" @if (! $u) @endif>@if (! $u)<label style="font-weight:400;margin:6px 0 0"><input type="checkbox" name="send_invite" value="1" id="inv" @checked(old('send_invite'))> Instead, email an invite link: the person chooses their own password</label>@endif</div>
         <div><label for="group_id">Group *</label><select id="group_id" name="group_id" required><option value="">Choose a group...</option>@foreach ($groups as $g)<option value="{{ $g->id }}" @selected((string) old('group_id', $groupId) === (string) $g->id)>{{ $g->name }}@if ($g->description) - {{ $g->description }}@endif</option>@endforeach</select></div></div>
 
     <h3>Companies this person may open</h3>
@@ -29,5 +29,6 @@
     </div>
     <div class="actions" style="margin-top:20px"><button>{{ $u ? 'Save changes' : 'Create user' }}</button><a class="btn ghost" href="{{ route('admin.users') }}">Cancel</a></div>
 </form>
+@if ($u)<form class="card" method="POST" action="{{ route('admin.users.reset-link', $u->id) }}" style="max-width:760px;margin-top:14px" onsubmit="return confirm('Email {{ $u->email }} a link to choose a new password? It signs them out everywhere.')">@csrf<strong>Forgot their password?</strong> <span class="muted">Email {{ $u->email }} a one-time link (works for 48 hours) so they choose a new one themselves.</span> <button class="ghost sm">Send password link</button></form>@endif
 <script>(function () { var all = document.getElementById('allAcc'), list = document.getElementById('accList'); function s() { list.style.opacity = all.checked ? .4 : 1; list.querySelectorAll('input').forEach(function (i) { i.disabled = all.checked; }); } all.addEventListener('change', s); s(); })();</script>
 @endsection

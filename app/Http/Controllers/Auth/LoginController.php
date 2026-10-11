@@ -49,6 +49,13 @@ class LoginController extends Controller
             ]);
         }
 
+        if (app(\App\Services\Auth\PasswordService::class)->tempExpired($user)) {
+            Auth::logout();
+            $this->record($identity, 'failed', $user->id);
+
+            return back()->withInput($request->only('identity'))->withErrors(['identity' => 'The temporary password has expired. Use "Forgot your password?" or ask an administrator for a new link.']);
+        }
+
         $request->session()->regenerate();
         $user->forceFill(['last_login' => time()])->save();
         $this->record($identity, 'signin', $user->id, 'password');

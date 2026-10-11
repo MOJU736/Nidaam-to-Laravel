@@ -289,6 +289,20 @@ class ActivityReports
 
     protected string $to = '';
 
+    /** Each account's net (debit positive) per column key over a date range: [ledger id => [key => net]]. $bucket is an SQL expression on the entry item / entry giving the key. */
+    protected function netByColumn(string $from, string $to, string $bucket): array
+    {
+        $by = [];
+        $moves = $this->db()->table('entryitems')->join('entries', 'entries.id', '=', 'entryitems.entry_id')->whereBetween('entries.date', [$from, $to])
+            ->groupBy('entryitems.ledger_id', DB::raw($bucket))
+            ->selectRaw("entryitems.ledger_id as lid, $bucket as ym, SUM(CASE WHEN entryitems.dc = 'D' THEN entryitems.amount ELSE -entryitems.amount END) as net")->get();
+        foreach ($moves as $m) {
+            $by[(int) $m->lid][(string) $m->ym] = Money::add($m->net, 0);
+        }
+
+        return $by;
+    }
+
     /** Profit & Loss with one column per month. */
     public function plByMonth(string $from, string $to): array
     {
@@ -299,21 +313,109 @@ class ActivityReports
             $months[$d->format('Y-m')] = $d->format('M Y');
             $d->modify('+1 month');
         }
-        $keys = array_keys($months);
-        $this->from = $from;
-        $this->to = $to;
 
-        // each account's net (debit positive) per month, in one query
-        $by = [];
-        $moves = $this->db()->table('entryitems')->join('entries', 'entries.id', '=', 'entryitems.entry_id')->whereBetween('entries.date', [$from, $to])
-            ->groupBy('entryitems.ledger_id', DB::raw("DATE_FORMAT(entries.date, '%Y-%m')"))
-            ->selectRaw("entryitems.ledger_id as lid, DATE_FORMAT(entries.date, '%Y-%m') as ym, SUM(CASE WHEN entryitems.dc = 'D' THEN entryitems.amount ELSE -entryitems.amount END) as net")->get();
-        foreach ($moves as $m) {
-            $by[(int) $m->lid][$m->ym] = Money::add($m->net, 0);
+        return $this->plColumns($months, $this->netByColumn($from, $to, "DATE_FORMAT(entries.date, '%Y-%m')"), $from, $to);
+    }
+
+    /** Profit & Loss with one column per project (and "No project"). */
+    public function plByProject(string $from, string $to): array
+    {
+        $by = $this->netByColumn($from, $to, 'COALESCE(entryitems.project_id, 0)');
+        $used = [];
+        foreach ($by as $cols) {
+            foreach ($cols as $k => $v) {
+                if (! Money::isZero($v)) {
+                    $used[(string) $k] = true;
+                }
+            }
+        }
+        $names = [];
+        if (Tables::has('projects')) {
+            foreach ($this->db()->table('projects')->orderBy('name')->get(['id', 'number', 'name']) as $p) {
+                $names[(string) $p->id] = trim(($p->number ? $p->number.' ' : '').$p->name);
+            }
+        }
+        $cols = [];
+        foreach ($names as $k => $label) {
+            if (isset($used[$k])) {
+                $cols[$k] = $label;
+            }
+        }
+        foreach (array_keys($used) as $k) {
+            if ($k !== '0' && ! isset($cols[$k])) {
+                $cols[$k] = 'Project '.$k;
+            }
+        }
+        if (isset($used['0'])) {
+            $cols['0'] = 'No project';
         }
 
-        $inc = $this->reports->treeFor('income', $from, $to);
-        $exp = $this->reports->treeFor('expense', $from, $to);
+        return $this->plColumns($cols, $by, $from, $to);
+    }
+
+    /** Profit & Loss for these dates beside another period ($cmp = [from, to]). Columns: cur, prev. */
+    public function plCompare(string $from, string $to, array $cmp): array
+    {
+        $cur = $this->netByColumn($from, $to, "'cur'");
+        $prev = $this->netByColumn($cmp[0], $cmp[1], "'prev'");
+        $by = $cur;
+        foreach ($prev as $lid => $v) {
+            $by[$lid] = ($by[$lid] ?? []) + $v;
+        }
+        $cols = ['cur' => $this->rangeLabel($from, $to), 'prev' => $this->rangeLabel($cmp[0], $cmp[1])];
+
+        return $this->plColumns($cols, $by, $from, $to, min($from, $cmp[0]), max($to, $cmp[1]));
+    }
+
+    /** "Jan - Oct 2026" for whole months, else "1 Jan 2025 - 9 Oct 2025". */
+    public function rangeLabel(string $from, string $to): string
+    {
+        $f = strtotime($from);
+        $t = strtotime($to);
+        if (substr($from, 8) === '01' && $to === date('Y-m-t', $t)) {
+            return substr($from, 0, 7) === substr($to, 0, 7) ? date('M Y', $f) : (substr($from, 0, 4) === substr($to, 0, 4) ? date('M', $f).' - '.date('M Y', $t) : date('M Y', $f).' - '.date('M Y', $t));
+        }
+
+        return date('j M Y', $f).' - '.date('j M Y', $t);
+    }
+
+    /** The period before from..to, of the same length (whole months shift by months). */
+    public function previousPeriod(string $from, string $to): array
+    {
+        $f = new \DateTime($from);
+        $t = new \DateTime($to);
+        if ($f->format('d') === '01' && $t->format('Y-m-d') === $t->format('Y-m-t')) {
+            $months = ((int) $t->format('Y') - (int) $f->format('Y')) * 12 + (int) $t->format('n') - (int) $f->format('n') + 1;
+            $pf = (clone $f)->modify("-$months months");
+            $pt = (clone $pf)->modify('+'.($months - 1).' months');
+
+            return [$pf->format('Y-m-d'), $pt->format('Y-m-t')];
+        }
+        $days = (int) $f->diff($t)->days + 1;
+        $pt = (clone $f)->modify('-1 day');
+        $pf = (clone $pt)->modify('-'.($days - 1).' days');
+
+        return [$pf->format('Y-m-d'), $pt->format('Y-m-d')];
+    }
+
+    /** The same date one year earlier (29 Feb becomes 28 Feb). */
+    public function yearBefore(string $ymd): string
+    {
+        $d = new \DateTime($ymd);
+        $y = (int) $d->format('Y') - 1;
+        $m = (int) $d->format('n');
+
+        return sprintf('%04d-%02d-%02d', $y, $m, min((int) $d->format('j'), (int) date('t', mktime(0, 0, 0, $m, 1, $y))));
+    }
+
+    /** The P&L laid out in columns: $cols = [key => label], $by = [ledger id => [key => net]]. */
+    protected function plColumns(array $months, array $by, string $from, string $to, ?string $treeFrom = null, ?string $treeTo = null): array
+    {
+        $keys = array_map('strval', array_keys($months));
+        $this->from = $from;
+        $this->to = $to;
+        $inc = $this->reports->treeFor('income', $treeFrom ?? $from, $treeTo ?? $to);
+        $exp = $this->reports->treeFor('expense', $treeFrom ?? $from, $treeTo ?? $to);
         $sec = $this->reports->plSections($inc, $exp);
         $out = [];
         foreach ([['income', 'C', $inc], ['cogs', 'D', null], ['expense', 'D', $exp], ['other_income', 'C', null], ['other_expense', 'D', null]] as [$name, $normal, $loose]) {

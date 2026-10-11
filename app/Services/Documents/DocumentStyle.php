@@ -84,6 +84,21 @@ class DocumentStyle
             'signature_title' => null, 'footer_address' => null, 'footer_phone' => null, 'footer_email' => null, 'footer_website' => null, 'qty_label' => null, 'price_label' => null, 'payment_extra' => null, 'footer_note' => null];
     }
 
+    /** The five custom fields that have a name: number => [label, [document kinds they print on]]. Kinds: invoice, quotation. */
+    public function customFields(?object $s = null): array
+    {
+        $s ??= $this->settings();
+        $out = [];
+        foreach (range(1, 5) as $i) {
+            $label = trim((string) ($s->{"cf{$i}_label"} ?? ''));
+            if ($label !== '') {
+                $out[$i] = [$label, array_values(array_filter(explode(',', (string) ($s->{"cf{$i}_docs"} ?? ''))))];
+            }
+        }
+
+        return $out;
+    }
+
     public function save(array $row): void
     {
         $q = $this->db()->table('document_template_settings')->where('id', 1);

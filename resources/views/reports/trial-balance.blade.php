@@ -3,6 +3,7 @@
 @section('content')
 @php use App\Support\Money; @endphp
 @include('reports._head', ['title' => 'Trial Balance', 'subtitle' => 'As of '.$reports->longDate($asof), 'mode' => 'asof'])
+<p class="muted noprint" style="margin-top:0"><a href="{{ route('reports.trial-balance', ['asof' => $asof, 'view' => 'detail']) }}">Show details</a>: opening balance, debits, credits and closing balance of every account.</p>
 @if (! $tb['balanced'])
     <div class="flash bad">The trial balance does not balance: debits are {{ Money::format($tb['debit']) }} and credits are {{ Money::format($tb['credit']) }}. Check the opening balances under Accounts.</div>
 @endif

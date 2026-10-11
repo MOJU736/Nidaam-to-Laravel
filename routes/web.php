@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\ActivityReportController;
+use App\Http\Controllers\AdvancedReportController;
 use App\Http\Controllers\AdminGroupsController;
 use App\Http\Controllers\AdminUsersController;
 use App\Http\Controllers\BankingController;
@@ -52,7 +54,22 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:30,1');
 });
 
-Route::middleware('auth')->group(function () {
+// Forgot password and the link in an invite / reset email (no sign-in needed).
+Route::middleware('guest')->group(function () {
+    Route::get('/password/forgot', [PasswordController::class, 'forgot'])->name('password.forgot');
+    Route::post('/password/forgot', [PasswordController::class, 'sendLink'])->middleware('throttle:20,1')->name('password.forgot.send');
+});
+Route::get('/password/set/{code}', [PasswordController::class, 'setForm'])->name('password.set');
+Route::post('/password/set/{code}', [PasswordController::class, 'setSave'])->middleware('throttle:20,1')->name('password.set.save');
+
+Route::middleware(['auth', 'fresh-password'])->group(function () {
+    Route::get('/password/first', [PasswordController::class, 'firstForm'])->name('password.first');
+    Route::post('/password/first', [PasswordController::class, 'firstSave'])->name('password.first.save');
+    Route::get('/password/change', [PasswordController::class, 'changeForm'])->name('password.change');
+    Route::post('/password/change', [PasswordController::class, 'changeSave'])->name('password.change.save');
+});
+
+Route::middleware(['auth', 'fresh-password'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
@@ -224,6 +241,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/users/{id}/edit', [AdminUsersController::class, 'edit'])->whereNumber('id')->name('admin.users.edit');
             Route::put('/users/{id}', [AdminUsersController::class, 'update'])->whereNumber('id')->name('admin.users.update');
             Route::delete('/users/{id}', [AdminUsersController::class, 'destroy'])->whereNumber('id')->name('admin.users.destroy');
+        Route::post('/users/{id}/reset-link', [AdminUsersController::class, 'resetLink'])->whereNumber('id')->name('admin.users.reset-link');
             Route::get('/groups', [AdminGroupsController::class, 'index'])->name('admin.groups');
             Route::get('/groups/create', [AdminGroupsController::class, 'create'])->name('admin.groups.create');
             Route::post('/groups', [AdminGroupsController::class, 'store'])->name('admin.groups.store');
@@ -402,6 +420,25 @@ Route::middleware('auth')->group(function () {
             Route::get('/inventory-valuation', [ActivityReportController::class, 'inventory'])->name('reports.inventory-valuation');
             Route::get('/reorder', [ActivityReportController::class, 'reorder'])->name('reports.reorder');
             Route::get('/profit-loss-by-month', [ActivityReportController::class, 'plByMonth'])->name('reports.pl-by-month');
+            Route::get('/cash-flow', [AdvancedReportController::class, 'cashFlow'])->name('reports.cash-flow');
+            Route::get('/general-ledger', [AdvancedReportController::class, 'generalLedger'])->name('reports.general-ledger');
+            Route::get('/profit-loss-compare', [AdvancedReportController::class, 'plCompare'])->name('reports.pl-compare');
+            Route::get('/profit-loss-by-project', [AdvancedReportController::class, 'plByProject'])->name('reports.pl-by-project');
+            Route::get('/balance-sheet-compare', [AdvancedReportController::class, 'bsCompare'])->name('reports.bs-compare');
+            Route::get('/profit-by-item', [AdvancedReportController::class, 'profitByItem'])->name('reports.profit-by-item');
+            Route::get('/payments-received', [AdvancedReportController::class, 'paymentsReceived'])->name('reports.payments-received');
+            Route::get('/customer-items', [AdvancedReportController::class, 'customerItems'])->name('reports.customer-items');
+            Route::post('/customer-items/email', [AdvancedReportController::class, 'customerItemsEmail'])->name('reports.customer-items.email');
+            Route::get('/stock-expiry', [AdvancedReportController::class, 'stockExpiry'])->name('reports.stock-expiry');
+            Route::get('/health-check', [AdvancedReportController::class, 'health'])->name('reports.health');
+            Route::post('/health-check/repair', [AdvancedReportController::class, 'healthRepair'])->name('reports.health-repair');
+        Route::get('/cash-flow', [AdvancedReportController::class, 'cashFlow'])->name('reports.cash-flow');
+        Route::get('/general-ledger', [AdvancedReportController::class, 'generalLedger'])->name('reports.general-ledger');
+        Route::get('/profit-loss-compare', [AdvancedReportController::class, 'plCompare'])->name('reports.pl-compare');
+        Route::get('/profit-loss-by-project', [AdvancedReportController::class, 'plByProject'])->name('reports.pl-by-project');
+        Route::get('/balance-sheet-compare', [AdvancedReportController::class, 'bsCompare'])->name('reports.bs-compare');
+        Route::get('/profit-by-item', [AdvancedReportController::class, 'profitByItem'])->name('reports.profit-by-item');
+        Route::get('/payments-received', [AdvancedReportController::class, 'paymentsReceived'])->name('reports.payments-received');
         });
     });
 });

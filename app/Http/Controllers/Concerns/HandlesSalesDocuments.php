@@ -70,6 +70,8 @@ trait HandlesSalesDocuments
             'tax_percent' => ['nullable', 'numeric', 'min:0', 'max:100'], 'tax_total' => ['nullable', 'numeric', 'min:0'],
             'doc_discount_type' => ['nullable', 'string', 'max:10'], 'doc_discount_value' => ['nullable', 'string', 'max:30'],
             'vehicle_ids' => ['nullable', 'array'], 'project_id' => ['nullable', 'integer'],
+            'cf1_value' => ['nullable', 'string', 'max:255'], 'cf2_value' => ['nullable', 'string', 'max:255'], 'cf3_value' => ['nullable', 'string', 'max:255'],
+            'cf4_value' => ['nullable', 'string', 'max:255'], 'cf5_value' => ['nullable', 'string', 'max:255'],
         ]);
         if ($sales->numberTaken($table, (int) $d['number'], $exceptId)) {
             throw ValidationException::withMessages(['number' => 'Another document already has that number.']);
@@ -83,7 +85,12 @@ trait HandlesSalesDocuments
             }
         }
 
-        return [
+        $cf = [];
+        foreach (range(1, 5) as $i) {
+            $cf["cf{$i}_value"] = trim((string) ($d["cf{$i}_value"] ?? '')) ?: null;
+        }
+
+        return $cf + [
             'project_id' => $project ? (int) $project->id : null,
             'customer_id' => (int) $d['customer_id'], 'date' => $d['date'], 'due_date' => $d['due_date'] ?? null, 'expiry_date' => $d['expiry_date'] ?? null,
             'number' => (int) $d['number'], 'notes' => $d['notes'] ?? null, 'tax_percent' => $d['tax_percent'] ?? null, 'tax_total' => $d['tax_total'] ?? '0.00',
@@ -108,6 +115,7 @@ trait HandlesSalesDocuments
             'kind' => $kind, 'doc' => $doc, 'customers' => $customers, 'catalog' => $catalog, 'vehicles' => $vehicles, 'vehiclesOn' => $vehiclesOn,
             'selectedCustomer' => $doc->customer_id ?? $customerId, 'sales' => $sales,
             'projectOptions' => \App\Services\Construction\ConstructionService::enabled() && \App\Support\Tables::has('projects') ? app(\App\Services\Construction\ConstructionService::class)->options([(int) ($doc->project_id ?? 0)]) : [],
+            'customFields' => app(\App\Services\Documents\DocumentStyle::class)->customFields(),
             'selectedProject' => $doc->project_id ?? (int) request()->query('project') ?: null,
             'nextNumber' => $doc ? null : $sales->nextNumber($kind === 'quotation' ? 'quotations' : 'invoices'),
         ];

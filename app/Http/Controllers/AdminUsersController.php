@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Master\Account;
 use App\Models\User;
 use App\Services\Accounting\ActivityLog;
+use App\Services\Auth\PasswordService;
 use App\Services\Auth\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +53,7 @@ class AdminUsersController extends Controller
             'email' => ['required', 'email', 'max:30', Rule::unique('master.users', 'email')->ignore($user?->id)],
             'first_name' => ['required', 'string', 'max:11'], 'last_name' => ['nullable', 'string', 'max:11'], 'company' => ['nullable', 'string', 'max:25'],
             'phone' => ['nullable', 'regex:/^\d{5,15}$/'], 'group_id' => ['required', 'integer', 'exists:master.groups,id'],
-            'password' => [$user ? 'nullable' : 'required', 'string', 'min:8', 'max:72'], 'accounts' => ['nullable', 'array'],
+            'password' => [$user || request()->boolean('send_invite') ? 'nullable' : 'required', 'string', 'min:8', 'max:72'], 'accounts' => ['nullable', 'array'],
         ];
     }
 
@@ -73,15 +74,25 @@ class AdminUsersController extends Controller
     {
         $d = $request->validate($this->rules(null));
         [$all, $accounts] = $this->accountsJson($request);
+        $invite = $request->boolean('send_invite');
+        if (! $invite && ($problem = app(PasswordService::class)->problem((string) $d['password'], [$d['username'], $d['first_name'], strstr($d['email'], '@', true)]))) {
+            throw ValidationException::withMessages(['password' => $problem]);
+        }
+        $d['password'] = $invite ? app(PasswordService::class)->randomPassword() : $d['password'];
         $id = $this->master()->transaction(function () use ($d, $request, $all, $accounts) {
             $id = $this->master()->table('users')->insertGetId(['ip_address' => '127.0.0.1', 'username' => $d['username'], 'password' => Hash::make($d['password']), 'salt' => '', 'email' => $d['email'],
                 'created_on' => time(), 'active' => $request->boolean('active', true) ? 1 : 0, 'first_name' => $d['first_name'], 'last_name' => $d['last_name'] ?? null, 'company' => $d['company'] ?? null,
-                'phone' => $d['phone'] ?? null, 'accounts' => $accounts, 'all_accounts' => $all, 'must_change_password' => $request->boolean('must_change_password') ? 1 : 0, 'password_changed_at' => time()]);
+                'phone' => $d['phone'] ?? null, 'accounts' => $accounts, 'all_accounts' => $all, 'must_change_password' => $request->boolean('must_change_password') ? 1 : 0, 'temp_password_expires' => $request->boolean('must_change_password') ? time() + PasswordService::TEMP_PASSWORD_DAYS * 86400 : null, 'password_changed_at' => time()]);
             $this->master()->table('users_groups')->insert(['user_id' => $id, 'group_id' => $d['group_id']]);
 
             return $id;
         });
         ActivityLog::add("Created user {$d['username']}");
+        if ($invite) {
+            $sent = app(PasswordService::class)->sendInvite(User::findOrFail($id));
+
+            return redirect()->route('admin.users')->with($sent === true ? 'message' : 'error', $sent === true ? "User {$d['username']} was created and an invite link was emailed to {$d['email']}." : "User {$d['username']} was created, but the invite was not sent: $sent Open the user and press Send password link when email works.");
+        }
 
         return redirect()->route('admin.users')->with('message', "User {$d['username']} was created.");
     }
@@ -100,7 +111,10 @@ class AdminUsersController extends Controller
         $row = ['username' => $d['username'], 'email' => $d['email'], 'first_name' => $d['first_name'], 'last_name' => $d['last_name'] ?? null, 'company' => $d['company'] ?? null,
             'phone' => $d['phone'] ?? null, 'accounts' => $accounts, 'all_accounts' => $all, 'active' => $request->boolean('active') ? 1 : 0, 'must_change_password' => $request->boolean('must_change_password') ? 1 : 0];
         if (($d['password'] ?? '') !== '') {
-            $row += ['password' => Hash::make($d['password']), 'password_changed_at' => time(), 'session_token' => null]; // a new password signs the person out everywhere
+            if ($problem = app(PasswordService::class)->problem((string) $d['password'], [$d['username'], $d['first_name'], strstr($d['email'], '@', true)])) {
+                throw ValidationException::withMessages(['password' => $problem]);
+            }
+            $row += ['password' => Hash::make($d['password']), 'password_changed_at' => time(), 'session_token' => null, 'temp_password_expires' => $request->boolean('must_change_password') ? time() + PasswordService::TEMP_PASSWORD_DAYS * 86400 : null]; // a new password signs the person out everywhere
         }
         $this->master()->transaction(function () use ($id, $row, $groupId) {
             $this->master()->table('users')->where('id', $id)->update($row);
@@ -110,6 +124,20 @@ class AdminUsersController extends Controller
         ActivityLog::add("Updated user {$d['username']}");
 
         return redirect()->route('admin.users')->with('message', "User {$d['username']} was updated.");
+    }
+
+    /** Emails the person a one-time link to choose a new password (and signs them out everywhere). */
+    public function resetLink(int $id)
+    {
+        $user = User::findOrFail($id);
+        $sent = app(PasswordService::class)->sendInvite($user, true);
+        if ($sent !== true) {
+            return back()->with('error', "The link was not sent: $sent");
+        }
+        $this->master()->table('users')->where('id', $id)->update(['session_token' => null]);
+        ActivityLog::add("Sent a password link to user {$user->username}");
+
+        return back()->with('message', "A link to choose a new password was emailed to {$user->email}. It works once for 48 hours.");
     }
 
     /** Active administrators other than $exceptId. */

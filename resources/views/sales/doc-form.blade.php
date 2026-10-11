@@ -87,6 +87,14 @@
 
     <label for="notes">Notes</label><textarea id="notes" name="notes" rows="2" maxlength="500">{{ $d('notes') }}</textarea>
 
+    @if (! empty($customFields))
+        <div class="row2" style="margin-top:8px">
+            @foreach ($customFields as $i => [$cfLabel])
+                <div><label for="cf{{ $i }}_value">{{ $cfLabel }}</label><input id="cf{{ $i }}_value" name="cf{{ $i }}_value" maxlength="255" value="{{ $d("cf{$i}_value") }}"></div>
+            @endforeach
+        </div>
+    @endif
+
     <div class="actions" style="margin-top:20px">
         @if ($isInv)
             <button type="submit" name="then" value="issue">{{ $editing ? 'Save & issue' : 'Save & issue' }}</button>

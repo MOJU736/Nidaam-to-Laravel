@@ -31,6 +31,7 @@
             <div><label for="from">From</label><input id="from" type="date" name="from" value="{{ $from }}"></div>
             <div><label for="to">To</label><input id="to" type="date" name="to" value="{{ $to }}"></div>
         @endif
+        {!! $before ?? '' !!}
         @foreach ($extra as $k => $v)<input type="hidden" name="{{ $k }}" value="{{ $v }}">@endforeach
         <button>Show</button>
     </div>

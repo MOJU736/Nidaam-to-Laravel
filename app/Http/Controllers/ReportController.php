@@ -118,6 +118,9 @@ class ReportController extends Controller
 
     public function trialBalance(Request $request)
     {
+        if ($request->query('view') === 'detail') {
+            return app(AdvancedReportController::class)->trialBalanceDetail($request);
+        }
         $asof = $this->reports->readDate($request->query('asof'), $this->reports->defaultAsOf());
         $tb = $this->reports->trialBalance($asof);
 

@@ -19,6 +19,7 @@
         <span class="sp"></span>
         <span class="co">{{ app(\App\Tenancy\TenantManager::class)->current()?->name }}</span>
         <a href="{{ route('companies.index') }}">Switch</a>
+        <a href="{{ route('password.change') }}" title="Change your password">Password</a>
         <form class="inline" method="POST" action="{{ route('logout') }}">@csrf <button class="link">Sign out</button></form>
     </div>
 </nav>
