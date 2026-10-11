@@ -11,7 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['tenant' => \App\Http\Middleware\SetTenant::class]);
+        $middleware->alias(['tenant' => \App\Http\Middleware\SetTenant::class, 'page' => \App\Http\Middleware\PagePermission::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

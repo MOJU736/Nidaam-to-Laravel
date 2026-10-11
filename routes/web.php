@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ActivityReportController;
+use App\Http\Controllers\AdminGroupsController;
+use App\Http\Controllers\AdminUsersController;
 use App\Http\Controllers\BankingController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ChartController;
@@ -10,6 +12,7 @@ use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DocumentTemplatesController;
 use App\Http\Controllers\EmailSettingsController;
 use App\Http\Controllers\EntryController;
 use App\Http\Controllers\ExpenseController;
@@ -24,6 +27,7 @@ use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseSettingsController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RecurringInvoiceController;
+use App\Http\Controllers\RemindersController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesSettingsController;
 use App\Http\Controllers\StockController;
@@ -46,7 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/companies/{id}', [CompanyController::class, 'activate'])->whereNumber('id')->name('companies.activate');
 
     // Everything inside a company runs on that company's database.
-    Route::middleware('tenant')->group(function () {
+    Route::middleware(['tenant', 'page'])->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
         Route::get('/accounts', ChartController::class)->name('chart');
@@ -203,9 +207,34 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices/{id}/write-off', [CreditNoteController::class, 'writeOffForm'])->whereNumber('id')->name('invoices.write-off');
         Route::post('/invoices/{id}/write-off', [CreditNoteController::class, 'writeOff'])->whereNumber('id');
 
+        // Admin: users, groups and what each group may do (administrators only).
+        Route::prefix('admin')->group(function () {
+            Route::get('/users', [AdminUsersController::class, 'index'])->name('admin.users');
+            Route::get('/users/create', [AdminUsersController::class, 'create'])->name('admin.users.create');
+            Route::post('/users', [AdminUsersController::class, 'store'])->name('admin.users.store');
+            Route::get('/users/{id}/edit', [AdminUsersController::class, 'edit'])->whereNumber('id')->name('admin.users.edit');
+            Route::put('/users/{id}', [AdminUsersController::class, 'update'])->whereNumber('id')->name('admin.users.update');
+            Route::delete('/users/{id}', [AdminUsersController::class, 'destroy'])->whereNumber('id')->name('admin.users.destroy');
+            Route::get('/groups', [AdminGroupsController::class, 'index'])->name('admin.groups');
+            Route::get('/groups/create', [AdminGroupsController::class, 'create'])->name('admin.groups.create');
+            Route::post('/groups', [AdminGroupsController::class, 'store'])->name('admin.groups.store');
+            Route::get('/groups/{id}/edit', [AdminGroupsController::class, 'edit'])->whereNumber('id')->name('admin.groups.edit');
+            Route::put('/groups/{id}', [AdminGroupsController::class, 'update'])->whereNumber('id')->name('admin.groups.update');
+            Route::delete('/groups/{id}', [AdminGroupsController::class, 'destroy'])->whereNumber('id')->name('admin.groups.destroy');
+        });
+
+        // Payment reminders (emails with the customer's statement attached; never sent on their own).
+        Route::get('/reminders', [RemindersController::class, 'index'])->name('reminders.index');
+        Route::post('/reminders/send', [RemindersController::class, 'send'])->name('reminders.send');
+        Route::post('/reminders/message', [RemindersController::class, 'message'])->name('reminders.message');
+        Route::post('/reminders/customer/{id}', [RemindersController::class, 'one'])->whereNumber('id')->name('reminders.one');
+
         // PDFs and email of documents; the company's email (SMTP) settings.
         Route::get('/documents/{type}/{id}/pdf', [DocumentController::class, 'pdf'])->whereNumber('id')->name('documents.pdf');
         Route::post('/documents/{type}/{id}/email', [DocumentController::class, 'email'])->whereNumber('id')->name('documents.email');
+        Route::get('/settings/templates', [DocumentTemplatesController::class, 'edit'])->name('settings.templates');
+        Route::post('/settings/templates', [DocumentTemplatesController::class, 'update']);
+        Route::post('/settings/templates/preview', [DocumentTemplatesController::class, 'preview'])->name('settings.templates.preview');
         Route::get('/settings/email', [EmailSettingsController::class, 'edit'])->name('settings.email');
         Route::put('/settings/email', [EmailSettingsController::class, 'update']);
 

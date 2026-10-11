@@ -112,7 +112,7 @@ class DocumentService
     /** @return array{d: array, file: string, party: ?object, mail: array}|null */
     public function build(string $type, int $id, array $opts = []): ?array
     {
-        return match ($type) {
+        $built = match ($type) {
             'invoice' => $this->invoice($id),
             'quotation' => $this->quotation($id),
             'credit-note' => $this->credit('ar', $id),
@@ -125,6 +125,12 @@ class DocumentService
             'vendor-statement' => $this->statement('ap', $id, $opts),
             default => null,
         };
+        if ($built) {
+            $built['d']['kind'] = ['invoice' => 'invoice', 'quotation' => 'quotation', 'credit-note' => 'credit', 'supplier-credit' => 'credit', 'receipt' => 'receipt', 'bill' => 'bill', 'purchase-order' => 'po', 'remittance' => 'remittance', 'customer-statement' => 'statement', 'vendor-statement' => 'statement'][$type] ?? 'other';
+            $built['d']['pad'] = in_array($type, ['invoice', 'quotation'], true);
+        }
+
+        return $built;
     }
 
     protected function mail(string $co, string $title, string $label, string $name, ?string $email, string $extra, string $table, int $partyId): array
@@ -157,6 +163,7 @@ class DocumentService
             $d['stamp'] = 'VOID';
         }
         $d['notes'] = $inv->notes;
+        $d['total_raw'] = $inv->total;
         $d['bank'] = $this->bank();
         $d['footer'] = 'We appreciate your business and look forward to serving you!';
         $co = $d['company']['name'];
@@ -180,6 +187,7 @@ class DocumentService
         $d['rows'] = $this->lineRows($q->items);
         $d['totals'] = $this->totalRows($q, 'Total');
         $d['notes'] = $q->notes;
+        $d['total_raw'] = $q->total;
         $d['footer'] = 'Thank you for the opportunity to quote.';
 
         return ['d' => $d, 'file' => "Quotation $label.pdf", 'party' => $this->db()->table('customers')->where('id', $q->customer_id)->first(),
@@ -204,6 +212,7 @@ class DocumentService
         $d['totals'] = $this->totalRows($cn, 'Total credit');
         $d['notes'] = $cn->notes;
         $d['stamp'] = $cn->status === 'void' ? 'VOID' : null;
+        $d['total_raw'] = $cn->total;
         $table = $c['party_table'];
         $what = $wo ? 'write-off' : strtolower($c['name']);
 
@@ -350,7 +359,7 @@ class DocumentService
     /** The PDF bytes for a built document. */
     public function pdfBytes(array $built): string
     {
-        return $this->pdf->fromHtml(view('pdf.document', ['d' => $built['d']])->render());
+        return $this->pdf->fromHtml(view('pdf.document', ['d' => $built['d'], 'st' => app(DocumentStyle::class)->resolve()])->render());
     }
 
     /** A table of rows (the same rows a report downloads as CSV) as a PDF. First cells of single-cell rows are headings. */

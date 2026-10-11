@@ -15,7 +15,7 @@
     </div>
     <div class="actions">
         <a class="btn ghost" href="{{ route($cfg['route'].'.edit', $party->id) }}">Edit</a>
-        @if ($cfg['side'] === 'ar')<a class="btn ghost" href="{{ route('quotations.create', $party->id) }}">New quotation</a><a class="btn ghost" href="{{ route('invoices.create', $party->id) }}">New invoice</a><a class="btn" href="{{ route('payments.create', $party->id) }}">Receive payment</a>@else<a class="btn ghost" href="{{ route('purchase-orders.create', $party->id) }}">New purchase order</a><a class="btn ghost" href="{{ route('bills.create', $party->id) }}">New bill</a><a class="btn" href="{{ route('vendor-payments.create', $party->id) }}">Pay vendor</a>@endif
+        @if ($cfg['side'] === 'ar')@if ($closing['dc'] === 'D' && Money::positive($closing['amount']))<button type="button" class="ghost" onclick="var e=document.getElementById('reminderBox');if(e){e.hidden=!e.hidden;if(!e.hidden)e.scrollIntoView({behavior:'smooth',block:'center'})}">Send reminder</button>@endif<a class="btn ghost" href="{{ route('quotations.create', $party->id) }}">New quotation</a><a class="btn ghost" href="{{ route('invoices.create', $party->id) }}">New invoice</a><a class="btn" href="{{ route('payments.create', $party->id) }}">Receive payment</a>@else<a class="btn ghost" href="{{ route('purchase-orders.create', $party->id) }}">New purchase order</a><a class="btn ghost" href="{{ route('bills.create', $party->id) }}">New bill</a><a class="btn" href="{{ route('vendor-payments.create', $party->id) }}">Pay vendor</a>@endif
     </div>
 </div>
 
@@ -69,4 +69,5 @@
     </table>
 </div>
 @include('documents._email-box', ['type' => $cfg['side'] === 'ar' ? 'customer-statement' : 'vendor-statement', 'id' => $party->id, 'opts' => array_filter(['startdate' => $startdate ? date('Y-m-d', strtotime($startdate)) : null, 'enddate' => $enddate ? date('Y-m-d', strtotime($enddate)) : null])])
+@if ($cfg['side'] === 'ar')@include('sales._reminder-box', ['party' => $party])@endif
 @endsection
