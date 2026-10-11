@@ -23,6 +23,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ItemSettingsController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseSettingsController;
 use App\Http\Controllers\QuotationController;
@@ -255,6 +256,30 @@ Route::middleware('auth')->group(function () {
         Route::get('/banking/history/{id}', [BankingController::class, 'history'])->whereNumber('id')->name('banking.history');
         Route::get('/banking/report/{id}', [BankingController::class, 'report'])->whereNumber('id')->name('banking.report');
         Route::post('/banking/undo/{id}', [BankingController::class, 'undo'])->whereNumber('id')->name('banking.undo');
+
+        // Payroll (confidential: administrators and groups ticked "Payroll" under Groups & permissions).
+        Route::prefix('payroll')->group(function () {
+            Route::get('/', [PayrollController::class, 'index'])->name('payroll.index');
+            Route::get('/employees', [PayrollController::class, 'employees'])->name('payroll.employees');
+            Route::post('/employees', [PayrollController::class, 'employeeStore'])->name('payroll.employees.store');
+            Route::get('/employees/{id}', [PayrollController::class, 'employeeShow'])->whereNumber('id')->name('payroll.employees.show');
+            Route::put('/employees/{id}', [PayrollController::class, 'employeeUpdate'])->whereNumber('id')->name('payroll.employees.update');
+            Route::get('/advances', [PayrollController::class, 'advances'])->name('payroll.advances');
+            Route::post('/advances', [PayrollController::class, 'advanceStore'])->name('payroll.advances.store');
+            Route::post('/advances/{id}/void', [PayrollController::class, 'advanceVoid'])->whereNumber('id')->name('payroll.advances.void');
+            Route::post('/runs', [PayrollController::class, 'runStore'])->name('payroll.runs.store');
+            Route::get('/runs/{id}', [PayrollController::class, 'runShow'])->whereNumber('id')->name('payroll.runs.show');
+            Route::put('/runs/{id}', [PayrollController::class, 'runUpdate'])->whereNumber('id')->name('payroll.runs.update');
+            Route::delete('/runs/{id}', [PayrollController::class, 'runDestroy'])->whereNumber('id')->name('payroll.runs.destroy');
+            Route::post('/runs/{id}/approve', [PayrollController::class, 'runApprove'])->whereNumber('id')->name('payroll.runs.approve');
+            Route::post('/runs/{id}/pay', [PayrollController::class, 'runPay'])->whereNumber('id')->name('payroll.runs.pay');
+            Route::post('/runs/{id}/void', [PayrollController::class, 'runVoid'])->whereNumber('id')->name('payroll.runs.void');
+            Route::post('/payments/{id}/void', [PayrollController::class, 'paymentVoid'])->whereNumber('id')->name('payroll.payments.void');
+            Route::get('/payslips/{lineId}', [PayrollController::class, 'payslip'])->whereNumber('lineId')->name('payroll.payslip');
+            Route::get('/payslips/{lineId}/pdf', [PayrollController::class, 'payslipPdf'])->whereNumber('lineId')->name('payroll.payslip.pdf');
+            Route::post('/payslips/{lineId}/email', [PayrollController::class, 'payslipEmail'])->whereNumber('lineId')->name('payroll.payslip.email');
+            Route::get('/reports', [PayrollController::class, 'reports'])->name('payroll.reports');
+        });
 
         // Reports (read-only; dates come from the address, ?download=csv repeats the page as a file)
         Route::prefix('reports')->group(function () {

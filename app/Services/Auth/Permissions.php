@@ -152,6 +152,9 @@ class Permissions
         if ($area === 'settings') {
             return $has('account_settings-index') ? $on('account_settings-index') : false;
         }
+        if ($area === 'payroll') {
+            return $on('payroll-access'); // confidential: only a group an administrator ticked "Payroll" for
+        }
         if ($area === 'documents') {
             return $this->modulePasses($row, $this->documentModule($type), 'view');
         }
@@ -193,6 +196,9 @@ class Permissions
         }
         if ($group === self::RESTRICTED) {
             return 'Your account can only view the Dashboard and Reports.';
+        }
+        if ($routeName && explode('.', $routeName)[0] === 'payroll') {
+            return "Payroll is confidential - your role can't open it. An administrator can give a role Payroll under Groups & permissions.";
         }
         $module = $routeName ? $this->module($routeName) : null;
         $names = ['sales' => 'Sales', 'purchases' => 'Purchases', 'customers' => 'Customers', 'vendors' => 'Vendors', 'items' => 'Inventory'];
