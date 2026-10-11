@@ -13,6 +13,7 @@
         @can('page', 'banking.index')<a href="{{ route('banking.index') }}" @class(['on' => request()->routeIs('banking.*')])>Banking</a>@endcan
         @can('page', 'payroll.index')<a href="{{ route('payroll.index') }}" @class(['on' => request()->routeIs('payroll.*')])>Payroll</a>@endcan
         @can('page', 'reports.index')<a href="{{ route('reports.index') }}" @class(['on' => request()->routeIs('reports.*')])>Reports</a>@endcan
+        @can('page', 'settings.index')<a href="{{ route('settings.index') }}" @class(['on' => request()->routeIs('settings.*')])>Settings</a>@endcan
         @if (auth()->user()->isAdmin())<a href="{{ route('admin.users') }}" @class(['on' => request()->routeIs('admin.*')])>Admin</a>@endif
         <span class="sp"></span>
         <span class="co">{{ app(\App\Tenancy\TenantManager::class)->current()?->name }}</span>
@@ -24,7 +25,7 @@
     @if (session('message'))<div class="flash ok">{{ session('message') }}</div>@endif
     @if (session('warning'))<div class="flash bad">{{ session('warning') }}</div>@endif
     @if (session('error'))<div class="flash bad">{{ session('error') }}</div>@endif
-    @foreach (['party', 'ledger', 'group', 'entry', 'item', 'category', 'vehicle', 'prices', 'batch', 'lines', 'adjustment', 'sales', 'purchases', 'credit', 'banking', 'recurring', 'reminders', 'payroll'] as $k)@if ($errors->has($k))<div class="flash bad">{{ $errors->first($k) }}</div>@endif @endforeach
+    @foreach (['party', 'ledger', 'group', 'entry', 'item', 'category', 'vehicle', 'prices', 'batch', 'lines', 'adjustment', 'sales', 'purchases', 'credit', 'banking', 'recurring', 'reminders', 'payroll', 'settings'] as $k)@if ($errors->has($k))<div class="flash bad">{{ $errors->first($k) }}</div>@endif @endforeach
     @yield('content')
 </div>
 @endsection

@@ -83,6 +83,7 @@
             <select name="doc_discount_type" id="ddt" style="width:62px;display:inline-block"><option value="">—</option><option value="percent" @selected($d('discount_type') === 'percent')>%</option><option value="amount" @selected($d('discount_type') === 'amount')>$</option></select>
             <input name="doc_discount_value" id="ddv" class="num" inputmode="decimal" style="width:80px;display:inline-block" value="{{ old('doc_discount_value', $doc->discount_value ?? '') }}"></td><td class="num" id="tdisc">0.00</td></tr>@endif
         <tr><td class="num"><span style="margin-right:8px">Tax</span><input name="tax_percent" id="tp" class="num" inputmode="decimal" placeholder="%" style="width:70px;display:inline-block" value="{{ old('tax_percent', isset($doc->tax_percent) ? rtrim(rtrim((string) $doc->tax_percent, '0'), '.') : '') }}">
+            @include('settings._tax-picker', ['side' => 'ap', 'isNew' => ! $editing])
             <input name="tax_total" id="tt" class="num" inputmode="decimal" placeholder="or amount" style="width:100px;display:inline-block" value="{{ old('tax_total', $doc->tax_total ?? '') }}"></td><td class="num" id="ttax">0.00</td></tr>
         <tr><td class="num"><strong>Total</strong></td><td class="num"><strong id="ttot">0.00</strong></td></tr>
     </table>

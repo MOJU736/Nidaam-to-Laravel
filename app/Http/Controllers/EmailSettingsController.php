@@ -16,7 +16,6 @@ class EmailSettingsController extends Controller
 
     public function edit(Request $request)
     {
-        abort_unless($request->user()->isAdmin(), 403);
         $core = DB::connection('master')->table('settings')->first();
 
         return view('settings.email', ['s' => Setting::first(), 'defaultReady' => (bool) ($core->smtp_host ?? null)]);
@@ -24,7 +23,6 @@ class EmailSettingsController extends Controller
 
     public function update(Request $request)
     {
-        abort_unless($request->user()->isAdmin(), 403);
         $d = $request->validate(['email_host' => ['nullable', 'string', 'max:255'], 'email_port' => ['nullable', 'integer', 'min:1', 'max:65535'], 'email_username' => ['nullable', 'string', 'max:255'],
             'email_password' => ['nullable', 'string', 'max:255'], 'email_from' => ['nullable', 'email', 'max:255']]);
         $row = ['email_use_default' => $request->boolean('email_use_default') ? 1 : 0, 'email_protocol' => 'smtp', 'email_host' => $d['email_host'] ?? '', 'email_port' => $d['email_port'] ?? 587,

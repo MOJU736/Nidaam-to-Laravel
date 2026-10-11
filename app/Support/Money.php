@@ -74,6 +74,11 @@ class Money
         $places = (int) ($s['decimal_places'] ?? 2);
         $neg = self::cmp($amount, 0) < 0;
         $abs = ltrim(number_format(abs((float) $amount), $places, '.', ','), '-');
+        if (($s['number_format'] ?? '') === '##,##.##') { // Indian grouping: 12,34,567.89
+            [$whole, $frac] = array_pad(explode('.', $abs, 2), 2, null);
+            $whole = str_replace(',', '', $whole);
+            $abs = (strlen($whole) > 3 ? preg_replace('/\B(?=(\d{2})+(?!\d))/', ',', substr($whole, 0, -3)).','.substr($whole, -3) : $whole).($frac !== null ? '.'.$frac : '');
+        }
 
         return ($neg ? '-' : '').$s['symbol'].$abs;
     }
@@ -88,15 +93,25 @@ class Money
         return \Illuminate\Support\Carbon::parse($value)->format(self::settings()['date_format']);
     }
 
+    /** Company formatting settings by database name, read once per request. */
+    protected static array $cache = [];
+
+    /** Drop the remembered settings (call after the company settings are saved, so nothing is formatted with the old ones). */
+    public static function forget(): void
+    {
+        self::$cache = [];
+    }
+
     protected static function settings(): array
     {
-        static $cache = [];
+        $cache = &self::$cache;
         $key = config('database.connections.tenant.database');
         if (! isset($cache[$key])) {
             $row = Setting::query()->first();
             $cache[$key] = [
                 'symbol' => trim((string) ($row->currency_symbol ?? '')) ?: '$',
                 'decimal_places' => $row->decimal_places ?? 2,
+                'number_format' => (string) ($row->currency_format ?? ''),
                 'date_format' => explode('|', (string) ($row->date_format ?? ''))[0] ?: 'd-M-Y',
                 'vehicles' => $row === null || ! isset($row->vehicles_enabled) ? true : (bool) $row->vehicles_enabled,
                 'billable' => (bool) ($row->billable_expenses_enabled ?? false),

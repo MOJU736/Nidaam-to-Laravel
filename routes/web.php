@@ -31,6 +31,8 @@ use App\Http\Controllers\RecurringInvoiceController;
 use App\Http\Controllers\RemindersController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesSettingsController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SettingsListsController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\VehicleModelController;
 use App\Http\Controllers\VendorController;
@@ -234,10 +236,35 @@ Route::middleware('auth')->group(function () {
         Route::get('/documents/{type}/{id}/pdf', [DocumentController::class, 'pdf'])->whereNumber('id')->name('documents.pdf');
         Route::post('/documents/{type}/{id}/email', [DocumentController::class, 'email'])->whereNumber('id')->name('documents.email');
         Route::get('/settings/templates', [DocumentTemplatesController::class, 'edit'])->name('settings.templates');
-        Route::post('/settings/templates', [DocumentTemplatesController::class, 'update']);
+        Route::post('/settings/templates', [DocumentTemplatesController::class, 'update'])->name('settings.templates.update');
         Route::post('/settings/templates/preview', [DocumentTemplatesController::class, 'preview'])->name('settings.templates.preview');
         Route::get('/settings/email', [EmailSettingsController::class, 'edit'])->name('settings.email');
-        Route::put('/settings/email', [EmailSettingsController::class, 'update']);
+        Route::put('/settings/email', [EmailSettingsController::class, 'update'])->name('settings.email.update');
+
+        // Company settings: home, details and financial year, close / lock the books, and the small lists.
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::get('/settings/company', [SettingsController::class, 'company'])->name('settings.company');
+        Route::put('/settings/company', [SettingsController::class, 'updateCompany'])->name('settings.company.update');
+        Route::get('/settings/close-books', [SettingsController::class, 'closeBooks'])->name('settings.close-books');
+        Route::put('/settings/close-books', [SettingsController::class, 'updateCloseBooks'])->name('settings.close-books.update');
+        Route::get('/settings/lock', [SettingsController::class, 'lock'])->name('settings.lock');
+        Route::put('/settings/lock', [SettingsController::class, 'updateLock'])->name('settings.lock.update');
+        Route::get('/settings/tax-rates', [SettingsListsController::class, 'taxRates'])->name('settings.tax-rates');
+        Route::post('/settings/tax-rates', [SettingsListsController::class, 'saveTaxRate'])->name('settings.tax-rates.store');
+        Route::put('/settings/tax-rates/{id}', [SettingsListsController::class, 'saveTaxRate'])->whereNumber('id')->name('settings.tax-rates.update');
+        Route::delete('/settings/tax-rates/{id}', [SettingsListsController::class, 'deleteTaxRate'])->whereNumber('id')->name('settings.tax-rates.destroy');
+        Route::get('/settings/payment-methods', [SettingsListsController::class, 'paymentMethods'])->name('settings.payment-methods');
+        Route::post('/settings/payment-methods', [SettingsListsController::class, 'savePaymentMethod'])->name('settings.payment-methods.store');
+        Route::put('/settings/payment-methods/{id}', [SettingsListsController::class, 'savePaymentMethod'])->whereNumber('id')->name('settings.payment-methods.update');
+        Route::delete('/settings/payment-methods/{id}', [SettingsListsController::class, 'deletePaymentMethod'])->whereNumber('id')->name('settings.payment-methods.destroy');
+        Route::get('/settings/entry-types', [SettingsListsController::class, 'entryTypes'])->name('settings.entry-types');
+        Route::post('/settings/entry-types', [SettingsListsController::class, 'saveEntryType'])->name('settings.entry-types.store');
+        Route::put('/settings/entry-types/{id}', [SettingsListsController::class, 'saveEntryType'])->whereNumber('id')->name('settings.entry-types.update');
+        Route::delete('/settings/entry-types/{id}', [SettingsListsController::class, 'deleteEntryType'])->whereNumber('id')->name('settings.entry-types.destroy');
+        Route::get('/settings/tags', [SettingsListsController::class, 'tags'])->name('settings.tags');
+        Route::post('/settings/tags', [SettingsListsController::class, 'saveTag'])->name('settings.tags.store');
+        Route::put('/settings/tags/{id}', [SettingsListsController::class, 'saveTag'])->whereNumber('id')->name('settings.tags.update');
+        Route::delete('/settings/tags/{id}', [SettingsListsController::class, 'deleteTag'])->whereNumber('id')->name('settings.tags.destroy');
 
         // Recurring invoices (created as drafts).
         Route::get('/recurring', [RecurringInvoiceController::class, 'index'])->name('recurring.index');

@@ -1,6 +1,7 @@
 @extends('layouts.main')
 @section('title', 'Document templates')
 @section('content')
+@include('settings._tabs')
 @php
     $v = fn ($k, $default = '') => old("look.$k", $saved[$k] ?? $default);
     $co = fn ($k) => old($k, $s->{$k} ?? '');

@@ -19,7 +19,6 @@ class DocumentTemplatesController extends Controller
 
     public function edit(Request $request)
     {
-        abort_unless($request->user()->isAdmin(), 403);
         $s = $this->style->settings();
         $design = (int) ($request->query('design') ?: $s->template_id ?: 1);
         $design = isset(DocumentStyle::DESIGNS[$design]) ? $design : 1;
@@ -64,7 +63,6 @@ class DocumentTemplatesController extends Controller
 
     public function update(Request $request)
     {
-        abort_unless($request->user()->isAdmin(), 403);
         $design = (int) $request->input('design');
         abort_unless(isset(DocumentStyle::DESIGNS[$design]), 422);
         $s = $this->style->settings();
@@ -110,7 +108,6 @@ class DocumentTemplatesController extends Controller
     /** The unsaved look on a real document (the newest issued invoice, else a sample), as a web page to look at. */
     public function preview(Request $request)
     {
-        abort_unless($request->user()->isAdmin(), 403);
         $design = (int) $request->input('design');
         abort_unless(isset(DocumentStyle::DESIGNS[$design]), 422);
         $row = (object) array_merge((array) $this->style->settings(), $this->companyRow($request));

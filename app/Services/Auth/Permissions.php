@@ -46,6 +46,12 @@ class Permissions
 
     protected const CUSTOMER_DOCS = ['invoice', 'receipt', 'credit-note', 'customer-statement'];
 
+    /** Which account_settings-* tick each Settings page needs (the second part of the route name). Tax rates and payment methods belong to the company details. */
+    protected const SETTINGS_TICKS = [
+        'company' => 'main', 'tax-rates' => 'main', 'payment-methods' => 'main', 'email' => 'email', 'templates' => 'printer',
+        'entry-types' => 'entrytypes', 'tags' => 'tags', 'close-books' => 'lock', 'lock' => 'lock',
+    ];
+
     protected const ALWAYS = ['companies.index', 'companies.activate', 'logout'];
 
     protected array $groupCache = [];
@@ -150,7 +156,13 @@ class Permissions
         $on = fn (string $key) => (int) ($row[$key] ?? 0) === 1;
 
         if ($area === 'settings') {
-            return $has('account_settings-index') ? $on('account_settings-index') : false;
+            // "Open Settings" is needed for every settings page; each page then has its own tick (a page the table has no tick for needs only the first)
+            if (! $on('account_settings-index')) {
+                return false;
+            }
+            $tick = self::SETTINGS_TICKS[explode('.', $routeName)[1] ?? ''] ?? null;
+
+            return $tick === null || ! $has("account_settings-$tick") || $on("account_settings-$tick");
         }
         if ($area === 'payroll') {
             return $on('payroll-access'); // confidential: only a group an administrator ticked "Payroll" for

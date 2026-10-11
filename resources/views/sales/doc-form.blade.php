@@ -66,6 +66,7 @@
                 <td class="num" id="tdisc">0.00</td><td></td></tr>
             <tr><td colspan="4" class="num" style="vertical-align:middle">Tax</td>
                 <td><div class="actions" style="flex-wrap:nowrap"><input name="tax_percent" id="tp" class="num" inputmode="decimal" placeholder="%" style="width:70px" value="{{ old('tax_percent', isset($doc->tax_percent) ? rtrim(rtrim((string) $doc->tax_percent, '0'), '.') : '') }}">
+                    @include('settings._tax-picker', ['side' => 'ar', 'isNew' => ! $editing])
                     <input name="tax_total" id="tt" class="num" inputmode="decimal" placeholder="or amount" style="width:100px" value="{{ old('tax_total', $doc->tax_total ?? '') }}"></div></td>
                 <td class="num" id="ttax">0.00</td><td></td></tr>
             <tr><td colspan="5" class="num"><strong>Total</strong></td><td class="num"><strong id="ttot">0.00</strong></td><td></td></tr>

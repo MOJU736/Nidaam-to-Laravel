@@ -50,6 +50,7 @@
     <table style="margin-top:16px;max-width:520px;margin-left:auto">
         <tr><td class="num">Subtotal</td><td class="num" id="tsub" style="width:120px">0.00</td></tr>
         <tr><td class="num"><span style="margin-right:8px">Tax</span><input name="tax_percent" id="tp" class="num" inputmode="decimal" placeholder="%" style="width:70px;display:inline-block" value="{{ $taxPercent }}">
+            @include('settings._tax-picker', ['side' => ($ui['route'] ?? '') === 'supplier-credits' ? 'ap' : 'ar', 'isNew' => ! $editing])
             <input name="tax_total" id="tt" class="num" inputmode="decimal" placeholder="or amount" style="width:100px;display:inline-block" value="{{ $taxTotal }}"></td><td class="num" id="ttax">0.00</td></tr>
         <tr><td class="num"><strong>Total credit</strong></td><td class="num"><strong id="ttot">0.00</strong></td></tr>
     </table>

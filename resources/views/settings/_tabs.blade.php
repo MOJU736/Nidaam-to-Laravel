@@ -1,0 +1,10 @@
+@php
+    $tabs = [['settings.index', 'Home', ['settings.index']], ['settings.company', 'Company', ['settings.company*']], ['settings.tax-rates', 'Tax rates', ['settings.tax-rates*']], ['settings.payment-methods', 'Payment methods', ['settings.payment-methods*']],
+        ['settings.entry-types', 'Entry types', ['settings.entry-types*']], ['settings.tags', 'Tags', ['settings.tags*']], ['settings.email', 'Email', ['settings.email*']], ['settings.templates', 'Templates & logo', ['settings.templates*']],
+        ['settings.close-books', 'Close books', ['settings.close-books*']], ['settings.lock', 'Lock company', ['settings.lock*']]];
+@endphp
+<div class="actions" style="margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:8px">
+    @foreach ($tabs as [$route, $label, $match])
+        @can('page', $route)<a class="btn sm {{ request()->routeIs(...$match) ? '' : 'ghost' }}" href="{{ route($route) }}">{{ $label }}</a>@endcan
+    @endforeach
+</div>
