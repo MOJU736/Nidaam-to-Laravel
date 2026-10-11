@@ -21,7 +21,7 @@
         <a class="btn ghost" href="{{ route('reports.index') }}">All reports</a>
     </div>
 </div>
-@if (empty($noFilter))
+@if (empty($noFilter) && $mode !== 'none')
 <form class="card noprint" method="GET" action="{{ url()->current() }}" style="margin-bottom:16px">
     <div class="rfilter">
         @if ($mode === 'asof')

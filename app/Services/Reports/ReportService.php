@@ -306,14 +306,7 @@ class ReportService
         $inc = $this->treeFor('income', $from, $to);
         $exp = $this->treeFor('expense', $from, $to);
 
-        $sec = ['income' => [], 'cogs' => [], 'expense' => [], 'other_income' => [], 'other_expense' => []];
-        foreach ($inc['groups'] as $g) {
-            $sec[preg_match('/^other\s+income/i', trim($g['name'])) ? 'other_income' : 'income'][] = $g;
-        }
-        foreach ($exp['groups'] as $g) {
-            $n = trim($g['name']);
-            $sec[preg_match('/cost\s+of\s+(goods|sales|revenue)|^purchases/i', $n) ? 'cogs' : (preg_match('/^other\s+expense/i', $n) ? 'other_expense' : 'expense')][] = $g;
-        }
+        $sec = $this->plSections($inc, $exp);
 
         [$incomeRows, $incomeTotal] = $this->sectionRows($sec['income'], 'C', $inc);
         [$cogsRows, $cogsTotal] = $this->sectionRows($sec['cogs'], 'D');
@@ -338,6 +331,21 @@ class ReportService
             // the two trees' own totals, as a cross-check on the sections
             'check' => Money::sub($this->side($inc['net'], 'C'), $this->side($exp['net'], 'D')),
         ];
+    }
+
+    /** Splits the Income and Expense trees the way a QuickBooks P&L reads, by group name: income, cost of goods sold, expenses, other income, other expenses. */
+    public function plSections(array $inc, array $exp): array
+    {
+        $sec = ['income' => [], 'cogs' => [], 'expense' => [], 'other_income' => [], 'other_expense' => []];
+        foreach ($inc['groups'] as $g) {
+            $sec[preg_match('/^other\s+income/i', trim($g['name'])) ? 'other_income' : 'income'][] = $g;
+        }
+        foreach ($exp['groups'] as $g) {
+            $n = trim($g['name']);
+            $sec[preg_match('/cost\s+of\s+(goods|sales|revenue)|^purchases/i', $n) ? 'cogs' : (preg_match('/^other\s+expense/i', $n) ? 'other_expense' : 'expense')][] = $g;
+        }
+
+        return $sec;
     }
 
     /** Rows for a list of group nodes (one P&L section) and their total; $loose adds accounts sitting straight under the top group. */

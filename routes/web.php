@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ActivityReportController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ChartController;
 use App\Http\Controllers\CompanyController;
@@ -187,6 +188,16 @@ Route::middleware('auth')->group(function () {
             Route::get('/customer-balance', [ReportController::class, 'partyBalance'])->defaults('side', 'ar')->name('reports.customer-balance');
             Route::get('/vendor-balance', [ReportController::class, 'partyBalance'])->defaults('side', 'ap')->name('reports.vendor-balance');
             Route::get('/journal', [ReportController::class, 'journal'])->name('reports.journal');
+            Route::get('/open-invoices', [ActivityReportController::class, 'openDocs'])->defaults('side', 'ar')->name('reports.open-invoices');
+            Route::get('/unpaid-bills', [ActivityReportController::class, 'openDocs'])->defaults('side', 'ap')->name('reports.unpaid-bills');
+            Route::get('/sales-by-customer', [ActivityReportController::class, 'salesByCustomer'])->name('reports.sales-by-customer');
+            Route::get('/sales-by-item', [ActivityReportController::class, 'byItem'])->defaults('side', 'ar')->name('reports.sales-by-item');
+            Route::get('/purchases-by-vendor', [ActivityReportController::class, 'purchasesByVendor'])->name('reports.purchases-by-vendor');
+            Route::get('/purchases-by-item', [ActivityReportController::class, 'byItem'])->defaults('side', 'ap')->name('reports.purchases-by-item');
+            Route::get('/tax-summary', [ActivityReportController::class, 'tax'])->name('reports.tax-summary');
+            Route::get('/inventory-valuation', [ActivityReportController::class, 'inventory'])->name('reports.inventory-valuation');
+            Route::get('/reorder', [ActivityReportController::class, 'reorder'])->name('reports.reorder');
+            Route::get('/profit-loss-by-month', [ActivityReportController::class, 'plByMonth'])->name('reports.pl-by-month');
         });
     });
 });
