@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Nidaam">
+  <!-- Nidaam brand mark - "reversed" variant for use on the primary purple
+       gradient (login aside, dark surfaces) where the standard purple-
+       stroke mark has no contrast. White stroke + light emerald dot,
+       per the brand spec's dark-mode accent pairing. -->
+  <path d="M 20 38 Q 20 76 50 76 Q 80 76 80 38" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="50" cy="18" r="8" fill="#5DCAA5"/>
+</svg>

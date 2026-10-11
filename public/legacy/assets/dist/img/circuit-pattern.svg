@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <!-- Nidaam login background - ICT/circuit motif tile, repeated via CSS.
+       Deliberate override of the brand spec's "no circuit/network
+       iconography" rule for this one screen, per explicit user request
+       (2026-09-08). Kept to brand colors only (white/light-purple/emerald
+       at low opacity so it reads as texture, not the primary identity -
+       the noon mark stays the actual brand mark). -->
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="2" stroke-linecap="round">
+    <path d="M0 40 H60 V100 H150"/>
+    <path d="M170 0 V60 H240"/>
+    <path d="M0 160 H90 V240"/>
+    <path d="M110 240 V180 H200 V120 H240"/>
+    <path d="M60 100 V150 H20"/>
+    <path d="M200 120 V70 H150 V40"/>
+  </g>
+  <g fill="#5DCAA5" fill-opacity="0.35">
+    <circle cx="60" cy="40" r="4"/>
+    <circle cx="60" cy="100" r="4"/>
+    <circle cx="150" cy="100" r="4"/>
+    <circle cx="170" cy="60" r="4"/>
+    <circle cx="90" cy="160" r="4"/>
+    <circle cx="200" cy="120" r="4"/>
+    <circle cx="150" cy="40" r="4"/>
+  </g>
+  <g fill="#AFA9EC" fill-opacity="0.22">
+    <rect x="140" y="30" width="14" height="14" rx="2"/>
+    <rect x="15" y="150" width="14" height="14" rx="2"/>
+    <rect x="190" y="110" width="14" height="14" rx="2"/>
+  </g>
+</svg>

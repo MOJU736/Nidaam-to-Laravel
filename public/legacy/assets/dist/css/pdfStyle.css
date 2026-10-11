@@ -1,0 +1,130 @@
+@page {
+    size: A4 portrait;
+}
+
+table, tr, td, th, tbody, thead, tfoot {
+    page-break-inside: avoid !important;
+    /*overflow: hidden !important;
+    white-space: nowrap !important;*/
+}
+
+/*table.stripped tbody {
+    page-break-inside: avoid !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+}*/
+
+table.stripped {
+    width: 100% !important;
+}
+
+table.stripped tr th {
+  border-bottom:1px solid #DDDDDD !important;
+  /*border-top:1px solid #DDDDDD !important;*/
+}
+
+table.stripped tr td {
+  border-bottom:1px solid #DDDDDD !important;
+  /*border-top:1px solid #DDDDDD !important;*/
+}
+
+table.stripped tr:hover {
+    background-color: #FFFF99 !important;
+}
+
+table.stripped .tr-ledger {
+
+}
+
+table.stripped .tr-group {
+    font-weight: bold !important;
+}
+
+table.stripped .tr-highlight {
+    background-color: #F3F3F3 !important;
+}
+
+table.stripped .tr-root-group {
+    background-color: #F3F3F3 !important;
+    color: #754719 !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.table-top {
+    vertical-align: top;
+}
+
+/*#section-to-print, #section-to-print * {
+    visibility: visible !important;
+}
+#section-to-print {
+    position: relative !important;
+    left: 55px !important;
+    right: 55px !important;
+    top: 40px !important;
+    bottom: 80px !important;
+}*/
+
+.dc-error {
+    background: #FFB2B2 !important;
+}
+
+.dc-ok {
+    background: #4ec14e !important;
+}
+
+.width-50 {
+    width: 40% !important;
+}
+
+.width-70 {
+    width: 70% !important;
+}
+
+.width-30 {
+    width: 30% !important;
+}
+
+.subtitle {
+    color: #333333 !important;
+    font-size: 19px !important;
+    margin-bottom: 10px !important;
+}
+
+.report-tb-pad {
+    margin-top: 30px !important;
+}
+
+.bold-text {
+    font-weight: bold !important;
+}
+
+.bg-filled {
+    background-color: #F3F3F3 !important;
+}
+
+.ok-text {
+    /*color: #006400 !important;*/
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.alert {
+  position: relative;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+}
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
