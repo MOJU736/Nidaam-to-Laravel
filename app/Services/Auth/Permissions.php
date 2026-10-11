@@ -49,7 +49,7 @@ class Permissions
     /** Which account_settings-* tick each Settings page needs (the second part of the route name). Tax rates and payment methods belong to the company details. */
     protected const SETTINGS_TICKS = [
         'company' => 'main', 'tax-rates' => 'main', 'payment-methods' => 'main', 'email' => 'email', 'templates' => 'printer',
-        'entry-types' => 'entrytypes', 'tags' => 'tags', 'close-books' => 'lock', 'lock' => 'lock',
+        'entry-types' => 'entrytypes', 'tags' => 'tags', 'close-books' => 'lock', 'lock' => 'lock', 'year-end' => 'lock',
     ];
 
     protected const ALWAYS = ['companies.index', 'companies.activate', 'logout'];
@@ -137,7 +137,7 @@ class Permissions
         $area = explode('.', $routeName)[0];
 
         // administration and company settings: administrators only (or whoever the group's own tick allows, for settings pages)
-        if ($area === 'admin' || $routeName === 'sales.settings' || $routeName === 'purchases.settings' || $routeName === 'items.settings') {
+        if ($area === 'admin' || str_starts_with($routeName, 'settings.backup') || $routeName === 'sales.settings' || $routeName === 'purchases.settings' || $routeName === 'items.settings') {
             return false;
         }
 
