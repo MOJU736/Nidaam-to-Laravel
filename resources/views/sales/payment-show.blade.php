@@ -48,4 +48,17 @@
         <div class="actions" style="margin-top:12px"><button>Apply</button></div>
     </form>
 @endif
+@if ($refunds->count())
+    <h2>Refunds</h2>
+    <div class="card tbl"><table>
+        <thead><tr><th>Date</th><th>Paid from</th><th>Method</th><th>Reference</th><th class="num">Amount</th><th></th></tr></thead>
+        <tbody>@foreach ($refunds as $r)
+            <tr><td>{{ Money::date($r->date) }}</td><td>{{ $r->ledger_name }}</td><td>{{ $r->method }}</td><td>{{ $r->reference }}</td><td class="num">{{ Money::format($r->amount) }}</td>
+                <td style="text-align:right"><form class="inline" method="POST" action="{{ route('credit-notes.refund.delete', $r->id) }}" onsubmit="return confirm('Delete this refund? Its journal entry is reversed.')">@csrf<button class="ghost sm">Delete</button></form></td></tr>
+        @endforeach</tbody>
+    </table></div>
+@endif
+@if ($p->status === 'received' && Money::positive($unapplied))
+    @include('credits._refund-form', ['action' => route('payments.refund', $p->id), 'remaining' => $unapplied, 'heading' => 'Refund the unapplied '.Money::format($unapplied).' to the customer'])
+@endif
 @endsection

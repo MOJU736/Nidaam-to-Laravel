@@ -5,6 +5,7 @@ use App\Http\Controllers\ActivityReportController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ChartController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntryController;
@@ -175,6 +176,28 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('customers', CustomerController::class)->parameters(['customers' => 'id'])->whereNumber('id');
         Route::resource('vendors', VendorController::class)->parameters(['vendors' => 'id'])->whereNumber('id');
+
+        // Credit notes (customers) and supplier credits (vendors): one controller, the route's `side` says which. Plus refunds and write-offs.
+        foreach (['ar' => 'credit-notes', 'ap' => 'supplier-credits'] as $side => $name) {
+            $r = fn (string $verb, string $uri, string $action, string $as) => Route::$verb("/$name$uri", [CreditNoteController::class, $action])->defaults('side', $side)->name("$name.$as");
+            $r('get', '', 'index', 'index');
+            $r('get', '/create', 'create', 'create');
+            $r('post', '', 'store', 'store');
+            $r('get', '/{id}', 'show', 'show')->whereNumber('id');
+            $r('get', '/{id}/edit', 'edit', 'edit')->whereNumber('id');
+            $r('put', '/{id}', 'update', 'update')->whereNumber('id');
+            $r('post', '/{id}/issue', 'issue', 'issue')->whereNumber('id');
+            $r('post', '/{id}/void', 'void', 'void')->whereNumber('id');
+            $r('delete', '/{id}', 'destroy', 'destroy')->whereNumber('id');
+            $r('post', '/{id}/apply', 'apply', 'apply')->whereNumber('id');
+            $r('post', '/{id}/refund', 'refund', 'refund')->whereNumber('id');
+            $r('post', '/allocations/{allocationId}/remove', 'removeAllocation', 'allocation.remove')->whereNumber('allocationId');
+            $r('post', '/refunds/{refundId}/delete', 'refundDelete', 'refund.delete')->whereNumber('refundId');
+        }
+        Route::post('/payments/{id}/refund', [CreditNoteController::class, 'refundPayment'])->defaults('side', 'ar')->whereNumber('id')->name('payments.refund');
+        Route::post('/vendor-payments/{id}/refund', [CreditNoteController::class, 'refundPayment'])->defaults('side', 'ap')->whereNumber('id')->name('vendor-payments.refund');
+        Route::get('/invoices/{id}/write-off', [CreditNoteController::class, 'writeOffForm'])->whereNumber('id')->name('invoices.write-off');
+        Route::post('/invoices/{id}/write-off', [CreditNoteController::class, 'writeOff'])->whereNumber('id');
 
         // Reports (read-only; dates come from the address, ?download=csv repeats the page as a file)
         Route::prefix('reports')->group(function () {

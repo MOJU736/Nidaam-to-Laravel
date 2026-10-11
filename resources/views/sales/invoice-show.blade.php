@@ -20,6 +20,8 @@
             @if (Money::positive($credit ?? 0) && Money::positive($inv->balance_due ?? 0))
                 <form class="inline" method="POST" action="{{ route('invoices.apply-credit', $inv->id) }}">@csrf<button class="ghost">Apply {{ Money::format($credit) }} credit</button></form>
             @endif
+            <a class="btn ghost" href="{{ route('credit-notes.create', ['invoice' => $inv->id]) }}">Credit note</a>
+            @if (Money::positive($inv->balance_due ?? 0))<a class="btn ghost" href="{{ route('invoices.write-off', $inv->id) }}">Write off</a>@endif
             <a class="btn ghost" href="{{ route('invoices.edit', $inv->id) }}">Edit due date / notes</a>
             <form class="inline" method="POST" action="{{ route('invoices.revert', $inv->id) }}" onsubmit="return confirm('Revert to draft? Its journal entry is reversed and any payments applied to it become unapplied credit.')">@csrf<button class="ghost">Revert to draft</button></form>
             <form class="inline" method="POST" action="{{ route('invoices.void', $inv->id) }}" onsubmit="return confirm('Void this invoice? Its journal entry is reversed and stock restored.')">@csrf<button class="danger">Void</button></form>

@@ -68,6 +68,8 @@ class VendorPaymentController extends Controller
         return view('purchases.payment-show', [
             'p' => $p, 'apps' => $apps, 'appliedTotal' => array_reduce($apps, fn ($c, $a) => Money::add($c, $a->amount), '0.00'), 'unapplied' => $left,
             'openDocs' => Money::positive($left) ? $this->allocs->openDocs('ap', $p->vendor_id) : [],
+            'refunds' => app(\App\Services\Credits\CreditService::class)->refundsFor('ap', 'pay', $id), 'banks' => Money::positive($left) ? app(\App\Services\Accounting\EntryService::class)->accountOptions(4) : [],
+            'methods' => \Illuminate\Support\Facades\DB::connection('tenant')->table('payment_methods')->orderBy('name')->pluck('name')->all(), 'ui' => app(\App\Services\Credits\CreditService::class)->cfg('ap'),
         ]);
     }
 

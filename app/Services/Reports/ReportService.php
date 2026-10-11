@@ -587,7 +587,7 @@ class ReportService
                 foreach ($this->db()->table('credit_notes')->whereIn('entry_id', $ids)->get(['id', 'entry_id', 'number', 'side', 'kind', 'party_id']) as $r) {
                     $ar = $r->side === 'ar';
                     $name = $this->db()->table($ar ? 'customers' : 'vendors')->where('id', $r->party_id)->value('name');
-                    $put($r->entry_id, $r->kind === 'writeoff' ? 'Write-off' : ($ar ? 'Credit Memo' : 'Vendor Credit'), $r->number, $name, null);
+                    $put($r->entry_id, $r->kind === 'writeoff' ? 'Write-off' : ($ar ? 'Credit Memo' : 'Vendor Credit'), $r->number, $name, route($ar ? 'credit-notes.show' : 'supplier-credits.show', $r->id));
                 }
             }
             if (Tables::has('credit_refunds')) {

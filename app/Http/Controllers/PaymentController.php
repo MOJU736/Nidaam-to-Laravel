@@ -76,6 +76,7 @@ class PaymentController extends Controller
         return view('sales.payment-show', [
             'p' => $p, 'apps' => $apps, 'appliedTotal' => array_reduce($apps, fn ($c, $a) => Money::add($c, $a->amount), '0.00'), 'unapplied' => $left,
             'openDocs' => $has ? $this->allocs->openDocs('ar', $p->customer_id) : [], 'email' => Customer::whereKey($p->customer_id)->value('email'),
+            'refunds' => app(\App\Services\Credits\CreditService::class)->refundsFor('ar', 'pay', $id), 'banks' => $has ? $this->banks() : [], 'methods' => $this->methods(), 'ui' => app(\App\Services\Credits\CreditService::class)->cfg('ar'),
         ]);
     }
 

@@ -1,5 +1,5 @@
 @php
-    $tabs = [['invoices.index', 'Invoices', ['invoices.*']], ['quotations.index', 'Quotations', ['quotations.*']], ['payments.index', 'Payments', ['payments.*']]];
+    $tabs = [['invoices.index', 'Invoices', ['invoices.*']], ['quotations.index', 'Quotations', ['quotations.*']], ['payments.index', 'Payments', ['payments.*']], ['credit-notes.index', 'Credit notes', ['credit-notes.*']]];
     if (auth()->user()->isAdmin()) { $tabs[] = ['sales.settings', 'Settings', ['sales.settings']]; }
 @endphp
 <div class="actions" style="margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:8px">

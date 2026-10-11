@@ -16,6 +16,7 @@
         @elseif ($status === 'issued')
             @if (Money::positive($b->balance_due ?? 0))<a class="btn" href="{{ route('vendor-payments.create', ['vendor' => $b->vendor_id, 'bill' => $b->id, 'amount' => $b->balance_due]) }}">Pay vendor</a>@endif
             @if (Money::positive($credit ?? 0) && Money::positive($b->balance_due ?? 0))<form class="inline" method="POST" action="{{ route('bills.apply-credit', $b->id) }}">@csrf<button class="ghost">Apply {{ Money::format($credit) }} credit</button></form>@endif
+            <a class="btn ghost" href="{{ route('supplier-credits.create', ['bill' => $b->id]) }}">Supplier credit</a>
             <form class="inline" method="POST" action="{{ route('bills.revert', $b->id) }}" onsubmit="return confirm('Revert to draft? Its journal entry is reversed, stock it bought is taken back out, and payments applied to it become prepayments.')">@csrf<button class="ghost">Revert to draft</button></form>
             <form class="inline" method="POST" action="{{ route('bills.void', $b->id) }}" onsubmit="return confirm('Void this bill? Its journal entry is reversed.')">@csrf<button class="danger">Void</button></form>
         @else
