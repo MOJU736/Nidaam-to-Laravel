@@ -18,6 +18,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseSettingsController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesSettingsController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\VehicleModelController;
@@ -173,5 +174,19 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('customers', CustomerController::class)->parameters(['customers' => 'id'])->whereNumber('id');
         Route::resource('vendors', VendorController::class)->parameters(['vendors' => 'id'])->whereNumber('id');
+
+        // Reports (read-only; dates come from the address, ?download=csv repeats the page as a file)
+        Route::prefix('reports')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])->name('reports.index');
+            Route::get('/balance-sheet', [ReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+            Route::get('/profit-loss', [ReportController::class, 'profitLoss'])->name('reports.profit-loss');
+            Route::get('/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial-balance');
+            Route::get('/account-statement', [ReportController::class, 'statement'])->name('reports.statement');
+            Route::get('/ar-aging', [ReportController::class, 'aging'])->defaults('side', 'ar')->name('reports.ar-aging');
+            Route::get('/ap-aging', [ReportController::class, 'aging'])->defaults('side', 'ap')->name('reports.ap-aging');
+            Route::get('/customer-balance', [ReportController::class, 'partyBalance'])->defaults('side', 'ar')->name('reports.customer-balance');
+            Route::get('/vendor-balance', [ReportController::class, 'partyBalance'])->defaults('side', 'ap')->name('reports.vendor-balance');
+            Route::get('/journal', [ReportController::class, 'journal'])->name('reports.journal');
+        });
     });
 });

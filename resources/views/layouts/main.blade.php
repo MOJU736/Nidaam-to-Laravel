@@ -10,6 +10,7 @@
         <a href="{{ route('items.index') }}" @class(['on' => request()->routeIs('items.*')])>Items</a>
         <a href="{{ route('customers.index') }}" @class(['on' => request()->routeIs('customers.*')])>Customers</a>
         <a href="{{ route('vendors.index') }}" @class(['on' => request()->routeIs('vendors.*')])>Vendors</a>
+        <a href="{{ route('reports.index') }}" @class(['on' => request()->routeIs('reports.*')])>Reports</a>
         <span class="sp"></span>
         <span class="co">{{ app(\App\Tenancy\TenantManager::class)->current()?->name }}</span>
         <a href="{{ route('companies.index') }}">Switch</a>

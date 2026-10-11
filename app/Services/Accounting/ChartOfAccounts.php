@@ -49,6 +49,7 @@ class ChartOfAccounts
     {
         [$codes, $like, $legacy] = match ($kind) {
             'asset' => [['01', 'ASSETS'], 'Asset', 1],
+            'liability' => [['02', 'LIABILITIES'], 'Liabilit', 2],
             'income' => [['03', 'INCOME'], 'Incom', 3],
             'expense' => [['04', 'EXPENSES'], 'Expense', 4],
             default => [[], '', 0],
