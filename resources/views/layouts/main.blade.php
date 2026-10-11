@@ -13,6 +13,7 @@
         @can('page', 'items.index')<a href="{{ route('items.index') }}" @class(['on' => request()->routeIs('items.*')])>Items</a>@endcan
         @can('page', 'customers.index')<a href="{{ route('customers.index') }}" @class(['on' => request()->routeIs('customers.*')])>Customers</a>@endcan
         @can('page', 'vendors.index')<a href="{{ route('vendors.index') }}" @class(['on' => request()->routeIs('vendors.*')])>Vendors</a>@endcan
+        @if (\App\Services\Commissions\CommissionService::enabled())@can('page', 'commissions.index')<a href="{{ route('commissions.index') }}" @class(['on' => request()->routeIs('commissions.*')])>Commissions</a>@endcan @endif
         @if (\App\Support\Money::constructionEnabled())@can('page', 'projects.index')<a href="{{ route('projects.index') }}" @class(['on' => request()->routeIs('projects.*', 'construction.*')])>Projects</a>@endcan @endif
         @can('page', 'banking.index')<a href="{{ route('banking.index') }}" @class(['on' => request()->routeIs('banking.*')])>Banking</a>@endcan
         @can('page', 'payroll.index')<a href="{{ route('payroll.index') }}" @class(['on' => request()->routeIs('payroll.*')])>Payroll</a>@endcan
@@ -35,4 +36,13 @@
     @foreach (['party', 'ledger', 'group', 'entry', 'item', 'category', 'vehicle', 'prices', 'batch', 'lines', 'adjustment', 'sales', 'purchases', 'credit', 'banking', 'recurring', 'reminders', 'payroll', 'settings', 'projects'] as $k)@if ($errors->has($k))<div class="flash bad">{{ $errors->first($k) }}</div>@endif @endforeach
     @yield('content')
 </div>
+<script>
+(function () {
+    // signed out after 30 minutes without activity: this page's own timer (the server checks too); real activity pings the server at most every 5 minutes
+    var IDLE = 30 * 60 * 1000, last = Date.now(), sent = Date.now();
+    var act = function () { last = Date.now(); if (last - sent > 5 * 60 * 1000) { sent = last; fetch({{ \Illuminate\Support\Js::from(route('session.keepalive')) }}, { method: 'POST', headers: { 'X-CSRF-TOKEN': {{ \Illuminate\Support\Js::from(csrf_token()) }}, 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' }).catch(function () {}); } };
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(function (e) { addEventListener(e, act, { passive: true }); });
+    setInterval(function () { if (Date.now() - last > IDLE) { location.href = {{ \Illuminate\Support\Js::from(route('session.timeout')) }}; } }, 30000);
+})();
+</script>
 @endsection

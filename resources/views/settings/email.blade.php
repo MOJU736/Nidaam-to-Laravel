@@ -22,4 +22,11 @@
     <div class="row2"><div><label for="test_to" style="margin-top:0">Test address</label><input id="test_to" name="test_to" placeholder="you@example.com" value="{{ old('test_to') }}"></div><div></div></div>
     <div class="actions" style="margin-top:20px"><button>Save</button><button name="then" value="test" class="ghost">Save &amp; send test email</button></div>
 </form>
+<form class="card" method="POST" action="{{ route('settings.email.cc') }}" style="max-width:720px;margin-top:16px" id="email-cc">
+    @csrf
+    <h2 style="margin-top:0">Always copy emails to</h2>
+    <p class="muted" style="margin-top:0">Every "Send by email" box (invoices, quotations, receipts, credit notes, remittances, reminders) starts with these addresses in CC. They can still be removed in the box before sending. Payslips are never copied. Leave empty for nobody; separate several with commas (up to 5).</p>
+    <input name="email_cc_default" inputmode="email" maxlength="500" placeholder="e.g. accounts@yourcompany.com" value="{{ old('email_cc_default', $s->email_cc_default ?? '') }}">
+    <div class="actions" style="margin-top:14px"><button>Save</button></div>
+</form>
 @endsection

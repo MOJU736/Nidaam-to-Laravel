@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Master\LoginHistory;
 use App\Models\User;
+use App\Services\Auth\SecurityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -39,9 +40,10 @@ class LoginController extends Controller
             ]);
         }
 
-        $user = User::where('username', $identity)->orWhere('email', $identity)->orderByDesc('id')->first();
+        app(SecurityService::class)->ensureSchema(); // the remember-me column
+        $user =User::where('username', $identity)->orWhere('email', $identity)->orderByDesc('id')->first();
 
-        if (! $user || ! $user->active || ! Auth::attempt(['id' => $user->id, 'password' => $data['password']])) {
+        if (! $user || ! $user->active || ! Auth::attempt(['id' => $user->id, 'password' => $data['password']], $request->boolean('remember'))) {
             $this->record($identity, 'failed', $user?->id);
 
             return back()->withInput($request->only('identity'))->withErrors([
@@ -58,7 +60,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
         $user->forceFill(['last_login' => time()])->save();
-        $this->record($identity, 'signin', $user->id, 'password');
+        app(SecurityService::class)->startSession($user, $request, 'password'); // one device at a time, login history, new-device email
 
         return redirect()->route('companies.index');
     }
@@ -66,6 +68,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         if ($user = $request->user()) {
+            app(SecurityService::class)->endSession($request, 'logout');
             $this->record($user->username, 'logout', $user->id);
         }
         Auth::logout();
@@ -73,6 +76,12 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    /** The page's own 30-minute idle timer ran out: sign out and say why. */
+    public function timeout(Request $request)
+    {
+        return app(\App\Http\Middleware\DeviceSession::class)->signOut($request, 'idle');
     }
 
     /** Seconds left on the lock, 0 when not locked. */

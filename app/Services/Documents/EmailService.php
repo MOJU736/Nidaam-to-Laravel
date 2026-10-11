@@ -36,6 +36,12 @@ class EmailService
         return $out;
     }
 
+    /** "Always copy emails to" (Settings → Email): the addresses every Send-by-email box starts with in CC. Never used for payslips. */
+    public function defaultCc(): string
+    {
+        return \App\Support\Tables::has('settings', 'email_cc_default') ? trim((string) (Setting::first()->email_cc_default ?? '')) : '';
+    }
+
     /** Plain text from the message box as the email's HTML body. */
     public function textToHtml(string $text): string
     {

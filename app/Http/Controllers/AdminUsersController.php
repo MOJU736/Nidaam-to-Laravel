@@ -114,7 +114,7 @@ class AdminUsersController extends Controller
             if ($problem = app(PasswordService::class)->problem((string) $d['password'], [$d['username'], $d['first_name'], strstr($d['email'], '@', true)])) {
                 throw ValidationException::withMessages(['password' => $problem]);
             }
-            $row += ['password' => Hash::make($d['password']), 'password_changed_at' => time(), 'session_token' => null, 'temp_password_expires' => $request->boolean('must_change_password') ? time() + PasswordService::TEMP_PASSWORD_DAYS * 86400 : null]; // a new password signs the person out everywhere
+            $row += ['password' => Hash::make($d['password']), 'password_changed_at' => time(), 'session_token' => 'x:password', 'temp_password_expires' => $request->boolean('must_change_password') ? time() + PasswordService::TEMP_PASSWORD_DAYS * 86400 : null]; // a new password signs the person out everywhere
         }
         $this->master()->transaction(function () use ($id, $row, $groupId) {
             $this->master()->table('users')->where('id', $id)->update($row);
@@ -134,7 +134,7 @@ class AdminUsersController extends Controller
         if ($sent !== true) {
             return back()->with('error', "The link was not sent: $sent");
         }
-        $this->master()->table('users')->where('id', $id)->update(['session_token' => null]);
+        $this->master()->table('users')->where('id', $id)->update(['session_token' => 'x:password']);
         ActivityLog::add("Sent a password link to user {$user->username}");
 
         return back()->with('message', "A link to choose a new password was emailed to {$user->email}. It works once for 48 hours.");

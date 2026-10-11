@@ -62,15 +62,17 @@ Route::middleware('guest')->group(function () {
 Route::get('/password/set/{code}', [PasswordController::class, 'setForm'])->name('password.set');
 Route::post('/password/set/{code}', [PasswordController::class, 'setSave'])->middleware('throttle:20,1')->name('password.set.save');
 
-Route::middleware(['auth', 'fresh-password'])->group(function () {
+Route::middleware(['auth', 'device-session', 'fresh-password'])->group(function () {
     Route::get('/password/first', [PasswordController::class, 'firstForm'])->name('password.first');
     Route::post('/password/first', [PasswordController::class, 'firstSave'])->name('password.first.save');
     Route::get('/password/change', [PasswordController::class, 'changeForm'])->name('password.change');
     Route::post('/password/change', [PasswordController::class, 'changeSave'])->name('password.change.save');
 });
 
-Route::middleware(['auth', 'fresh-password'])->group(function () {
+Route::middleware(['auth', 'device-session', 'fresh-password'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::post('/session/keepalive', fn () => response()->noContent())->name('session.keepalive'); // the page tells the server the person is still working
+    Route::get('/session/timeout', [LoginController::class, 'timeout'])->name('session.timeout'); // the page's own 30-minute timer
 
     Route::get('/companies', [CompanyController::class, 'index'])->name('companies.index');
     Route::post('/companies/{id}', [CompanyController::class, 'activate'])->whereNumber('id')->name('companies.activate');
@@ -242,6 +244,8 @@ Route::middleware(['auth', 'fresh-password'])->group(function () {
             Route::put('/users/{id}', [AdminUsersController::class, 'update'])->whereNumber('id')->name('admin.users.update');
             Route::delete('/users/{id}', [AdminUsersController::class, 'destroy'])->whereNumber('id')->name('admin.users.destroy');
         Route::post('/users/{id}/reset-link', [AdminUsersController::class, 'resetLink'])->whereNumber('id')->name('admin.users.reset-link');
+            Route::post('/users/{id}/sign-out', [\App\Http\Controllers\AdminSecurityController::class, 'signOut'])->whereNumber('id')->name('admin.users.sign-out');
+            Route::get('/login-history', [\App\Http\Controllers\AdminSecurityController::class, 'history'])->name('admin.login-history');
             Route::get('/groups', [AdminGroupsController::class, 'index'])->name('admin.groups');
             Route::get('/groups/create', [AdminGroupsController::class, 'create'])->name('admin.groups.create');
             Route::post('/groups', [AdminGroupsController::class, 'store'])->name('admin.groups.store');
@@ -264,7 +268,21 @@ Route::middleware(['auth', 'fresh-password'])->group(function () {
         Route::post('/settings/templates/preview', [DocumentTemplatesController::class, 'preview'])->name('settings.templates.preview');
         Route::get('/settings/email', [EmailSettingsController::class, 'edit'])->name('settings.email');
         Route::put('/settings/email', [EmailSettingsController::class, 'update'])->name('settings.email.update');
+        Route::post('/settings/email/cc', [EmailSettingsController::class, 'updateCc'])->name('settings.email.cc');
 
+        // Commissions (a company with it switched on): money received on a client's behalf, settled later less the commission.
+        Route::middleware('commissions')->prefix('commissions')->name('commissions.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\CommissionController::class, 'index'])->name('index');
+            Route::get('/receive', [\App\Http\Controllers\CommissionController::class, 'create'])->name('create');
+            Route::post('/receive', [\App\Http\Controllers\CommissionController::class, 'store'])->name('store');
+            Route::get('/{id}/settle', [\App\Http\Controllers\CommissionController::class, 'settleForm'])->whereNumber('id')->name('settle-form');
+            Route::post('/{id}/settle', [\App\Http\Controllers\CommissionController::class, 'settle'])->whereNumber('id')->name('settle');
+            Route::post('/{id}/unsettle', [\App\Http\Controllers\CommissionController::class, 'unsettle'])->whereNumber('id')->name('unsettle');
+            Route::post('/{id}/void', [\App\Http\Controllers\CommissionController::class, 'void'])->whereNumber('id')->name('void');
+            Route::get('/settings', [\App\Http\Controllers\CommissionController::class, 'settings'])->name('settings');
+            Route::post('/settings', [\App\Http\Controllers\CommissionController::class, 'saveSettings'])->name('settings.save');
+        });
+        Route::get('/reports/commissions', [\App\Http\Controllers\AdvancedReportController::class, 'commissions'])->middleware('commissions')->name('reports.commissions');
         // Data Sharing (a company with it switched on): SIM board, clients, money in and out, profit, reports and the monthly presentation.
         Route::middleware('datasharing')->prefix('datasharing')->name('datasharing.')->group(function () {
             Route::get('/', [\App\Http\Controllers\DataSharingController::class, 'index'])->name('index');

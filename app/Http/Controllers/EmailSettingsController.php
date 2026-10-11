@@ -6,6 +6,7 @@ use App\Models\Tenant\Setting;
 use App\Services\Accounting\ActivityLog;
 use App\Services\Documents\DocumentService;
 use App\Services\Documents\EmailService;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,6 +20,28 @@ class EmailSettingsController extends Controller
         $core = DB::connection('master')->table('settings')->first();
 
         return view('settings.email', ['s' => Setting::first(), 'defaultReady' => (bool) ($core->smtp_host ?? null)]);
+    }
+
+    /** "Always copy emails to": up to 5 addresses put in the CC box of every Send-by-email window (still removable there). */
+    public function updateCc(Request $request)
+    {
+        $list = $this->mail->addresses($request->input('email_cc_default'), $bad);
+        if ($bad) {
+            return redirect()->to(route('settings.email').'#email-cc')->withInput()->with('error', 'Not a valid email address: '.implode(', ', array_slice($bad, 0, 5)).'. Nothing was saved.');
+        }
+        if (count($list) > 5) {
+            return redirect()->to(route('settings.email').'#email-cc')->withInput()->with('error', 'Up to 5 addresses. Nothing was saved.');
+        }
+        if (! Schema::connection('tenant')->hasColumn('settings', 'email_cc_default')) {
+            if (! $list) {
+                return redirect()->to(route('settings.email').'#email-cc')->with('message', 'Emails are not copied to anyone by default.');
+            }
+            DB::connection('tenant')->statement('ALTER TABLE `settings` ADD COLUMN `email_cc_default` VARCHAR(500) NULL DEFAULT NULL'); // made the first time an address is saved
+        }
+        DB::connection('tenant')->table('settings')->update(['email_cc_default' => $list ? implode(', ', $list) : null]);
+        ActivityLog::add('Changed "Always copy emails to" to '.($list ? implode(', ', $list) : 'nobody'));
+
+        return redirect()->to(route('settings.email').'#email-cc')->with('message', $list ? 'Every email box will copy '.implode(', ', $list).'.' : 'Emails are no longer copied to anyone by default.');
     }
 
     public function update(Request $request)

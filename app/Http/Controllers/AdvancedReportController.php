@@ -362,6 +362,20 @@ class AdvancedReportController extends ActivityReportController
 
     // ---- books health check ------------------------------------------------------------------------------------------------------
 
+    /** Commissions: every agent with a commission transaction (voided ones excluded). Received, paid out, commission kept and still owed. */
+    public function commissions(Request $request)
+    {
+        $rows = app(\App\Services\Commissions\CommissionService::class)->summaryByAgent();
+        $sum = fn (string $k) => array_reduce($rows, fn ($c, $r) => Money::add($c, $r[$k]), '0.00');
+        $settled = $sum('settled_received');
+        $totals = ['transaction_count' => array_sum(array_column($rows, 'transaction_count')), 'total_received' => $sum('total_received'), 'total_remitted' => $sum('total_remitted'), 'total_commission' => $sum('total_commission'),
+            'commission_pct' => Money::positive($settled) ? rtrim(rtrim(number_format((float) $sum('total_commission') / (float) $settled * 100, 2, '.', ''), '0'), '.').'%' : '–', 'outstanding_amount' => $sum('outstanding_amount')];
+
+        return $this->listPage($request, 'Commissions', 'Commissions report', [['Agent', 'party_name', 'text', null], ['Transactions', 'transaction_count', 'int', null], ['Total received', 'total_received', 'money', null], ['Total remitted', 'total_remitted', 'money', null],
+            ['Total commission', 'total_commission', 'money', null], ['Commission %', 'commission_pct', 'text', null], ['Outstanding', 'outstanding_amount', 'money', null]], $rows, $totals, 'none',
+            ['subtitle' => 'All time', 'note' => 'Commission % is the commission kept out of the settled amounts. Outstanding is what has been received but not yet settled - the "Due to Client" balance.']);
+    }
+
     public function health(\App\Services\Reports\HealthService $health, Request $request)
     {
         return view('reports.health', ['findings' => $health->run($request->user()->isAdmin()), 'checkedAt' => now()->format('Y-m-d H:i')]);

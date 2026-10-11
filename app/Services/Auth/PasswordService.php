@@ -88,7 +88,7 @@ class PasswordService
     {
         $this->db()->table('users')->where('id', $userId)->update([
             'password' => Hash::make($password), 'remember_code' => null, 'forgotten_password_code' => null, 'must_change_password' => $mustChange ? 1 : 0,
-            'temp_password_expires' => $mustChange ? time() + self::TEMP_PASSWORD_DAYS * 86400 : null, 'invite_code' => null, 'invite_expires' => null, 'password_changed_at' => time(), 'session_token' => null,
+            'temp_password_expires' => $mustChange ? time() + self::TEMP_PASSWORD_DAYS * 86400 : null, 'invite_code' => null, 'invite_expires' => null, 'password_changed_at' => time(), 'session_token' => 'x:password',
         ]);
     }
 

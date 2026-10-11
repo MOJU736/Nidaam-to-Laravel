@@ -38,7 +38,7 @@
         </tbody>
     </table></div>
     <div class="card" style="margin-top:12px">
-        <div class="row2"><div><label for="email_cc" style="margin-top:0">Copy every reminder to (CC)</label><input id="email_cc" name="email_cc" placeholder="optional" value="{{ old('email_cc') }}"></div><div><label for="email_bcc" style="margin-top:0">Hidden copy (BCC)</label><input id="email_bcc" name="email_bcc" placeholder="optional" value="{{ old('email_bcc') }}"></div></div>
+        <div class="row2"><div><label for="email_cc" style="margin-top:0">Copy every reminder to (CC)</label><input id="email_cc" name="email_cc" placeholder="optional" value="{{ old('email_cc', app(\App\Services\Documents\EmailService::class)->defaultCc()) }}"></div><div><label for="email_bcc" style="margin-top:0">Hidden copy (BCC)</label><input id="email_bcc" name="email_bcc" placeholder="optional" value="{{ old('email_bcc') }}"></div></div>
         <div class="actions" style="margin-top:14px"><button id="remSend" onclick="return confirm('Send ' + document.querySelectorAll('.rem:checked').length + ' payment reminder(s) now?')">Send reminders (<span id="remCount">0</span>)</button><span class="muted">Up to {{ $limit }} at a time.</span></div>
     </div>
 </form>

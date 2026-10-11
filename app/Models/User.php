@@ -20,10 +20,10 @@ class User extends Authenticatable
         return ['active' => 'boolean', 'all_accounts' => 'boolean', 'must_change_password' => 'boolean'];
     }
 
-    /** The legacy table has no remember_token column, so "remember me" is not supported (same as the old app). */
+    /** "Keep me signed in" uses the legacy remember_code column (widened to 100 characters by SecurityService::ensureSchema). */
     public function getRememberTokenName()
     {
-        return '';
+        return 'remember_code';
     }
 
     public function groups()

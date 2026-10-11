@@ -29,6 +29,7 @@
     </div>
     <div class="actions" style="margin-top:20px"><button>{{ $u ? 'Save changes' : 'Create user' }}</button><a class="btn ghost" href="{{ route('admin.users') }}">Cancel</a></div>
 </form>
+@if ($u)<form class="card" method="POST" action="{{ route('admin.users.sign-out', $u->id) }}" style="max-width:760px;margin-top:14px" onsubmit="return confirm('Sign {{ $u->username }} out on every device?')">@csrf<strong>Signed in somewhere they should not be?</strong> <span class="muted">Sign them out on every device; they must sign in again.</span> <button class="ghost sm">Sign out everywhere</button> <a class="btn ghost sm" href="{{ route('admin.login-history', ['user' => $u->id]) }}">Login history</a></form>@endif
 @if ($u)<form class="card" method="POST" action="{{ route('admin.users.reset-link', $u->id) }}" style="max-width:760px;margin-top:14px" onsubmit="return confirm('Email {{ $u->email }} a link to choose a new password? It signs them out everywhere.')">@csrf<strong>Forgot their password?</strong> <span class="muted">Email {{ $u->email }} a one-time link (works for 48 hours) so they choose a new one themselves.</span> <button class="ghost sm">Send password link</button></form>@endif
 <script>(function () { var all = document.getElementById('allAcc'), list = document.getElementById('accList'); function s() { list.style.opacity = all.checked ? .4 : 1; list.querySelectorAll('input').forEach(function (i) { i.disabled = all.checked; }); } all.addEventListener('change', s); s(); })();</script>
 @endsection
