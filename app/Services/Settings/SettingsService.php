@@ -9,6 +9,7 @@ use App\Support\Tables;
 use App\Tenancy\TenantManager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -106,7 +107,8 @@ class SettingsService
             'fy_start' => $start, 'fy_end' => $end,
             'vehicles_enabled' => ! empty($d['vehicles_enabled']) ? 1 : 0, 'commissions_enabled' => ! empty($d['commissions_enabled']) ? 1 : 0,
             'billable_expenses_enabled' => ! empty($d['billable_expenses_enabled']) ? 1 : 0,
-        ] + (Tables::has('settings', 'construction_enabled') && array_key_exists('construction_enabled', $d) ? ['construction_enabled' => ! empty($d['construction_enabled']) ? 1 : 0] : []));
+        ] + (Tables::has('settings', 'construction_enabled') && array_key_exists('construction_enabled', $d) ? ['construction_enabled' => ! empty($d['construction_enabled']) ? 1 : 0] : [])
+            + $this->dataSharingColumns($d));
         // the "Choose company" page reads the year from the master list
         if ($account = app(TenantManager::class)->current()) {
             DB::connection('master')->table('accounts')->where('id', $account->id)->update(['fy_start' => $start, 'fy_end' => $end]);
@@ -118,6 +120,18 @@ class SettingsService
         ActivityLog::add('Updated company settings');
     }
 
+    /** The Data Sharing switches that this company's settings table has columns for (the columns are made when the switch is first ticked). */
+    protected function dataSharingColumns(array $d): array
+    {
+        $out = [];
+        foreach (['datasharing_enabled', 'datasharing_only'] as $col) {
+            if (array_key_exists($col, $d) && Schema::connection('tenant')->hasColumn('settings', $col)) {
+                $out[$col] = ! empty($d[$col]) ? 1 : 0;
+            }
+        }
+
+        return $out;
+    }
     // ---- close / lock the books -------------------------------------------
 
     /** Nothing dated on or before $date can be added, changed, voided or deleted. Null reopens the books. */

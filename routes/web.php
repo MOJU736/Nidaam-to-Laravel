@@ -265,6 +265,26 @@ Route::middleware(['auth', 'fresh-password'])->group(function () {
         Route::get('/settings/email', [EmailSettingsController::class, 'edit'])->name('settings.email');
         Route::put('/settings/email', [EmailSettingsController::class, 'update'])->name('settings.email.update');
 
+        // Data Sharing (a company with it switched on): SIM board, clients, money in and out, profit, reports and the monthly presentation.
+        Route::middleware('datasharing')->prefix('datasharing')->name('datasharing.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\DataSharingController::class, 'index'])->name('index');
+            Route::get('/sims', [\App\Http\Controllers\DataSharingController::class, 'sims'])->name('sims');
+            Route::get('/clients', [\App\Http\Controllers\DataSharingController::class, 'clients'])->name('clients');
+            Route::get('/client/{id}', [\App\Http\Controllers\DataSharingController::class, 'client'])->whereNumber('id')->name('client');
+            Route::get('/money', [\App\Http\Controllers\DataSharingController::class, 'money'])->name('money');
+            Route::get('/money-in', [\App\Http\Controllers\DataSharingController::class, 'moneyIn'])->name('money-in');
+            Route::get('/profit', [\App\Http\Controllers\DataSharingController::class, 'profit'])->name('profit');
+            Route::get('/reports', [\App\Http\Controllers\DataSharingController::class, 'reports'])->name('reports');
+            Route::get('/deck', [\App\Http\Controllers\DataSharingController::class, 'deck'])->name('deck');
+            Route::get('/plans', [\App\Http\Controllers\DataSharingController::class, 'plans'])->name('plans');
+            foreach (['sim-add' => 'simAdd', 'client-add' => 'clientAdd', 'move' => 'move', 'expense-add' => 'expenseAdd', 'income-add' => 'incomeAdd', 'plan-add' => 'planAdd', 'plan-move' => 'planMove', 'cycle-start' => 'cycleStart', 'close' => 'close'] as $uri => $method) {
+                Route::post('/'.$uri, [\App\Http\Controllers\DataSharingController::class, $method])->name($uri);
+            }
+            foreach (['sim-save' => 'simSave', 'sim-renew' => 'simRenew', 'sim-retire' => 'simRetire', 'client-save' => 'clientSave', 'client-remove' => 'clientRemove', 'pay' => 'pay', 'recharge' => 'recharge', 'payment-void' => 'paymentVoid',
+                'expense-void' => 'expenseVoid', 'income-void' => 'incomeVoid', 'usage-add' => 'usageAdd', 'usage-sim' => 'usageSim', 'usage-delete' => 'usageDelete', 'note-done' => 'noteDone', 'plan-save' => 'planSave', 'plan-toggle' => 'planToggle', 'plan-delete' => 'planDelete'] as $uri => $method) {
+                Route::post('/'.$uri.'/{id}', [\App\Http\Controllers\DataSharingController::class, $method])->whereNumber('id')->name($uri);
+            }
+        });
         // Construction (a company with it switched on): projects, claims, workers and wage sheets.
         Route::middleware('construction')->group(function () {
             Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
@@ -337,6 +357,9 @@ Route::middleware(['auth', 'fresh-password'])->group(function () {
         Route::get('/settings/backup', [BackupController::class, 'index'])->name('settings.backup');
         Route::post('/settings/backup', [BackupController::class, 'download'])->name('settings.backup.download');
         Route::get('/settings/backup/auto/{date}/{file}', [BackupController::class, 'auto'])->name('settings.backup.auto');
+        Route::match(['get', 'post'], '/settings/quickbooks', [\App\Http\Controllers\QuickBooksController::class, 'index'])->name('settings.quickbooks');
+        Route::post('/settings/quickbooks/import', [\App\Http\Controllers\QuickBooksController::class, 'import'])->name('settings.quickbooks.import');
+        Route::post('/settings/quickbooks/cancel', [\App\Http\Controllers\QuickBooksController::class, 'cancel'])->name('settings.quickbooks.cancel');
         Route::get('/settings/lock', [SettingsController::class, 'lock'])->name('settings.lock');
         Route::put('/settings/lock', [SettingsController::class, 'updateLock'])->name('settings.lock.update');
         Route::get('/settings/tax-rates', [SettingsListsController::class, 'taxRates'])->name('settings.tax-rates');

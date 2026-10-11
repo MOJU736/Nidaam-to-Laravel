@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\Auth\Permissions;
+use App\Services\DataSharing\DataSharingService;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -16,6 +17,13 @@ class PagePermission
         $user = $request->user();
         $route = $request->route();
         $name = $route?->getName();
+        // a Data Sharing company with "Data Sharing only": people who are not administrators see only the Data Sharing pages
+        if ($user && $name && ! str_starts_with($name, 'datasharing.') && ! str_starts_with($name, 'companies.') && $name !== 'logout' && DataSharingService::only()) {
+            $g = $this->permissions->groupName($user);
+            if (! in_array($g, ['admin', Permissions::RESTRICTED, Permissions::CUSTOMER_VIEWER], true)) {
+                return $request->isMethod('get') ? redirect()->route('datasharing.index') : abort(403, 'This company only uses Data Sharing.');
+            }
+        }
         if (! $user || $this->permissions->allows($user, $name, $route?->parameter('type'))) {
             return $next($request);
         }

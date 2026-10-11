@@ -137,7 +137,7 @@ class Permissions
         $area = explode('.', $routeName)[0];
 
         // administration and company settings: administrators only (or whoever the group's own tick allows, for settings pages)
-        if ($area === 'admin' || str_starts_with($routeName, 'settings.backup') || $routeName === 'sales.settings' || $routeName === 'purchases.settings' || $routeName === 'items.settings') {
+        if ($area === 'admin' || str_starts_with($routeName, 'settings.backup') || str_starts_with($routeName, 'settings.quickbooks') || $routeName === 'sales.settings' || $routeName === 'purchases.settings' || $routeName === 'items.settings') {
             return false;
         }
 

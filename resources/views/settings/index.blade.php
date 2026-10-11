@@ -13,7 +13,7 @@
             ['items.settings', 'Item settings', 'Inventory and cost of goods accounts'], ['settings.tax-rates', 'Tax rates', $taxRates.' named rate'.($taxRates === 1 ? '' : 's').' to pick on documents'],
             ['settings.payment-methods', 'Payment methods', 'The list offered when recording a payment']],
         '3. Journal entries' => [['settings.entry-types', 'Entry types', 'Numbering (prefix, suffix, padding) and account rules for each kind of entry'], ['settings.tags', 'Tags', 'Labels for grouping journal entries']],
-        '4. Keep it safe' => [['settings.close-books', 'Close books', 'Stop changes to a finished month or year'], ['settings.year-end', 'Year-end close', 'Finish the financial year and start the next one'], ['settings.backup', 'Backup', 'Download a full copy of this company\'s data'], ['settings.lock', 'Lock company', 'Stop every change until it is unlocked']],
+        '4. Keep it safe' => [['settings.close-books', 'Close books', 'Stop changes to a finished month or year'], ['settings.year-end', 'Year-end close', 'Finish the financial year and start the next one'], ['settings.backup', 'Backup', 'Download a full copy of this company\'s data'], ['settings.quickbooks', 'Move from QuickBooks', 'Bring in balances, open invoices, bills and stock'],['settings.lock', 'Lock company', 'Stop every change until it is unlocked']],
     ];
 @endphp
 @foreach ($groups as $title => $cards)

@@ -30,7 +30,10 @@ class SettingsController extends Controller
             'currency_symbol' => ['required', 'string', 'max:10'], 'currency_format' => ['required', 'string'], 'decimal_places' => ['required', 'integer', 'min:0', 'max:2'],
             'date_format' => ['required', 'string'], 'fy_start' => ['required', 'date_format:Y-m-d'],
         ]);
-        $this->settings->saveCompany($d + ['vehicles_enabled' => $request->boolean('vehicles_enabled'), 'commissions_enabled' => $request->boolean('commissions_enabled'),
+        if ($request->boolean('datasharing_enabled')) {
+            \App\Services\DataSharing\DataSharingService::ensureSettingsColumns(); // the two switches' columns, made on first use
+        }
+        $this->settings->saveCompany($d + ['datasharing_enabled' => $request->boolean('datasharing_enabled'), 'datasharing_only' => $request->boolean('datasharing_enabled') && $request->boolean('datasharing_only')] + ['vehicles_enabled' => $request->boolean('vehicles_enabled'), 'commissions_enabled' => $request->boolean('commissions_enabled'),
             'billable_expenses_enabled' => $request->boolean('billable_expenses_enabled'), 'construction_enabled' => $request->boolean('construction_enabled')]);
 
         return redirect()->route('settings.company')->with('message', 'Company settings saved.');
