@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Choose a password')
 @section('body')
-<div class="center">
+<div class="entry">
+    @include('auth._aside')
+    <div class="pane">
     @if ($bad)
         <div class="card">
             <h1>This link has expired</h1>
@@ -23,5 +25,6 @@
             <button class="full" type="submit">Save my password</button>
         </form>
     @endif
+    </div>
 </div>
 @endsection

@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Forgot password')
 @section('body')
-<div class="center">
+<div class="entry">
+    @include('auth._aside')
+    <div class="pane">
     <form class="card" method="POST" action="{{ route('password.forgot.send') }}">
         @csrf
         <h1>Forgot your password?</h1>
@@ -18,5 +20,6 @@
             <p style="text-align:center;margin-bottom:0"><a href="{{ route('login') }}">Back to sign in</a></p>
         @endif
     </form>
+    </div>
 </div>
 @endsection

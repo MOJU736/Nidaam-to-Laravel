@@ -2,28 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tenant\Bill;
-use App\Models\Tenant\Customer;
-use App\Models\Tenant\Invoice;
-use App\Models\Tenant\Ledger;
 use App\Models\Tenant\Setting;
-use App\Models\Tenant\Vendor;
+use App\Services\Reports\DashboardService;
 
-/** Placeholder landing page; proves the tenant connection and models work. The real dashboard is ported later. */
+/** The landing page of a company: cash, who owes you, what to pay soon, a six-month chart and what was done lately. */
 class DashboardController extends Controller
 {
-    public function __invoke()
+    public function __invoke(DashboardService $dashboard)
     {
         app(\App\Services\Sales\RecurringService::class)->runDueAndNotify();
-        return view('dashboard', [
-            'company' => Setting::first(),
-            'counts' => [
-                'Customers' => Customer::count(),
-                'Vendors' => Vendor::count(),
-                'Ledgers' => Ledger::count(),
-                'Invoices' => Invoice::count(),
-                'Bills' => Bill::count(),
-            ],
-        ]);
+
+        return view('dashboard', ['company' => Setting::first(), 'd' => $dashboard->data()]);
     }
 }
