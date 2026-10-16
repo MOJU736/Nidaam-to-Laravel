@@ -65,13 +65,13 @@
             @foreach ($lines as $i => $l)
                 @php $l = array_merge(['item_id' => '', 'description' => '', 'qty' => '1', 'unit_price' => '', 'discount_type' => '', 'discount_value' => ''], (array) $l); @endphp
                 <tr class="line">
-                    <td><select name="lines[{{ $i }}][item_id]" class="it"><option value="">Choose an item...</option>@foreach ($catalog as $id => $c)<option value="{{ $id }}" @selected((string) $l['item_id'] === (string) $id)>{{ $c['name'] }}</option>@endforeach</select><div class="muted stk" style="font-size:12px"></div></td>
-                    <td><input name="lines[{{ $i }}][description]" class="ds" value="{{ $l['description'] }}" maxlength="255"></td>
-                    <td><input name="lines[{{ $i }}][qty]" class="qty num" inputmode="decimal" value="{{ $l['qty'] }}"></td>
-                    <td><input name="lines[{{ $i }}][unit_price]" class="up num" inputmode="decimal" value="{{ $l['unit_price'] }}"></td>
-                    <td><div class="actions" style="flex-wrap:nowrap"><select name="lines[{{ $i }}][discount_type]" class="dt" style="width:58px;padding-left:8px;padding-right:4px"><option value="">—</option><option value="percent" @selected($l['discount_type'] === 'percent')>%</option><option value="amount" @selected($l['discount_type'] === 'amount')>$</option></select>
+                    <td data-l="Item"><select name="lines[{{ $i }}][item_id]" class="it"><option value="">Choose an item...</option>@foreach ($catalog as $id => $c)<option value="{{ $id }}" @selected((string) $l['item_id'] === (string) $id)>{{ $c['name'] }}</option>@endforeach</select><div class="muted stk" style="font-size:12px"></div></td>
+                    <td data-l="Description"><input name="lines[{{ $i }}][description]" class="ds" value="{{ $l['description'] }}" maxlength="255"></td>
+                    <td data-l="Qty"><input name="lines[{{ $i }}][qty]" class="qty num" inputmode="decimal" value="{{ $l['qty'] }}"></td>
+                    <td data-l="Unit price"><input name="lines[{{ $i }}][unit_price]" class="up num" inputmode="decimal" value="{{ $l['unit_price'] }}"></td>
+                    <td data-l="Discount"><div class="actions" style="flex-wrap:nowrap"><select name="lines[{{ $i }}][discount_type]" class="dt" style="width:58px;padding-left:8px;padding-right:4px"><option value="">—</option><option value="percent" @selected($l['discount_type'] === 'percent')>%</option><option value="amount" @selected($l['discount_type'] === 'amount')>$</option></select>
                         <input name="lines[{{ $i }}][discount_value]" class="dv num" inputmode="decimal" value="{{ $l['discount_value'] }}" style="width:66px"></div></td>
-                    <td class="num amt">0.00</td>
+                    <td class="num amt" data-l="Amount">0.00</td>
                     <td><button type="button" class="ghost sm rm" title="Remove line">&times;</button></td>
                 </tr>
             @endforeach

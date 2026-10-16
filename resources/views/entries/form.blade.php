@@ -33,7 +33,7 @@
         <tbody>
         @foreach ($lines as $i => $l)
             <tr class="line">
-                <td>
+                <td data-l="Account">
                     <select name="lines[{{ $i }}][account]" class="acct">
                         <option value="">Choose an account...</option>
                         @foreach ($accounts as $a)
@@ -45,11 +45,11 @@
                     </select>
                     <input type="hidden" class="party-init" value="{{ $l['party'] }}">
                 </td>
-                <td><input name="lines[{{ $i }}][narration]" value="{{ $l['narration'] }}" maxlength="500"></td>
-                <td><input name="lines[{{ $i }}][debit]" class="dr num" inputmode="decimal" value="{{ $l['debit'] }}" placeholder="0.00"></td>
-                <td><input name="lines[{{ $i }}][credit]" class="cr num" inputmode="decimal" value="{{ $l['credit'] }}" placeholder="0.00"></td>
+                <td data-l="Description"><input name="lines[{{ $i }}][narration]" value="{{ $l['narration'] }}" maxlength="500"></td>
+                <td data-l="Debit"><input name="lines[{{ $i }}][debit]" class="dr num" inputmode="decimal" value="{{ $l['debit'] }}" placeholder="0.00"></td>
+                <td data-l="Credit"><input name="lines[{{ $i }}][credit]" class="cr num" inputmode="decimal" value="{{ $l['credit'] }}" placeholder="0.00"></td>
                 @if ($projects)
-                    <td><select name="lines[{{ $i }}][project]"><option value="">None</option>
+                    <td data-l="Project"><select name="lines[{{ $i }}][project]"><option value="">None</option>
                         @foreach ($projects as $group => $opts)<optgroup label="{{ $group }}">@foreach ($opts as $v => $t)<option value="{{ $v }}" @selected((string) $l['project'] === (string) $v)>{{ $t }}</option>@endforeach</optgroup>@endforeach
                     </select></td>
                 @endif
