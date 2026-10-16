@@ -54,18 +54,17 @@
         ]],
     ];
 @endphp
-<div class="bar"><div><h1 style="margin:0">Reports</h1><div class="muted">Every report, grouped by the question it answers. Not sure where to look? Type what you want to know.</div></div>
-    <a class="btn ghost" href="{{ route('dashboard') }}">Back to Dashboard</a></div>
-<input id="rsearch" type="search" placeholder="Find a report, e.g. profit, who owes, stock, tax..." autocomplete="off" style="max-width:520px;margin-bottom:6px">
+<div class="bar"><div><h1>Reports</h1><div class="muted">Grouped by the question each one answers</div></div>
+    <input id="rsearch" class="find" type="search" placeholder="Find a report: profit, who owes, stock, tax..." autocomplete="off" style="width:340px;max-width:100%"></div>
 <div class="muted" id="rnone" hidden style="margin:12px 0">No report matches that. Try another word.</div>
 @foreach ($sections as [$heading, $hint, $cards])
     <div class="rsec">
-        <h3 style="margin:22px 0 8px">{{ $heading }} <span class="muted" style="font-size:13px;font-weight:400">· {{ $hint }}</span></h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px">
+        <h3 class="sec" style="margin-top:26px">{{ $heading }} <span style="text-transform:none;letter-spacing:0;font-weight:400">· {{ $hint }}</span></h3>
+        <div class="linkgrid">
             @foreach (array_filter($cards) as $card)
                 @php [$route, $name, $desc] = $card; $q = $card[3] ?? []; @endphp
                 @can('page', $route)
-                <a class="card rcard" data-text="{{ strtolower($name.' '.$desc.' '.$heading) }}" href="{{ route($route, $q) }}" style="text-decoration:none;color:inherit;display:block"><strong>{{ $name }}</strong><div class="muted" style="font-size:13px;margin-top:4px">{{ $desc }}</div></a>
+                <a class="linkcard rcard {{ $loop->parent->first ? 'hot' : '' }}" data-text="{{ strtolower($name.' '.$desc.' '.$heading) }}" href="{{ route($route, $q) }}"><span><strong>{{ $name }}</strong><small>{{ $desc }}</small></span>{!! \App\Support\Icon::svg('chevron', 16) !!}</a>
                 @endcan
             @endforeach
         </div>
@@ -76,7 +75,7 @@
     var box = document.getElementById('rsearch'), none = document.getElementById('rnone');
     box.addEventListener('input', function () {
         var words = box.value.toLowerCase().split(/\s+/).filter(Boolean), shown = 0;
-        document.querySelectorAll('.rcard').forEach(function (c) { var t = c.getAttribute('data-text'), ok = words.every(function (w) { return t.indexOf(w) !== -1; }); c.style.display = ok ? 'block' : 'none'; if (ok) { shown++; } });
+        document.querySelectorAll('.rcard').forEach(function (c) { var t = c.getAttribute('data-text'), ok = words.every(function (w) { return t.indexOf(w) !== -1; }); c.style.display = ok ? '' : 'none'; if (ok) { shown++; } });
         document.querySelectorAll('.rsec').forEach(function (s) { var any = Array.prototype.some.call(s.querySelectorAll('.rcard'), function (c) { return c.style.display !== 'none'; }); s.style.display = any ? '' : 'none'; });
         none.hidden = shown > 0;
     });

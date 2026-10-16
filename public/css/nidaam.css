@@ -290,6 +290,12 @@ label.chk { display: flex; align-items: center; gap: 8px; font-weight: 400; marg
 .avs.lg { width: 44px; height: 44px; font-size: 18px; }
 a.who { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; } a.who:hover { color: var(--brand-strong); }
 
+.linkgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.linkcard { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); color: var(--text); text-decoration: none; }
+.linkcard strong { display: block; font-size: 15px; } .linkcard small { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; line-height: 1.4; }
+.linkcard .ic { color: var(--muted); } .linkcard:hover { border-color: var(--brand); color: var(--text); } .linkcard:hover .ic { color: var(--brand-strong); transform: translateX(2px); }
+.linkcard.hot { background: var(--brand-soft); border-color: transparent; } .linkcard.hot strong { color: var(--brand-dark); }
+
 /* ---- sign-in and other pages without the sidebar ------------------------------------------------------------------- */
 .entry { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
 .entry .aside { position: relative; overflow: hidden; background: linear-gradient(155deg, #3C3489 0%, #534AB7 58%, #6A60D0 100%); color: #fff; padding: 48px; display: flex; flex-direction: column; justify-content: space-between; }
