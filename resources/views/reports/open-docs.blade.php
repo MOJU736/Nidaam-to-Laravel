@@ -6,7 +6,7 @@
 <div class="card" style="margin-bottom:16px;display:flex;gap:32px;flex-wrap:wrap">
     <div><div class="muted">{{ $ar ? 'Invoices' : 'Bills' }} open</div><strong>{{ $g['count'] }}</strong></div>
     <div><div class="muted">Balance due</div><strong>{{ Money::format($g['due']) }}</strong></div>
-    <div><div class="muted">Of which overdue</div><strong @if (Money::positive($g['overdue'])) style="color:#b3261e" @endif>{{ Money::format($g['overdue']) }}</strong></div>
+    <div><div class="muted">Of which overdue</div><strong @if (Money::positive($g['overdue'])) style="color:var(--danger)" @endif>{{ Money::format($g['overdue']) }}</strong></div>
 </div>
 <div class="card tbl"><table>
     <thead><tr><th>{{ $ar ? 'Invoice' : 'Bill' }}</th><th>Date</th><th>Due</th><th class="num">Days overdue</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Balance due</th></tr></thead>

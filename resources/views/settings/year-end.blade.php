@@ -23,7 +23,7 @@
         <ul style="list-style:none;padding:0;margin:0">
             @foreach ($ye['checks'] as $c)
                 <li style="display:flex;gap:10px;padding:6px 0">
-                    <span style="font-size:18px;color:{{ $c['ok'] === null ? 'var(--muted)' : ($c['ok'] ? '#1d9650' : ($c['block'] ? 'var(--danger)' : '#b7791f')) }}">{{ $c['ok'] === null ? '↓' : ($c['ok'] ? '✓' : ($c['block'] ? '✕' : '!')) }}</span>
+                    <span style="font-size:18px;color:{{ $c['ok'] === null ? 'var(--muted)' : ($c['ok'] ? 'var(--good)' : ($c['block'] ? 'var(--danger)' : '#b7791f')) }}">{{ $c['ok'] === null ? '↓' : ($c['ok'] ? '✓' : ($c['block'] ? '✕' : '!')) }}</span>
                     <div><strong>{{ $c['title'] }}</strong><div class="muted" style="font-size:13px">{{ $c['text'] }} @if ($c['url'])<a href="{{ $c['url'] }}">{{ $c['ok'] === null ? 'Go to Backup' : 'Open' }} →</a>@endif</div></div>
                 </li>
             @endforeach

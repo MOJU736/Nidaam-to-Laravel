@@ -15,7 +15,7 @@
         <div><div class="muted">Statement ending balance</div><strong>{{ Money::format($rec->statement_balance) }}</strong></div>
         <div><div class="muted">Cleared balance</div><strong id="recCleared">{{ Money::format($totals['cleared']) }}</strong>
             <div class="muted" style="font-size:13px">{{ Money::format($rec->begin_balance) }} beginning + <span id="recIn">{{ Money::format($totals['in']) }}</span> in (<span id="recNIn">{{ $totals['n_in'] }}</span>) − <span id="recOut">{{ Money::format($totals['out']) }}</span> out (<span id="recNOut">{{ $totals['n_out'] }}</span>)</div></div>
-        <div id="recDiffBox"><div class="muted">Difference</div><strong id="recDiff" style="color:{{ $zero ? 'inherit' : '#b3261e' }}">{{ Money::format($totals['difference']) }}</strong></div>
+        <div id="recDiffBox"><div class="muted">Difference</div><strong id="recDiff" style="color:{{ $zero ? 'inherit' : 'var(--danger)' }}">{{ Money::format($totals['difference']) }}</strong></div>
     </div>
 
     <div class="actions" style="margin-bottom:10px;flex-wrap:wrap">
@@ -51,7 +51,7 @@
         <button type="submit" name="do" value="discard" class="danger" onclick="return confirm('Throw away this reconciliation? Nothing will be marked as cleared.')">Discard</button>
     </div>
 </form>
-<style>#recTable tbody tr.t td { background: rgba(46,125,50,.10) } .chip.on { background: var(--accent, #2563eb); color: #fff }</style>
+<style>#recTable tbody tr.t td { background: var(--good-soft) } .chip.on { background: var(--brand-soft); color: var(--brand-dark); border-color: var(--brand) }</style>
 <script>
 (function () {
     var sum = document.getElementById('recSum'), begin = +sum.dataset.begin, statement = +sum.dataset.statement;
@@ -64,7 +64,7 @@
         document.getElementById('recIn').textContent = money(inC); document.getElementById('recOut').textContent = money(outC);
         document.getElementById('recNIn').textContent = nIn; document.getElementById('recNOut').textContent = nOut;
         document.getElementById('recCleared').textContent = money(cleared); document.getElementById('recDiff').textContent = money(diff);
-        document.getElementById('recDiff').style.color = diff === 0 ? 'inherit' : '#b3261e';
+        document.getElementById('recDiff').style.color = diff === 0 ? 'inherit' : 'var(--danger)';
         document.getElementById('recFinish').disabled = diff !== 0;
     }
     rows.forEach(function (r) {

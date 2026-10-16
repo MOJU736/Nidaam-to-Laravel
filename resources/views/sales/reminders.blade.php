@@ -31,7 +31,7 @@
                 <td><a href="{{ route('customers.show', $r['customer_id']) }}">{{ $r['customer_name'] }}</a></td>
                 <td>@if ($r['email']){{ $r['email'] }}@else<span class="muted">no email on file</span>@endif</td>
                 <td class="num">{{ Money::format($r['balance']) }}</td>
-                <td class="num">@if ($r['is_overdue'])<span style="color:#b3261e">{{ Money::format($r['overdue_amount']) }}</span>@else<span class="muted">—</span>@endif</td>
+                <td class="num">@if ($r['is_overdue'])<span style="color:var(--danger)">{{ Money::format($r['overdue_amount']) }}</span>@else<span class="muted">—</span>@endif</td>
                 <td class="num">{{ $r['is_overdue'] ? $r['days_overdue'] : '' }}</td>
                 <td>@if ($r['last_reminded_at']){{ Money::date(substr($r['last_reminded_at'], 0, 10)) }}@if ($recent) <span class="pill owes">recent</span>@endif @else<span class="muted">never</span>@endif</td>
             </tr>

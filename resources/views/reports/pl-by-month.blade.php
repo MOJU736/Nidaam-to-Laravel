@@ -34,7 +34,7 @@
                 @endif
             </tr>
         @endforeach
-        <tr style="font-weight:700;border-top:1px solid #999"><td>Total {{ $title }}</td>@foreach ($cols as $k)<td class="num">{{ $cell($pl['sections'][$name]['total'], $k) }}</td>@endforeach{!! $tail($pl['sections'][$name]['total']) !!}</tr>
+        <tr style="font-weight:700;border-top:1px solid var(--line-strong)"><td>Total {{ $title }}</td>@foreach ($cols as $k)<td class="num">{{ $cell($pl['sections'][$name]['total'], $k) }}</td>@endforeach{!! $tail($pl['sections'][$name]['total']) !!}</tr>
         @if ($name === 'cogs')
             <tr style="font-weight:700"><td>Gross Profit</td>@foreach ($cols as $k)<td class="num">{{ $cell($pl['gross'], $k) }}</td>@endforeach{!! $tail($pl['gross']) !!}</tr>
         @endif
@@ -45,7 +45,7 @@
     @if ($pl['has_other'])
         <tr style="font-weight:700"><td>Net Other Income</td>@foreach ($cols as $k)<td class="num">{{ $cell($pl['net_other'], $k) }}</td>@endforeach{!! $tail($pl['net_other']) !!}</tr>
     @endif
-    <tr style="font-weight:700;border-top:2px solid #333"><td>Net Income</td>@foreach ($cols as $k)<td class="num">{{ $cell($pl['net_income'], $k) }}</td>@endforeach{!! $tail($pl['net_income']) !!}</tr>
+    <tr style="font-weight:700;border-top:2px solid var(--text)"><td>Net Income</td>@foreach ($cols as $k)<td class="num">{{ $cell($pl['net_income'], $k) }}</td>@endforeach{!! $tail($pl['net_income']) !!}</tr>
     </tbody>
 </table></div>
 @endif

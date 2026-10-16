@@ -14,7 +14,7 @@
     .rfilter label { margin:0 0 4px }
     .rfilter .chips { align-self:center; margin-left:auto }
     .rcoal { display:none }
-    @media print { .subnav, .noprint, .side, .topbar { display:none !important } .main { margin:0 !important } .wide { padding:0 !important; max-width:none !important } .card { box-shadow:none !important; border:0 !important } .qbr tr.grand td { background:none; color:inherit; border-top:2px solid #333; border-bottom:3px double #333 } .rcoal { display:block } }
+    @media print { .subnav, .noprint, .side, .topbar { display:none !important } .main { margin:0 !important } .wide { padding:0 !important; max-width:none !important } .card { box-shadow:none !important; border:0 !important } .qbr tr.grand td { background:none; color:inherit; border-top:2px solid var(--text); border-bottom:3px double #333 } .rcoal { display:block } }
 </style>
 <div class="bar">
     <div><h1>{{ $title }}</h1><div class="muted">{{ $subtitle }}</div></div>
