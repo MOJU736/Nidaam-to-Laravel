@@ -169,6 +169,7 @@ dl.kv { display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; margin: 
 .chips button { padding: 6px 13px; font-size: 13px; font-weight: 500; border-radius: 999px; background: var(--card); color: var(--muted); border: 1px solid var(--line-strong); }
 .chips button:hover { background: var(--brand-soft); color: var(--brand-dark); border-color: var(--brand); }
 .chips button.on { background: var(--brand-soft); color: var(--brand-dark); border-color: var(--brand); font-weight: 600; }
+a.chip { padding: 6px 13px; font-size: 13px; font-weight: 500; border-radius: 999px; background: var(--card); color: var(--muted); border: 1px solid var(--line-strong); text-decoration: none; } a.chip small { opacity: .7; margin-left: 3px; } a.chip:hover { background: var(--brand-soft); color: var(--brand-dark); border-color: var(--brand); } a.chip.on { background: var(--brand-soft); color: var(--brand-dark); border-color: var(--brand); font-weight: 600; }
 .tools { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .tools input[type=search], .tools input.find { width: 240px; max-width: 100%; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }

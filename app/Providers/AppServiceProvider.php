@@ -20,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // raw SQL (selectRaw, whereRaw ...) gets the company's table prefix too, for companies that share a database
+        \Illuminate\Database\Connection::resolverFor('mysql', fn ($pdo, $database, $prefix, $config) => new \App\Database\PrefixAwareConnection($pdo, $database, $prefix, $config));
+
         // @can('page', 'invoices.index') in a view: may this person open that page? (used to hide menu items they could not use)
         \Illuminate\Support\Facades\Gate::define('page', fn (\App\Models\User $user, string $route, ?string $type = null) => app(\App\Services\Auth\Permissions::class)->allows($user, $route, $type));
     }

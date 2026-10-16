@@ -2,12 +2,11 @@
 @section('title', 'Reconcile')
 @section('content')
 @php use App\Support\Money; @endphp
-<div class="bar"><h1 style="margin:0">Reconcile</h1></div>
-<p class="muted" style="margin-top:0">Check your books against each bank statement: enter the statement's ending date and balance, then tick every transaction that appears on it until the difference is zero.</p>
+<div class="bar"><div><h1>Reconcile</h1><div class="muted">Check your books against each bank statement: enter the statement's ending date and balance, then tick every transaction that appears on it until the difference is zero.</div></div></div>
 @if (! $cards)
     <div class="card muted">No bank or cash accounts yet. In <a href="{{ route('chart') }}">Accounts</a>, edit an account and switch on <em>Bank or cash account</em> or <em>Reconcile with statements</em>.</div>
 @else
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px">
+    <div class="linkgrid" style="grid-template-columns:repeat(auto-fill,minmax(310px,1fr))">
     @foreach ($cards as $c)
         @php $l = $c['ledger']; @endphp
         <div class="card">

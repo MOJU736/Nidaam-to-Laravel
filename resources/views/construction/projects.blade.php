@@ -3,18 +3,23 @@
 @section('content')
 @include('construction._tabs')
 @php use App\Support\Money; use App\Services\Construction\ConstructionService as C; @endphp
-<div class="bar"><h1 style="margin:0">Projects</h1><a class="btn" href="{{ route('projects.create') }}">New project</a></div>
-<div class="actions" style="margin-bottom:12px">
-    <a class="btn sm {{ $status ? 'ghost' : '' }}" href="{{ route('projects.index') }}">All ({{ $counts[''] ?? 0 }})</a>
-    @foreach (C::STATUSES as $k => $l)<a class="btn sm {{ $status === $k ? '' : 'ghost' }}" href="{{ route('projects.index', ['status' => $k]) }}">{{ $l }} ({{ $counts[$k] ?? 0 }})</a>@endforeach
+<div class="bar"><div><h1>Projects</h1><div class="muted">Contract, costs and what the client still owes, project by project</div></div><a class="btn" href="{{ route('projects.create') }}">{{ \App\Support\Icon::svg('plus', 16) }}New project</a></div>
+<div class="tiles">
+    <div class="tile"><small>Contract value</small><b>{{ Money::format($totals['contract']) }}</b><span>{{ count($rows) }} project{{ count($rows) === 1 ? '' : 's' }} shown</span></div>
+    <div class="tile"><small>Costs so far</small><b>{{ Money::format($totals['cost']) }}</b><span>billed {{ Money::format($totals['billed']) }}</span></div>
+    <div class="tile {{ Money::cmp($totals['profit'], 0) < 0 ? 'bad' : '' }}"><small>Profit</small><b>{{ Money::format($totals['profit']) }}</b><span>billed minus costs</span></div>
+    <div class="tile"><small>Clients owe</small><b>{{ Money::format($totals['owed']) }}</b><span>unpaid on claims</span></div>
 </div>
-<div class="card tbl">
+<div class="tools"><div class="chips">
+    <a class="chip {{ $status ? '' : 'on' }}" href="{{ route('projects.index') }}">All <small>{{ $counts[''] ?? 0 }}</small></a>
+    @foreach (C::STATUSES as $k => $l)<a class="chip {{ $status === $k ? 'on' : '' }}" href="{{ route('projects.index', ['status' => $k]) }}">{{ $l }} <small>{{ $counts[$k] ?? 0 }}</small></a>@endforeach
+</div></div><div class="card tbl">
     <table>
         <thead><tr><th>Project</th><th>Client</th><th>Status</th><th class="num">Contract</th><th class="num">Costs</th><th class="num">Billed</th><th class="num">Profit</th><th class="num">Client owes</th></tr></thead>
         <tbody>
         @forelse ($rows as $r)
             <tr>
-                <td><a href="{{ route('projects.show', $r->id) }}"><strong>#{{ $r->number }} {{ $r->name }}</strong></a>@if ($r->site)<div class="muted" style="font-size:12px">{{ $r->site }}</div>@endif</td>
+                <td><a class="who" href="{{ route('projects.show', $r->id) }}"><span class="avs sq">{{ mb_strtoupper(mb_substr(trim($r->name), 0, 1)) }}</span><span><strong>#{{ $r->number }} {{ $r->name }}</strong>@if ($r->site)<small class="muted" style="display:block;font-size:12.5px">{{ $r->site }}</small>@endif</span></a></td>
                 <td>{{ $r->customer_name }}</td>
                 <td><span class="pill">{{ C::STATUSES[$r->status] ?? $r->status }}</span></td>
                 <td class="num">{{ Money::format($r->contract) }}</td>
