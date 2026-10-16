@@ -19,12 +19,10 @@
 @endphp
 
 <div class="bar">
-    <h1 style="margin:0">{{ $cfg['many'] }}</h1>
-    <div class="actions">
-        <input id="q" placeholder="Search {{ strtolower($cfg['many']) }}..." style="width:220px">
-        <a class="btn" href="{{ route($cfg['route'].'.create') }}">+ Add {{ $cfg['one'] }}</a>
-    </div>
+    <div><h1>{{ $cfg['many'] }}</h1><div class="muted">{{ $isAr ? 'People and companies you sell to' : 'Who you buy from' }}</div></div>
+    <a class="btn" href="{{ route($cfg['route'].'.create') }}">{{ \App\Support\Icon::svg('plus', 16) }}Add {{ $cfg['one'] }}</a>
 </div>
+<div class="tools"><div></div><input id="q" class="find" type="search" placeholder="Search {{ strtolower($cfg['many']) }}"></div>
 
 <div class="stats" id="tiles">
     @foreach ($tiles as [$key, $value, $label])
@@ -51,14 +49,13 @@
                 $chip = in_array('overdue', $tags) ? ['overdue', 'Overdue'] : (in_array('outstanding', $tags) ? ['owes', $isAr ? 'Owes you' : 'You owe'] : (in_array('credit', $tags) ? ['', 'In credit'] : ['', 'Paid up']));
             @endphp
             <tr data-tags="{{ implode(' ', $tags) }}" data-text="{{ strtolower($p->name.' '.$p->contact_person.' '.$p->email.' '.$p->phone) }}">
-                <td><a href="{{ route($cfg['route'].'.show', $p->id) }}"><strong>{{ $p->name }}</strong></a></td>
+                <td><a class="who" href="{{ route($cfg['route'].'.show', $p->id) }}"><span class="avs">{{ mb_strtoupper(mb_substr(trim($p->name), 0, 1)) }}</span><strong>{{ $p->name }}</strong></a></td>
                 <td>{{ $p->contact_person }}</td>
                 <td>@if ($p->email)<div>{{ $p->email }}</div>@endif @if ($p->phone)<div>{{ $p->phone }}</div>@endif</td>
                 <td class="num">{{ Money::format($signed) }}</td>
                 <td><span class="pill {{ $chip[0] }}">{{ $chip[1] }}</span>@unless ($p->status) <span class="pill">Inactive</span>@endunless</td>
                 <td>
                     <div class="actions">
-                        <a class="btn ghost sm" href="{{ route($cfg['route'].'.show', $p->id) }}">Transactions</a>
                         @if ($isAr)<a class="btn ghost sm" href="{{ route('invoices.create', $p->id) }}">Invoice</a><a class="btn ghost sm" href="{{ route('payments.create', $p->id) }}">Receive payment</a>@else<a class="btn ghost sm" href="{{ route('bills.create', $p->id) }}">Bill</a><a class="btn ghost sm" href="{{ route('vendor-payments.create', $p->id) }}">Pay</a>@endif
                         <a class="btn ghost sm" href="{{ route($cfg['route'].'.edit', $p->id) }}">Edit</a>
                         <form class="inline" method="POST" action="{{ route($cfg['route'].'.destroy', $p->id) }}" onsubmit="return confirm('Delete this {{ strtolower($cfg['one']) }}?')">

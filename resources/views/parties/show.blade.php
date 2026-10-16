@@ -8,28 +8,41 @@
     $bal = fn ($dc, $amt) => Money::format($dc === $cfg['normal'] ? $amt : Money::neg($amt));
     $typeNames = ['document' => $cfg['side'] === 'ar' ? 'Invoice' : 'Bill', 'payment' => 'Payment', 'credit_note' => 'Credit note', 'refund' => 'Refund', 'other' => 'Journal'];
 @endphp
+<a class="back" href="{{ route($cfg['route'].'.index') }}">&larr; {{ $cfg['many'] }}</a>
 <div class="bar">
-    <div>
-        <h1 style="margin:0">{{ $party->name }} @unless ($party->status)<span class="pill">Inactive</span>@endunless</h1>
-        <a href="{{ route($cfg['route'].'.index') }}" class="muted">&larr; {{ $cfg['many'] }}</a>
-    </div>
+    <div class="titlerow"><span class="avs lg">{{ mb_strtoupper(mb_substr(trim($party->name), 0, 1)) }}</span><h1>{{ $party->name }}</h1>@unless ($party->status)<span class="pill">Inactive</span>@endunless</div>
     <div class="actions">
-        <a class="btn ghost" href="{{ route($cfg['route'].'.edit', $party->id) }}">Edit</a>
-        @if ($cfg['side'] === 'ar')@if ($closing['dc'] === 'D' && Money::positive($closing['amount']))<button type="button" class="ghost" onclick="var e=document.getElementById('reminderBox');if(e){e.hidden=!e.hidden;if(!e.hidden)e.scrollIntoView({behavior:'smooth',block:'center'})}">Send reminder</button>@endif<a class="btn ghost" href="{{ route('quotations.create', $party->id) }}">New quotation</a><a class="btn ghost" href="{{ route('invoices.create', $party->id) }}">New invoice</a><a class="btn" href="{{ route('payments.create', $party->id) }}">Receive payment</a>@else<a class="btn ghost" href="{{ route('purchase-orders.create', $party->id) }}">New purchase order</a><a class="btn ghost" href="{{ route('bills.create', $party->id) }}">New bill</a><a class="btn" href="{{ route('vendor-payments.create', $party->id) }}">Pay vendor</a>@endif
+        @if ($cfg['side'] === 'ar')<a class="btn" href="{{ route('payments.create', $party->id) }}">Receive payment</a><a class="btn ghost" href="{{ route('invoices.create', $party->id) }}">New invoice</a>@else<a class="btn" href="{{ route('vendor-payments.create', $party->id) }}">Pay vendor</a><a class="btn ghost" href="{{ route('bills.create', $party->id) }}">New bill</a>@endif
+        <details class="menu">
+            <summary>More <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="drop">
+                @if ($cfg['side'] === 'ar')
+                    @if ($closing['dc'] === 'D' && Money::positive($closing['amount']))<button type="button" onclick="var e=document.getElementById('reminderBox');if(e){e.hidden=!e.hidden;if(!e.hidden)e.scrollIntoView({behavior:'smooth',block:'center'})}">Send reminder</button>@endif
+                    <a href="{{ route('quotations.create', $party->id) }}">New quotation</a>
+                @else
+                    <a href="{{ route('purchase-orders.create', $party->id) }}">New purchase order</a>
+                @endif
+                <hr><a href="{{ route($cfg['route'].'.edit', $party->id) }}">Edit details</a>
+            </div>
+        </details>
     </div>
 </div>
 
-<div class="card">
-    <dl class="kv">
-        <dt>Contact</dt><dd>{{ $party->contact_person ?: '—' }}</dd>
-        <dt>Phone</dt><dd>{{ $party->phone ?: '—' }}</dd>
-        <dt>Email</dt><dd>{{ $party->email ?: '—' }}</dd>
-        <dt>Address</dt><dd>{!! nl2br(e($party->address ?: '—')) !!}</dd>
-        @if ($party->notes)<dt>Notes</dt><dd>{!! nl2br(e($party->notes)) !!}</dd>@endif
-        <dt>{{ $cfg['side'] === 'ar' ? 'Owes you' : 'You owe' }}</dt><dd><strong>{{ Money::format($closingSigned) }}</strong></dd>
-    </dl>
+<div class="docgrid">
+    <div class="card docmeta">
+        <div><small>Contact</small>{{ $party->contact_person ?: '—' }}</div>
+        <div><small>Phone</small>{{ $party->phone ?: '—' }}</div>
+        <div><small>Email</small>{{ $party->email ?: '—' }}</div>
+        <div class="wide2"><small>Address</small>{!! nl2br(e($party->address ?: '—')) !!}</div>
+        @if ($party->notes)<div class="wide2"><small>Notes</small>{!! nl2br(e($party->notes)) !!}</div>@endif
+    </div>
+    @php $owes = Money::positive($closing['amount']); @endphp
+    <div class="card balance {{ $owes ? '' : 'settled' }}">
+        <small>{{ $owes ? ($cfg['side'] === 'ar' ? 'Owes you' : 'You owe') : 'All settled' }}</small>
+        <div class="big">{{ Money::format($closingSigned) }}</div>
+        <dl><dt>Opening balance</dt><dd>{{ Money::format($openingSigned) }}</dd><dt>{{ $startdate || $enddate ? 'In this period' : 'Transactions' }}</dt><dd>{{ count($transactions) }}</dd></dl>
+    </div>
 </div>
-
 @if ($vehicles->isNotEmpty())
     <h2>Vehicles</h2>
     <div class="card tbl"><table>
