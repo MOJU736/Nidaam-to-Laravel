@@ -2,11 +2,9 @@
 @section('title', $typeName.' '.$number)
 @section('content')
 @php use App\Support\Money; @endphp
+<a class="back" href="{{ route('entries.index') }}">&larr; Journal Entries</a>
 <div class="bar">
-    <div>
-        <h1 style="margin:0">{{ $typeName }} {{ $number }}</h1>
-        <a class="muted" href="{{ route('entries.index') }}">&larr; Journal Entries</a>
-    </div>
+    <div class="titlerow"><h1>{{ $typeName }} {{ $number }}</h1>@if ($tag)<span class="pill owes">{{ $tag->title }}</span>@endif</div>
     <div class="actions">
         @if ($linked)
             <span class="muted" style="align-self:center">Made by {{ preg_match('/^[aeiou]/i', $linked['label']) ? 'an' : 'a' }} {{ $linked['label'] }} - change it there.</span>
@@ -19,16 +17,20 @@
     </div>
 </div>
 
-<div class="card">
-    <dl class="kv">
-        <dt>Date</dt><dd>{{ Money::date($entry->date) }}</dd>
-        <dt>Type</dt><dd>{{ $typeName }}</dd>
-        @if ($tag)<dt>Tag</dt><dd><span class="pill">{{ $tag->title }}</span></dd>@endif
-        @if ($entry->notes)<dt>Notes</dt><dd>{!! nl2br(e($entry->notes)) !!}</dd>@endif
-    </dl>
+<div class="docgrid">
+    <div class="card docmeta">
+        <div><small>Date</small>{{ Money::date($entry->date) }}</div>
+        <div><small>Type</small>{{ $typeName }}</div>
+        @if ($entry->notes)<div class="wide2"><small>Notes</small>{!! nl2br(e($entry->notes)) !!}</div>@endif
+    </div>
+    <div class="card balance">
+        <small>Amount</small>
+        <div class="big">{{ Money::format($entry->dr_total) }}</div>
+        <dl><dt>Debits</dt><dd>{{ Money::format($entry->dr_total) }}</dd><dt>Credits</dt><dd>{{ Money::format($entry->cr_total) }}</dd></dl>
+    </div>
 </div>
 
-<div class="card tbl" style="margin-top:16px">
+<div class="card tbl">
     <table>
         <thead><tr><th>Account</th><th>Description</th>@if ($lines->contains(fn ($l) => $l['project']))<th>Project</th>@endif<th class="num">Debit</th><th class="num">Credit</th></tr></thead>
         <tbody>

@@ -21,10 +21,10 @@
 @endif
 
 <div class="bar">
-    <h1 style="margin:0">Chart of Accounts</h1>
+    <div><h1>Chart of Accounts</h1><div class="muted">Every account in your books, grouped. Balances are as of today.</div></div>
     <div class="actions">
         <a class="btn ghost" href="{{ route('groups.create') }}">New group</a>
-        <a class="btn" href="{{ route('ledgers.create') }}">+ New account</a>
+        <a class="btn" href="{{ route('ledgers.create') }}">{{ \App\Support\Icon::svg('plus', 16) }}New account</a>
     </div>
 </div>
 
@@ -106,10 +106,10 @@
 </p>
 
 <style>
-    #chart tr.root td { background:var(--bg); }
+    #chart tr.root td { background:var(--brand-soft); color:var(--brand-dark); }
     #chart tr.group td { font-weight:600; }
-    #chart tr.flash-row td { background:rgba(74,155,224,.25); transition:background 2s; }
-    .tgl { font-size:15px; text-decoration:none; width:1.4em; }
+    #chart tr.flash-row td { background:var(--brand-soft); transition:background 2s; }
+    .tgl { font-size:15px; text-decoration:none; width:1.4em; color:var(--muted); }
     .tgl.closed { transform:rotate(-90deg); display:inline-block; }
     #types button.on { border-color:var(--brand); box-shadow:0 0 0 1px var(--brand); }
 </style>

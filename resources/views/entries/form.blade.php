@@ -5,26 +5,30 @@
     use App\Support\Money;
     $editing = (bool) $entry;
 @endphp
-<div class="bar">
-    <h1 style="margin:0">{{ $editing ? 'Edit '.$typeName.' '.$numberLabel : 'New '.$typeName.($type->label === 'journal' ? ' entry' : '') }}</h1>
-    <a class="muted" href="{{ $editing ? route('entries.show', [$type->label, $entry->id]) : route('entries.index') }}">&larr; Back</a>
-</div>
+<a class="back" href="{{ $editing ? route('entries.show', [$type->label, $entry->id]) : route('entries.index') }}">&larr; {{ $editing ? 'Back to the entry' : 'Journal Entries' }}</a>
+<div class="bar"><h1>{{ $editing ? 'Edit '.$typeName.' '.$numberLabel : 'New '.$typeName.($type->label === 'journal' ? ' entry' : '') }}</h1></div>
 
-<form class="card" method="POST" id="je" action="{{ $editing ? route('entries.update', [$type->label, $entry->id]) : route('entries.store', $type->label) }}">
+<form class="docform" method="POST" id="je" action="{{ $editing ? route('entries.update', [$type->label, $entry->id]) : route('entries.store', $type->label) }}">
     @csrf
     @if ($editing) @method('PUT') @endif
-    @foreach (['number', 'date'] as $k)@if ($errors->has($k))<p class="error">{{ $errors->first($k) }}</p>@endif @endforeach
+    <div class="docmain">
+    @foreach (['number', 'date'] as $k)@if ($errors->has($k))<div class="flash bad">{{ $errors->first($k) }}</div>@endif @endforeach
 
-    <div class="row2" style="grid-template-columns:1fr 1fr 1fr">
-        <div><label for="date" style="margin-top:0">Date *</label><input id="date" type="date" name="date" required value="{{ old('date', $entry?->date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}"></div>
-        <div><label for="number" style="margin-top:0">Number</label>
+    <div class="card">
+        <h3 class="sec">Details</h3>
+        <div class="fgrid">
+        <div><label for="date">Date *</label><input id="date" type="date" name="date" required value="{{ old('date', $entry?->date?->format('Y-m-d') ?? now()->format('Y-m-d')) }}"></div>
+        <div><label for="number">Number</label>
             <input id="number" name="number" inputmode="numeric" value="{{ old('number', $entry->number ?? '') }}" placeholder="{{ $nextNumber ? 'Next: '.$nextNumber : '' }}" @if ((int) $type->numbering === 2) required @endif></div>
-        <div><label for="tag_id" style="margin-top:0">Tag</label>
+        <div><label for="tag_id">Tag</label>
             <select id="tag_id" name="tag_id"><option value="">No tag</option>@foreach ($tags as $t)<option value="{{ $t->id }}" @selected((string) old('tag_id', $entry->tag_id ?? '') === (string) $t->id)>{{ $t->title }}</option>@endforeach</select></div>
+        </div>
     </div>
 
-    <div class="tbl" style="margin-top:16px">
-    <table id="lines">
+    <div class="card">
+    <h3 class="sec">Lines</h3>
+    <div class="tbl">
+    <table id="lines" class="lines">
         <thead><tr><th style="min-width:230px">Account</th><th>Description</th><th class="num" style="width:130px">Debit</th><th class="num" style="width:130px">Credit</th>@if ($projects)<th style="min-width:150px">Project</th>@endif<th></th></tr></thead>
         <tbody>
         @foreach ($lines as $i => $l)
@@ -53,22 +57,31 @@
             </tr>
         @endforeach
         </tbody>
-        <tfoot>
-            <tr><td><button type="button" class="ghost sm" id="add">+ Add line</button></td><td class="num"><strong>Total</strong></td>
-                <td class="num"><strong id="tdr">0.00</strong></td><td class="num"><strong id="tcr">0.00</strong></td>@if ($projects)<td></td>@endif<td></td></tr>
-            <tr><td colspan="{{ $projects ? 6 : 5 }}" id="diff" class="muted"></td></tr>
-        </tfoot>
     </table>
     </div>
-
-    <label for="notes">Notes</label>
-    <textarea id="notes" name="notes" rows="2" maxlength="500">{{ old('notes', $entry->notes ?? '') }}</textarea>
-
-    <div class="actions" style="margin-top:20px">
-        <button type="submit">{{ $editing ? 'Save changes' : 'Save' }}</button>
-        @unless ($editing)<button type="submit" name="save_and_new" value="1" class="ghost">Save &amp; new</button>@endunless
-        <a class="btn ghost" href="{{ $editing ? route('entries.show', [$type->label, $entry->id]) : route('entries.index') }}">Cancel</a>
+    <button type="button" class="ghost sm" id="add" style="margin-top:12px">+ Add line</button>
     </div>
+
+    <div class="card">
+        <h3 class="sec">Notes</h3>
+        <label for="notes" class="sr">Notes</label>
+        <textarea id="notes" name="notes" rows="3" maxlength="500">{{ old('notes', $entry->notes ?? '') }}</textarea>
+    </div>
+    </div>
+
+    <aside class="docside">
+        <div class="card sum">
+            <h3 class="sec">Balance</h3>
+            <div class="srow"><span>Debits</span><b id="tdr">0.00</b></div>
+            <div class="srow"><span>Credits</span><b id="tcr">0.00</b></div>
+            <div class="srow total"><span id="diff" style="font-weight:600;font-size:14px"></span></div>
+            <div class="stack">
+                <button type="submit">{{ $editing ? 'Save changes' : 'Save' }}</button>
+                @unless ($editing)<button type="submit" name="save_and_new" value="1" class="ghost">Save &amp; new</button>@endunless
+                <a class="btn ghost" href="{{ $editing ? route('entries.show', [$type->label, $entry->id]) : route('entries.index') }}">Cancel</a>
+            </div>
+        </div>
+    </aside>
 </form>
 
 <script>

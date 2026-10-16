@@ -7,19 +7,22 @@
     $advanced = $filter['account'] || $filter['tag'] || $filter['min'] !== '' || $filter['max'] !== '' || $filter['all'];
 @endphp
 <div class="bar">
-    <h1 style="margin:0">Journal Entries</h1>
+    <div><h1>Journal Entries</h1><div class="muted">Every movement of money in the books, newest first</div></div>
     <div class="actions">
         <a class="btn ghost" href="{{ route('entries.simple', 'in') }}">Money In</a>
         <a class="btn ghost" href="{{ route('entries.simple', 'out') }}">Money Out</a>
         <a class="btn ghost" href="{{ route('entries.transfer') }}">Transfer</a>
-        <a class="btn" href="{{ route('entries.create', 'journal') }}">+ Journal</a>
-        @foreach ($quickTypes as $qt)
-            @if ($qt->label !== 'journal')<a class="btn ghost" href="{{ route('entries.create', $qt->label) }}">+ {{ $qt->name }}</a>@endif
-        @endforeach
+        <a class="btn" href="{{ route('entries.create', 'journal') }}">{{ \App\Support\Icon::svg('plus', 16) }}Journal</a>
+        @if (collect($quickTypes)->contains(fn ($qt) => $qt->label !== 'journal'))
+        <details class="menu">
+            <summary>More types <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="drop">@foreach ($quickTypes as $qt)@if ($qt->label !== 'journal')<a href="{{ route('entries.create', $qt->label) }}">{{ $qt->name }}</a>@endif @endforeach</div>
+        </details>
+        @endif
     </div>
 </div>
 
-<form method="GET" class="card" style="margin-bottom:16px">
+<form method="GET" class="card" style="margin-bottom:16px;padding:16px 20px">
     <div class="row2" style="grid-template-columns:2fr 1fr 1fr 1fr">
         <div><label for="q" style="margin-top:0">Search</label><input id="q" name="q" value="{{ $filter['q'] }}" placeholder="Account, description, notes or number"></div>
         <div><label for="type" style="margin-top:0">Type</label>
