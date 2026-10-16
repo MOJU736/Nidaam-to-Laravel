@@ -3,25 +3,40 @@
 @section('content')
 @php use App\Support\Money; use App\Services\Sales\Allocations; $label = Allocations::docLabel('', $p->number); @endphp
 @include('purchases._tabs')
+<a class="back" href="{{ route('vendor-payments.index') }}">&larr; Payments</a>
 <div class="bar">
-    <div><h1 style="margin:0">Payment {{ $label }} <span class="pill {{ $p->status === 'void' ? 'overdue' : '' }}">{{ $p->status === 'void' ? 'Void' : 'Paid' }}</span></h1><a class="muted" href="{{ route('vendor-payments.index') }}">&larr; Payments</a></div>
+    <div class="titlerow"><h1>Payment {{ $label }}</h1><span class="pill {{ $p->status === 'void' ? 'overdue' : '' }}">{{ $p->status === 'void' ? 'Void' : 'Paid' }}</span></div>
     <div class="actions">
         @include('documents._actions', ['type' => 'remittance', 'id' => $p->id])
-        @if ($p->status === 'paid')
-            <a class="btn ghost" href="{{ route('vendor-payments.edit', $p->id) }}">Edit</a>
-            <form class="inline" method="POST" action="{{ route('vendor-payments.void', $p->id) }}" onsubmit="return confirm('Void this payment? Its journal entry is reversed and the bills it paid become unpaid again.')">@csrf<button class="danger">Void</button></form>
-        @else
-            <form class="inline" method="POST" action="{{ route('vendor-payments.destroy', $p->id) }}" onsubmit="return confirm('Delete this voided payment for good?')">@csrf @method('DELETE')<button class="danger">Delete</button></form>
-        @endif
+        <details class="menu">
+            <summary>More <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="drop">
+                @if ($p->status === 'paid')
+                    <a href="{{ route('vendor-payments.edit', $p->id) }}">Edit</a><hr>
+                    <form method="POST" action="{{ route('vendor-payments.void', $p->id) }}" onsubmit="return confirm('Void this payment? Its journal entry is reversed and the bills it paid become unpaid again.')">@csrf<button class="danger">Void payment</button></form>
+                @else
+                    <form method="POST" action="{{ route('vendor-payments.destroy', $p->id) }}" onsubmit="return confirm('Delete this voided payment for good?')">@csrf @method('DELETE')<button class="danger">Delete payment</button></form>
+                @endif
+            </div>
+        </details>
     </div>
 </div>
-<div class="card" style="margin-bottom:16px"><dl class="kv">
-    <dt>Vendor</dt><dd><a href="{{ route('vendors.show', $p->vendor_id) }}">{{ $p->vendor_name }}</a></dd><dt>Date</dt><dd>{{ Money::date($p->date) }}</dd><dt>Amount</dt><dd><strong>{{ Money::format($p->amount) }}</strong></dd>
-    <dt>Paid from</dt><dd>{{ $p->ledger_name }}</dd>
-    @if ($p->posted_ledger_name)<dt>Posted to</dt><dd>{{ $p->posted_ledger_name }} <span class="muted">(the vendor's default expense account, not Accounts Payable - so it can't pay a bill)</span></dd>@endif
-    @if ($p->method)<dt>Method</dt><dd>{{ $p->method }}</dd>@endif @if ($p->reference)<dt>Reference</dt><dd>{{ $p->reference }}</dd>@endif @if ($p->notes)<dt>Notes</dt><dd>{{ $p->notes }}</dd>@endif
-    @if ($p->status === 'paid')<dt>Applied to bills</dt><dd>{{ Money::format($appliedTotal) }}</dd><dt>Unapplied</dt><dd><strong>{{ Money::format($unapplied) }}</strong> <span class="muted">a prepayment to the vendor</span></dd>@endif
-</dl></div>
+<div class="docgrid">
+    <div class="card docmeta">
+        <div class="wide2"><small>Paid to</small><div class="who"><a href="{{ route('vendors.show', $p->vendor_id) }}">{{ $p->vendor_name }}</a></div></div>
+        <div><small>Date</small>{{ Money::date($p->date) }}</div>
+        <div><small>Paid from</small>{{ $p->ledger_name }}</div>
+        @if ($p->method)<div><small>Method</small>{{ $p->method }}</div>@endif
+        @if ($p->reference)<div><small>Reference</small>{{ $p->reference }}</div>@endif
+        @if ($p->posted_ledger_name)<div class="wide2"><small>Posted to</small>{{ $p->posted_ledger_name }} <span class="muted">(the vendor's default expense account, not Accounts Payable - so it can't pay a bill)</span></div>@endif
+        @if ($p->notes)<div class="wide2"><small>Notes</small>{{ $p->notes }}</div>@endif
+    </div>
+    <div class="card balance {{ $p->status === 'void' ? 'void' : '' }}">
+        <small>{{ $p->status === 'void' ? 'Voided payment' : 'Amount paid' }}</small>
+        <div class="big">{{ Money::format($p->amount) }}</div>
+        @if ($p->status === 'paid')<dl><dt>Applied to bills</dt><dd>{{ Money::format($appliedTotal) }}</dd><dt>Prepayment left</dt><dd>{{ Money::format($unapplied) }}</dd></dl>@endif
+    </div>
+</div>
 @if ($apps)
     <h2>Applied to</h2>
     <div class="card tbl"><table><thead><tr><th>Bill</th><th>Date</th><th class="num">Bill total</th><th class="num">Applied</th><th></th></tr></thead><tbody>

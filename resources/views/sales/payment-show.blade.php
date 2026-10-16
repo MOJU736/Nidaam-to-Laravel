@@ -3,30 +3,41 @@
 @section('content')
 @php use App\Support\Money; use App\Services\Sales\Allocations; $label = Allocations::docLabel('', $p->number); @endphp
 @include('sales._tabs')
+<a class="back" href="{{ route('payments.index') }}">&larr; Payments</a>
 <div class="bar">
-    <div><h1 style="margin:0">Payment {{ $label }} <span class="pill {{ $p->status === 'void' ? 'overdue' : '' }}">{{ $p->status === 'void' ? 'Void' : 'Received' }}</span></h1><a class="muted" href="{{ route('payments.index') }}">&larr; Payments</a></div>
+    <div class="titlerow"><h1>Payment {{ $label }}</h1><span class="pill {{ $p->status === 'void' ? 'overdue' : '' }}">{{ $p->status === 'void' ? 'Void' : 'Received' }}</span></div>
     <div class="actions">
         @include('documents._actions', ['type' => 'receipt', 'id' => $p->id])
-        @if ($p->status === 'received')
-            <a class="btn ghost" href="{{ route('payments.edit', $p->id) }}">Edit</a>
-            <form class="inline" method="POST" action="{{ route('payments.void', $p->id) }}" onsubmit="return confirm('Void this payment? Its journal entry is reversed and the invoices it paid become unpaid again.')">@csrf<button class="danger">Void</button></form>
-        @else
-            <form class="inline" method="POST" action="{{ route('payments.destroy', $p->id) }}" onsubmit="return confirm('Delete this voided payment for good?')">@csrf @method('DELETE')<button class="danger">Delete</button></form>
-        @endif
+        <details class="menu">
+            <summary>More <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="drop">
+                @if ($p->status === 'received')
+                    <a href="{{ route('payments.edit', $p->id) }}">Edit</a><hr>
+                    <form method="POST" action="{{ route('payments.void', $p->id) }}" onsubmit="return confirm('Void this payment? Its journal entry is reversed and the invoices it paid become unpaid again.')">@csrf<button class="danger">Void payment</button></form>
+                @else
+                    <form method="POST" action="{{ route('payments.destroy', $p->id) }}" onsubmit="return confirm('Delete this voided payment for good?')">@csrf @method('DELETE')<button class="danger">Delete payment</button></form>
+                @endif
+            </div>
+        </details>
     </div>
 </div>
 
-<div class="card" style="margin-bottom:16px"><dl class="kv">
-    <dt>Customer</dt><dd><a href="{{ route('customers.show', $p->customer_id) }}">{{ $p->customer_name }}</a></dd>
-    <dt>Date</dt><dd>{{ Money::date($p->date) }}</dd>
-    <dt>Amount</dt><dd><strong>{{ Money::format($p->amount) }}</strong></dd>
-    <dt>Deposited to</dt><dd>{{ $p->ledger_name }}</dd>
-    @if (Money::positive($p->wht_amount ?? 0))<dt>Tax withheld</dt><dd>{{ Money::format($p->wht_amount) }} ({{ rtrim(rtrim((string) $p->wht_rate, '0'), '.') }}%) → {{ $p->wht_ledger_name }}; {{ Money::format(Money::sub($p->amount, $p->wht_amount)) }} reached the bank</dd>@endif
-    @if ($p->method)<dt>Method</dt><dd>{{ $p->method }}</dd>@endif
-    @if ($p->reference)<dt>Reference</dt><dd>{{ $p->reference }}</dd>@endif
-    @if ($p->notes)<dt>Notes</dt><dd>{{ $p->notes }}</dd>@endif
-    @if ($p->status === 'received')<dt>Applied to invoices</dt><dd>{{ Money::format($appliedTotal) }}</dd><dt>Unapplied</dt><dd><strong>{{ Money::format($unapplied) }}</strong> <span class="muted">kept as the customer's credit</span></dd>@endif
-</dl></div>
+<div class="docgrid">
+    <div class="card docmeta">
+        <div class="wide2"><small>Received from</small><div class="who"><a href="{{ route('customers.show', $p->customer_id) }}">{{ $p->customer_name }}</a></div></div>
+        <div><small>Date</small>{{ Money::date($p->date) }}</div>
+        <div><small>Deposited to</small>{{ $p->ledger_name }}</div>
+        @if ($p->method)<div><small>Method</small>{{ $p->method }}</div>@endif
+        @if ($p->reference)<div><small>Reference</small>{{ $p->reference }}</div>@endif
+        @if (Money::positive($p->wht_amount ?? 0))<div class="wide2"><small>Tax withheld</small>{{ Money::format($p->wht_amount) }} ({{ rtrim(rtrim((string) $p->wht_rate, '0'), '.') }}%) → {{ $p->wht_ledger_name }}; {{ Money::format(Money::sub($p->amount, $p->wht_amount)) }} reached the bank</div>@endif
+        @if ($p->notes)<div class="wide2"><small>Notes</small>{{ $p->notes }}</div>@endif
+    </div>
+    <div class="card balance {{ $p->status === 'void' ? 'void' : 'settled' }}">
+        <small>{{ $p->status === 'void' ? 'Voided payment' : 'Amount received' }}</small>
+        <div class="big">{{ Money::format($p->amount) }}</div>
+        @if ($p->status === 'received')<dl><dt>Applied to invoices</dt><dd>{{ Money::format($appliedTotal) }}</dd><dt>Kept as credit</dt><dd>{{ Money::format($unapplied) }}</dd></dl>@endif
+    </div>
+</div>
 
 @if ($apps)
     <h2>Applied to</h2>

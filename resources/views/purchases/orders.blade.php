@@ -3,7 +3,7 @@
 @section('content')
 @php use App\Support\Money; @endphp
 @include('purchases._tabs')
-<div class="bar"><h1 style="margin:0">Purchase orders</h1><a class="btn" href="{{ route('purchase-orders.create') }}">+ New purchase order</a></div>
+<div class="bar"><div><h1>Purchase orders</h1><div class="muted">What you have ordered from vendors</div></div><a class="btn" href="{{ route('purchase-orders.create') }}">{{ \App\Support\Icon::svg('plus', 16) }}New purchase order</a></div>
 <div class="card tbl"><table>
     <thead><tr><th>No.</th><th>Vendor</th><th>Date</th><th>Status</th><th class="num">Total</th></tr></thead>
     <tbody>

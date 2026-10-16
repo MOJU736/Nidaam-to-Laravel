@@ -8,7 +8,8 @@
 @section('title', $editing ? 'Edit payment' : 'Receive payment')
 @section('content')
 @include('sales._tabs')
-<div class="bar"><h1 style="margin:0">{{ $editing ? 'Edit payment '.\App\Services\Sales\Allocations::docLabel('', $payment->number) : 'Receive payment' }}</h1><a class="muted" href="{{ $editing ? route('payments.show', $payment->id) : route('payments.index') }}">&larr; Back</a></div>
+<a class="back" href="{{ $editing ? route('payments.show', $payment->id) : route('payments.index') }}">&larr; {{ $editing ? 'Back to the payment' : 'Payments' }}</a>
+<div class="bar"><h1>{{ $editing ? 'Edit payment '.\App\Services\Sales\Allocations::docLabel('', $payment->number) : 'Receive payment' }}</h1></div>
 
 <form class="card" method="POST" action="{{ $editing ? route('payments.update', $payment->id) : route('payments.store') }}" style="max-width:860px">
     @csrf
