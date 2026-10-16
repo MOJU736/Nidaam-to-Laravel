@@ -1,5 +1,10 @@
 {{-- Cycle bar, "to do in MTN" notes and the "cycle ended" warning. Included by the pages. --}}
 @unless ($exporting)
+    <nav class="subnav" aria-label="Data Sharing sections">
+        @foreach ([['datasharing.index', 'Today'], ['datasharing.sims', 'SIM board'], ['datasharing.clients', 'Clients'], ['datasharing.money-in', 'Money In'], ['datasharing.money', 'Money Out'], ['datasharing.profit', 'Profit'], ['datasharing.reports', 'Reports'], ['datasharing.plans', 'Plans']] as [$r, $label])
+            @if (\Illuminate\Support\Facades\Route::has($r) && auth()->user()->can('page', $r))<a class="{{ request()->routeIs($r) ? 'on' : '' }}" href="{{ route($r) }}">{{ $label }}</a>@endif
+        @endforeach
+    </nav>
     @php
         $dsDay = $ds->dayOfCycle($cyc);
         $dsLen = $ds->cycleDays($cyc);
