@@ -2,8 +2,9 @@
 @section('title', $u ? 'Edit user' : 'New user')
 @section('content')
 @include('admin._tabs')
-<div class="bar"><h1 style="margin:0">{{ $u ? 'Edit '.$u->username : 'New user' }}</h1><a class="muted" href="{{ route('admin.users') }}">&larr; Users</a></div>
-<form class="card" method="POST" action="{{ $u ? route('admin.users.update', $u->id) : route('admin.users.store') }}" style="max-width:760px" autocomplete="off">
+<a class="back" href="{{ route('admin.users') }}">&larr; Users</a>
+<div class="bar"><h1>{{ $u ? 'Edit '.$u->username : 'New user' }}</h1></div>
+<form class="card" method="POST" action="{{ $u ? route('admin.users.update', $u->id) : route('admin.users.store') }}" style="max-width:820px" autocomplete="off">
     @csrf
     @if ($u) @method('PUT') @endif
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach

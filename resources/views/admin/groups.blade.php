@@ -2,8 +2,7 @@
 @section('title', 'Groups')
 @section('content')
 @include('admin._tabs')
-<div class="bar"><h1 style="margin:0">Groups &amp; permissions</h1><a class="btn" href="{{ route('admin.groups.create') }}">+ New group</a></div>
-<p class="muted" style="margin-top:0">A group is a role. Everyone in a group can do what the group is allowed to; a person belongs to one group.</p>
+<div class="bar"><div><h1>Groups &amp; permissions</h1><div class="muted">A group is a role. Everyone in a group can do what the group is allowed to; a person belongs to one group.</div></div><a class="btn" href="{{ route('admin.groups.create') }}">{{ \App\Support\Icon::svg('plus', 16) }}New group</a></div>
 <div class="card tbl"><table>
     <thead><tr><th>Group</th><th>Description</th><th class="num">People</th><th class="num">Things allowed</th><th></th></tr></thead>
     <tbody>

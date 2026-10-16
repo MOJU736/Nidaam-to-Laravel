@@ -2,12 +2,12 @@
 @section('title', 'Login history')
 @section('content')
 @include('admin._tabs')
-<div class="bar"><h1 style="margin:0">Login history{{ $user ? ' · '.$user->username : '' }}</h1>
+<div class="bar"><div><h1>Login history{{ $user ? ' · '.$user->username : '' }}</h1><div class="muted">Every sign-in, sign-out and wrong password, newest first (the latest 200).</div></div>
     <form method="GET" class="actions" style="align-items:center">
         <select name="user" onchange="this.form.submit()" style="width:auto"><option value="">Everyone</option>@foreach ($users as $u)<option value="{{ $u->id }}" @selected($user && $user->id === $u->id)>{{ $u->username }}</option>@endforeach</select>
         <select name="event" onchange="this.form.submit()" style="width:auto"><option value="">All events</option>@foreach (['signin' => 'Sign-ins', 'logout' => 'Sign-outs', 'failed' => 'Wrong passwords', 'locked' => 'Locked out', 'reset_request' => 'Reset requests', 'reset_done' => 'Passwords chosen'] as $k => $l)<option value="{{ $k }}" @selected($event === $k)>{{ $l }}</option>@endforeach</select>
     </form></div>
-<p class="muted" style="margin-top:0">Every sign-in, sign-out and wrong password, newest first (the latest 200). A person is signed out automatically after 30 minutes without activity, and when they sign in on another device.</p>
+<p class="muted" style="margin-top:0;font-size:13.5px">A person is signed out automatically after 30 minutes without activity, and when they sign in on another device.</p>
 <div class="card tbl"><table>
     <thead><tr><th>When</th><th>Who</th><th>What</th><th>Device</th><th>IP address</th><th>Ended</th></tr></thead>
     <tbody>
