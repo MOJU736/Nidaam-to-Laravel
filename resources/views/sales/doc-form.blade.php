@@ -1,4 +1,4 @@
-@extends('layouts.main')
+﻿@extends('layouts.main')
 @php
     use App\Support\Money;
     $isInv = $kind === 'invoice';
@@ -14,96 +14,111 @@
 @section('title', ($editing ? 'Edit ' : 'New ').$word)
 @section('content')
 @include('sales._tabs')
-<div class="bar"><h1 style="margin:0">{{ $editing ? 'Edit '.$word.' '.$sales->label($kind, $doc->number) : 'New '.$word }}</h1><a class="muted" href="{{ route($isInv ? 'invoices.index' : 'quotations.index') }}">&larr; Back</a></div>
+<a class="back" href="{{ route($isInv ? 'invoices.index' : 'quotations.index') }}">&larr; {{ $isInv ? 'Invoices' : 'Quotations' }}</a>
+<div class="bar"><h1>{{ $editing ? 'Edit '.$word.' '.$sales->label($kind, $doc->number) : 'New '.$word }}</h1></div>
 
-<form class="card" method="POST" action="{{ $action }}" id="docForm">
+<form class="docform" method="POST" action="{{ $action }}" id="docForm">
     @csrf
     @if ($editing) @method('PUT') @endif
-    @foreach (['number', 'date', 'customer_id', 'project_id'] as $k)@if ($errors->has($k))<p class="error">{{ $errors->first($k) }}</p>@endif @endforeach
+    <div class="docmain">
+    @foreach (['number', 'date', 'customer_id', 'project_id'] as $k)@if ($errors->has($k))<div class="flash bad">{{ $errors->first($k) }}</div>@endif @endforeach
 
-    <div class="row2" style="grid-template-columns:2fr 1fr 1fr 1fr">
-        <div><label for="customer_id" style="margin-top:0">Customer *</label>
-            <select id="customer_id" name="customer_id" required><option value="">Choose a customer...</option>@foreach ($customers as $c)<option value="{{ $c->id }}" @selected((string) old('customer_id', $selectedCustomer) === (string) $c->id)>{{ $c->name }}</option>@endforeach</select></div>
-        <div><label for="number" style="margin-top:0">{{ $word }} no. *</label><input id="number" name="number" inputmode="numeric" required value="{{ $d('number', $nextNumber) }}"></div>
-        <div><label for="date" style="margin-top:0">Date *</label><input id="date" type="date" name="date" required value="{{ old('date', isset($doc->date) ? substr($doc->date, 0, 10) : now()->format('Y-m-d')) }}"></div>
-        <div>
-            @if ($isInv)<label for="due_date" style="margin-top:0">Due date</label><input id="due_date" type="date" name="due_date" value="{{ old('due_date', isset($doc->due_date) ? substr((string) $doc->due_date, 0, 10) : '') }}">
-            @else<label for="expiry_date" style="margin-top:0">Valid until</label><input id="expiry_date" type="date" name="expiry_date" value="{{ old('expiry_date', isset($doc->expiry_date) ? substr((string) $doc->expiry_date, 0, 10) : '') }}">@endif
+    <div class="card">
+        <h3 class="sec">Who and when</h3>
+        <div class="fgrid">
+            <div class="span2"><label for="customer_id">Customer *</label>
+                <select id="customer_id" name="customer_id" required><option value="">Choose a customer...</option>@foreach ($customers as $c)<option value="{{ $c->id }}" @selected((string) old('customer_id', $selectedCustomer) === (string) $c->id)>{{ $c->name }}</option>@endforeach</select></div>
+            <div><label for="number">{{ $word }} no. *</label><input id="number" name="number" inputmode="numeric" required value="{{ $d('number', $nextNumber) }}"></div>
+            <div><label for="date">Date *</label><input id="date" type="date" name="date" required value="{{ old('date', isset($doc->date) ? substr($doc->date, 0, 10) : now()->format('Y-m-d')) }}"></div>
+            <div>
+                @if ($isInv)<label for="due_date">Due date</label><input id="due_date" type="date" name="due_date" value="{{ old('due_date', isset($doc->due_date) ? substr((string) $doc->due_date, 0, 10) : '') }}">
+                @else<label for="expiry_date">Valid until</label><input id="expiry_date" type="date" name="expiry_date" value="{{ old('expiry_date', isset($doc->expiry_date) ? substr((string) $doc->expiry_date, 0, 10) : '') }}">@endif
+            </div>
+            @if ($isInv && $projectOptions)
+                <div class="span2"><label for="project_id">Project <span class="muted" style="font-weight:400">(optional, counts as billed to the project)</span></label>
+                    <select id="project_id" name="project_id"><option value="" data-customer="">None</option>@foreach ($projectOptions as $po)<option value="{{ $po['id'] }}" data-customer="{{ $po['customer_id'] }}" @selected((string) old('project_id', $selectedProject) === (string) $po['id'])>{{ $po['label'] }}</option>@endforeach</select></div>
+            @endif
         </div>
-    </div>
-
-    @if ($isInv && $projectOptions)
-        <div style="margin-top:12px;max-width:420px"><label for="project_id" style="margin-top:0">Project <span class="muted" style="font-weight:400">(optional - counts as billed to the project)</span></label>
-            <select id="project_id" name="project_id"><option value="" data-customer="">None</option>@foreach ($projectOptions as $po)<option value="{{ $po['id'] }}" data-customer="{{ $po['customer_id'] }}" @selected((string) old('project_id', $selectedProject) === (string) $po['id'])>{{ $po['label'] }}</option>@endforeach</select></div>
-        <script>
-        (function () {
-            var cust = document.getElementById('customer_id'), sel = document.getElementById('project_id');
-            function filter() { Array.prototype.forEach.call(sel.options, function (o) { var ok = o.value === '' || o.getAttribute('data-customer') === cust.value; o.hidden = !ok; o.disabled = !ok; if (!ok && o.selected) { sel.value = ''; } }); }
-            cust.addEventListener('change', filter); filter();
-        })();
-        </script>
-    @endif
-    @if ($vehiclesOn)
-        <div id="vehicleBox" style="margin-top:12px" hidden>
-            <label style="margin-top:0">Vehicles <span class="muted" style="font-weight:400">(optional - prices follow the vehicle model)</span></label>
-            <div id="vehicleList" class="actions"></div>
-        </div>
-    @endif
-
-    <div class="tbl" style="margin-top:16px">
-    <table id="lines">
-        <thead><tr><th style="min-width:200px">Item *</th><th style="min-width:160px">Description</th><th class="num" style="width:90px">Qty</th><th class="num" style="width:120px">Unit price</th><th style="width:150px">Discount</th><th class="num" style="width:110px">Amount</th><th></th></tr></thead>
-        <tbody>
-        @foreach ($lines as $i => $l)
-            @php $l = array_merge(['item_id' => '', 'description' => '', 'qty' => '1', 'unit_price' => '', 'discount_type' => '', 'discount_value' => ''], (array) $l); @endphp
-            <tr class="line">
-                <td><select name="lines[{{ $i }}][item_id]" class="it"><option value="">Choose an item...</option>@foreach ($catalog as $id => $c)<option value="{{ $id }}" @selected((string) $l['item_id'] === (string) $id)>{{ $c['name'] }}</option>@endforeach</select><div class="muted stk" style="font-size:12px"></div></td>
-                <td><input name="lines[{{ $i }}][description]" class="ds" value="{{ $l['description'] }}" maxlength="255"></td>
-                <td><input name="lines[{{ $i }}][qty]" class="qty num" inputmode="decimal" value="{{ $l['qty'] }}"></td>
-                <td><input name="lines[{{ $i }}][unit_price]" class="up num" inputmode="decimal" value="{{ $l['unit_price'] }}"></td>
-                <td><div class="actions" style="flex-wrap:nowrap"><select name="lines[{{ $i }}][discount_type]" class="dt" style="width:62px"><option value="">—</option><option value="percent" @selected($l['discount_type'] === 'percent')>%</option><option value="amount" @selected($l['discount_type'] === 'amount')>$</option></select>
-                    <input name="lines[{{ $i }}][discount_value]" class="dv num" inputmode="decimal" value="{{ $l['discount_value'] }}" style="width:80px"></div></td>
-                <td class="num amt">0.00</td>
-                <td><button type="button" class="ghost sm rm" title="Remove line">&times;</button></td>
-            </tr>
-        @endforeach
-        </tbody>
-        <tfoot>
-            <tr><td colspan="7"><button type="button" class="ghost sm" id="add">+ Add line</button></td></tr>
-            <tr><td colspan="5" class="num">Subtotal (after line discounts)</td><td class="num" id="tsub">0.00</td><td></td></tr>
-            <tr><td colspan="4" class="num" style="vertical-align:middle">Discount on the whole {{ strtolower($word) }}</td>
-                <td><div class="actions" style="flex-wrap:nowrap"><select name="doc_discount_type" id="ddt" style="width:62px"><option value="">—</option><option value="percent" @selected($d('discount_type') === 'percent')>%</option><option value="amount" @selected($d('discount_type') === 'amount')>$</option></select>
-                    <input name="doc_discount_value" id="ddv" class="num" inputmode="decimal" style="width:80px" value="{{ old('doc_discount_value', $doc->discount_value ?? '') }}"></div></td>
-                <td class="num" id="tdisc">0.00</td><td></td></tr>
-            <tr><td colspan="4" class="num" style="vertical-align:middle">Tax</td>
-                <td><div class="actions" style="flex-wrap:nowrap"><input name="tax_percent" id="tp" class="num" inputmode="decimal" placeholder="%" style="width:70px" value="{{ old('tax_percent', isset($doc->tax_percent) ? rtrim(rtrim((string) $doc->tax_percent, '0'), '.') : '') }}">
-                    @include('settings._tax-picker', ['side' => 'ar', 'isNew' => ! $editing])
-                    <input name="tax_total" id="tt" class="num" inputmode="decimal" placeholder="or amount" style="width:100px" value="{{ old('tax_total', $doc->tax_total ?? '') }}"></div></td>
-                <td class="num" id="ttax">0.00</td><td></td></tr>
-            <tr><td colspan="5" class="num"><strong>Total</strong></td><td class="num"><strong id="ttot">0.00</strong></td><td></td></tr>
-        </tfoot>
-    </table>
-    </div>
-
-    <label for="notes">Notes</label><textarea id="notes" name="notes" rows="2" maxlength="500">{{ $d('notes') }}</textarea>
-
-    @if (! empty($customFields))
-        <div class="row2" style="margin-top:8px">
-            @foreach ($customFields as $i => [$cfLabel])
-                <div><label for="cf{{ $i }}_value">{{ $cfLabel }}</label><input id="cf{{ $i }}_value" name="cf{{ $i }}_value" maxlength="255" value="{{ $d("cf{$i}_value") }}"></div>
-            @endforeach
-        </div>
-    @endif
-
-    <div class="actions" style="margin-top:20px">
-        @if ($isInv)
-            <button type="submit" name="then" value="issue">{{ $editing ? 'Save & issue' : 'Save & issue' }}</button>
-            <button type="submit" class="ghost">Save as draft</button>
-        @else
-            <button type="submit">Save quotation</button>
+        @if ($isInv && $projectOptions)
+            <script>
+            (function () {
+                var cust = document.getElementById('customer_id'), sel = document.getElementById('project_id');
+                function filter() { Array.prototype.forEach.call(sel.options, function (o) { var ok = o.value === '' || o.getAttribute('data-customer') === cust.value; o.hidden = !ok; o.disabled = !ok; if (!ok && o.selected) { sel.value = ''; } }); }
+                cust.addEventListener('change', filter); filter();
+            })();
+            </script>
         @endif
-        <a class="btn ghost" href="{{ route($isInv ? 'invoices.index' : 'quotations.index') }}">Cancel</a>
+        @if ($vehiclesOn)
+            <div id="vehicleBox" style="margin-top:14px" hidden>
+                <label style="margin-top:0">Vehicles <span class="muted" style="font-weight:400">(optional, prices follow the vehicle model)</span></label>
+                <div id="vehicleList" class="actions"></div>
+            </div>
+        @endif
     </div>
+
+    <div class="card">
+        <h3 class="sec">What you are selling</h3>
+        <div class="tbl">
+        <table id="lines" class="lines">
+            <thead><tr><th style="min-width:150px">Item *</th><th style="min-width:110px">Description</th><th class="num" style="width:64px">Qty</th><th class="num" style="width:96px">Unit price</th><th style="width:132px">Discount</th><th class="num" style="width:84px">Amount</th><th style="width:34px"></th></tr></thead>
+            <tbody>
+            @foreach ($lines as $i => $l)
+                @php $l = array_merge(['item_id' => '', 'description' => '', 'qty' => '1', 'unit_price' => '', 'discount_type' => '', 'discount_value' => ''], (array) $l); @endphp
+                <tr class="line">
+                    <td><select name="lines[{{ $i }}][item_id]" class="it"><option value="">Choose an item...</option>@foreach ($catalog as $id => $c)<option value="{{ $id }}" @selected((string) $l['item_id'] === (string) $id)>{{ $c['name'] }}</option>@endforeach</select><div class="muted stk" style="font-size:12px"></div></td>
+                    <td><input name="lines[{{ $i }}][description]" class="ds" value="{{ $l['description'] }}" maxlength="255"></td>
+                    <td><input name="lines[{{ $i }}][qty]" class="qty num" inputmode="decimal" value="{{ $l['qty'] }}"></td>
+                    <td><input name="lines[{{ $i }}][unit_price]" class="up num" inputmode="decimal" value="{{ $l['unit_price'] }}"></td>
+                    <td><div class="actions" style="flex-wrap:nowrap"><select name="lines[{{ $i }}][discount_type]" class="dt" style="width:58px;padding-left:8px;padding-right:4px"><option value="">—</option><option value="percent" @selected($l['discount_type'] === 'percent')>%</option><option value="amount" @selected($l['discount_type'] === 'amount')>$</option></select>
+                        <input name="lines[{{ $i }}][discount_value]" class="dv num" inputmode="decimal" value="{{ $l['discount_value'] }}" style="width:66px"></div></td>
+                    <td class="num amt">0.00</td>
+                    <td><button type="button" class="ghost sm rm" title="Remove line">&times;</button></td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+        </div>
+        <button type="button" class="ghost sm" id="add" style="margin-top:12px">+ Add line</button>
+    </div>
+
+    <div class="card">
+        <h3 class="sec">Notes</h3>
+        <label for="notes" class="sr">Notes</label><textarea id="notes" name="notes" rows="3" maxlength="500" placeholder="Shown on the {{ strtolower($word) }}">{{ $d('notes') }}</textarea>
+        @if (! empty($customFields))
+            <div class="fgrid" style="margin-top:6px">
+                @foreach ($customFields as $i => [$cfLabel])
+                    <div><label for="cf{{ $i }}_value">{{ $cfLabel }}</label><input id="cf{{ $i }}_value" name="cf{{ $i }}_value" maxlength="255" value="{{ $d("cf{$i}_value") }}"></div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+    </div>
+
+    <aside class="docside">
+        <div class="card sum">
+            <h3 class="sec">Summary</h3>
+            <div class="srow"><span>Subtotal</span><b id="tsub">0.00</b></div>
+            <div class="srow ctl"><span>Discount</span>
+                <div class="actions" style="flex-wrap:nowrap"><select name="doc_discount_type" id="ddt" style="width:62px"><option value="">—</option><option value="percent" @selected($d('discount_type') === 'percent')>%</option><option value="amount" @selected($d('discount_type') === 'amount')>$</option></select>
+                    <input name="doc_discount_value" id="ddv" class="num" inputmode="decimal" style="width:84px" value="{{ old('doc_discount_value', $doc->discount_value ?? '') }}"></div>
+                <b id="tdisc">0.00</b></div>
+            <div class="srow ctl"><span>Tax</span>
+                <div class="actions" style="flex-wrap:nowrap"><input name="tax_percent" id="tp" class="num" inputmode="decimal" placeholder="%" style="width:66px" value="{{ old('tax_percent', isset($doc->tax_percent) ? rtrim(rtrim((string) $doc->tax_percent, '0'), '.') : '') }}">
+                    @include('settings._tax-picker', ['side' => 'ar', 'isNew' => ! $editing])
+                    <input name="tax_total" id="tt" class="num" inputmode="decimal" placeholder="or amount" style="width:96px" value="{{ old('tax_total', $doc->tax_total ?? '') }}"></div>
+                <b id="ttax">0.00</b></div>
+            <div class="srow total"><span>Total</span><b id="ttot">0.00</b></div>
+            <div class="stack">
+                @if ($isInv)
+                    <button type="submit" name="then" value="issue">Save &amp; issue</button>
+                    <button type="submit" class="ghost">Save as draft</button>
+                @else
+                    <button type="submit">Save quotation</button>
+                @endif
+                <a class="btn ghost" href="{{ route($isInv ? 'invoices.index' : 'quotations.index') }}">Cancel</a>
+            </div>
+        </div>
+    </aside>
 </form>
 
 <script>
@@ -170,3 +185,4 @@
 })();
 </script>
 @endsection
+
