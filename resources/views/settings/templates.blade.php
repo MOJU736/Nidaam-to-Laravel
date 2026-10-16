@@ -38,7 +38,7 @@
             @endforeach
         </div>
         <div class="fgrid" style="margin-top:6px">
-            <div><label for="look_font">Font</label><select id="look_font" name="look[font]">@foreach ($fonts as $k => [$label])<option value="{{ $k }}" @selected($v('font', 'sans') === $k)>{{ $label }}</option>@endforeach</select></div>
+            <div><label for="look_font">Font</label><select id="look_font" name="look[font]">@foreach ($fonts as $k => [$label])<option value="{{ $k }}" @selected($v('font', $designs[$design]['font'] ?? 'sans') === $k)>{{ $label }}</option>@endforeach</select></div>
             <div><label for="look_size">Text size</label><select id="look_size" name="look[size]"><option value="">Normal</option><option value="small" @selected($v('size') === 'small')>Small</option><option value="large" @selected($v('size') === 'large')>Large</option></select></div>
             <div><label for="look_rows">Empty rows to fill</label><input id="look_rows" type="number" min="0" max="8" name="look[rows]" value="{{ $v('rows') }}" placeholder="0"></div>
         </div>

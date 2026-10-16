@@ -39,6 +39,15 @@
     .foot { @if ($preview) margin-top: 28px; @else position: fixed; left: 0; right: 0; bottom: -42px; @endif border-top: 1px solid #dfe3ea; padding-top: 7px; color: #6a7180; font-size: {{ round($fs - 1.5, 1) }}px; }
     .foot td { border: 0; padding: 0; }
     .pg { text-align: right; } .pg:after { content: "Page " counter(page); }
+    @if ($st['layout'] === 'ledger')
+    td { border: 1px solid #555; } .h td { border-color: #222; } .z td { background: #fff; } .top, .top td { border: 0; } .top { border-bottom: 2px solid #222; }
+    @elseif (in_array($st['layout'], ['minimal', 'elegant'], true))
+    .h td { background: none; color: {{ $st['main'] }}; border-bottom: 2px solid {{ $st['main'] }}; } .z td { background: #fff; } .t td { background: none; border-top: 2px solid {{ $st['main'] }}; }
+    @elseif ($st['layout'] === 'card')
+    .h td { background: {{ $st['row'] }}; color: {{ $st['main'] }}; border-bottom: 2px solid {{ $st['main'] }}; } .z td { background: #fff; }
+    @elseif ($st['layout'] === 'bold')
+    .h td { background: {{ $st['main'] }}; color: {{ $onColour($st['main']) }}; } .top { border-bottom: 10px solid {{ $st['main'] }}; } td { font-weight: bold; }
+    @endif
     @if ($preview)
     html { background: #e9e8f3; } body { width: 690px; margin: 0 auto; padding: 36px 36px 40px; background: #fff; min-height: 600px; box-shadow: 0 2px 14px rgba(40, 36, 90, .18); }
     @endif

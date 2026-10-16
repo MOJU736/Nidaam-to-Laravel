@@ -262,11 +262,19 @@ details.sec > summary + * { margin-top: 16px; }
 .mini .b { left: 8px; right: 8px; top: 40px; height: 9px; background: var(--s); opacity: .9; }
 .mini .c { left: 8px; right: 8px; top: 53px; height: 20px; background: var(--r); border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; }
 .mini .d { right: 8px; width: 38%; bottom: 7px; height: 8px; background: var(--m); border-radius: 2px; }
-.mini-line .a { border-bottom: 3px solid var(--s); height: 16px; background: linear-gradient(90deg, var(--m) 0 28%, transparent 28%); background-size: 100% 6px; background-repeat: no-repeat; }
+.mini-classic .a { border-bottom: 3px solid var(--s); height: 16px; background: linear-gradient(90deg, var(--m) 0 28%, transparent 28%) 0 0 / 100% 6px no-repeat; }
+.mini-card .a { height: 12px; border-bottom: 1px solid #ccc; background: linear-gradient(90deg, var(--m) 0 26%, transparent 26%) 0 0 / 100% 6px no-repeat; }
+.mini-card .b { top: 28px; height: 14px; background: none; border: 1px solid #bbb; border-radius: 4px; } .mini-card .c { top: 50px; background: #fff; border-radius: 4px; border: 1px solid #ccc; }
 .mini-band .a { left: 0; right: 0; top: 0; height: 24px; background: var(--m); }
+.mini-ledger .a { height: 20px; background: none; border: 2px solid #222; } .mini-ledger .b { top: 33px; height: 14px; background: none; border: 1px solid #222; } .mini-ledger .c { background: #fff; border: 1px solid #222; }
 .mini-center .a { left: 25%; right: 25%; height: 14px; background: linear-gradient(var(--m), var(--m)) center 0 / 100% 5px no-repeat; border-bottom: 3px solid var(--s); }
+.mini-sidebar .a { left: 0; top: 0; bottom: 0; width: 32%; right: auto; height: auto; background: var(--m); } .mini-sidebar .b { left: 38%; top: 36px; } .mini-sidebar .c { left: 38%; top: 49px; }
 .mini-stripe .a { border-left: 5px solid var(--s); background: linear-gradient(var(--m), var(--m)) 8px 0 / 40% 6px no-repeat; }
-.swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.mini-split .a { left: 0; right: 0; top: 0; height: 24px; background: linear-gradient(90deg, var(--m) 0 58%, var(--s) 58%); }
+.mini-minimal .a { height: 14px; background: linear-gradient(var(--m), var(--m)) 0 0 / 40% 4px no-repeat, linear-gradient(#ccc, #ccc) 100% 0 / 28% 4px no-repeat; } .mini-minimal .b { background: none; border-bottom: 2px solid var(--m); } .mini-minimal .c { background: #fff; border-color: #eee; }
+.mini-elegant .a { left: 20%; right: 20%; height: 22px; background: linear-gradient(var(--m), var(--m)) center 3px / 70% 3px no-repeat; border-top: 3px double var(--s); border-bottom: 3px double var(--s); } .mini-elegant .b { background: none; border-bottom: 1px solid var(--s); } .mini-elegant .c { background: #fff; border-color: var(--m); }
+.mini-bold .a { left: 0; right: 0; top: 0; height: 7px; background: var(--m); } .mini-bold .b { background: var(--m); } .mini-bold .c { top: 53px; }
+.mini-bold:before { content: ''; position: absolute; left: 8px; top: 14px; width: 55%; height: 14px; background: var(--m); opacity: .85; }.swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .swatches input[type=color] { height: 44px; padding: 3px; cursor: pointer; }
 @media (max-width: 560px) { .swatches { grid-template-columns: repeat(2, 1fr); } }
 .fgrid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }

@@ -16,19 +16,19 @@ use Illuminate\Support\Facades\Schema;
  */
 class DocumentStyle
 {
-    /** The 11 designs: name, its own colours, and the page layout it uses (line | band | center | stripe). */
+    /** The 11 designs: name, its own colours, and the page layout it uses (classic, card, band, ledger, center, sidebar, stripe, split, minimal, elegant, bold). */
     public const DESIGNS = [
-        1 => ['name' => 'Classic blue', 'main' => '#1f3f99', 'second' => '#2f5fd0', 'row' => '#f7f9fc', 'layout' => 'line'],
-        2 => ['name' => 'Fresh green', 'main' => '#145a32', 'second' => '#1e8449', 'row' => '#f4faf6', 'layout' => 'line'],
-        3 => ['name' => 'Warm amber', 'main' => '#7e5109', 'second' => '#b9770e', 'row' => '#fbf6ee', 'layout' => 'band'],
-        4 => ['name' => 'Black & white', 'main' => '#111111', 'second' => '#222222', 'row' => '#f5f5f5', 'layout' => 'line'],
-        5 => ['name' => 'Deep teal', 'main' => '#0b5345', 'second' => '#117a65', 'row' => '#f2f9f7', 'layout' => 'center'],
-        6 => ['name' => 'Navy band', 'main' => '#20304f', 'second' => '#33496f', 'row' => '#f4f6fa', 'layout' => 'band'],
+        1 => ['name' => 'Classic blue', 'main' => '#1f3f99', 'second' => '#2f5fd0', 'row' => '#f7f9fc', 'layout' => 'classic'],
+        2 => ['name' => 'Fresh green cards', 'main' => '#145a32', 'second' => '#1e8449', 'row' => '#f4faf6', 'layout' => 'card'],
+        3 => ['name' => 'Warm amber band', 'main' => '#7e5109', 'second' => '#b9770e', 'row' => '#fbf6ee', 'layout' => 'band'],
+        4 => ['name' => 'Black & white ledger', 'main' => '#111111', 'second' => '#222222', 'row' => '#f5f5f5', 'layout' => 'ledger'],
+        5 => ['name' => 'Deep teal centred', 'main' => '#0b5345', 'second' => '#117a65', 'row' => '#f2f9f7', 'layout' => 'center'],
+        6 => ['name' => 'Navy sidebar', 'main' => '#20304f', 'second' => '#33496f', 'row' => '#f4f6fa', 'layout' => 'sidebar'],
         7 => ['name' => 'Navy & orange', 'main' => '#1b3a5c', 'second' => '#f07c1d', 'row' => '#f4f7fb', 'layout' => 'stripe'],
-        8 => ['name' => 'Blue & orange bands', 'main' => '#1f5a85', 'second' => '#eb6c03', 'row' => '#d9e2f3', 'layout' => 'band'],
-        9 => ['name' => 'Modern teal', 'main' => '#0f766e', 'second' => '#14b8a6', 'row' => '#f0fdfa', 'layout' => 'center'],
-        10 => ['name' => 'Charcoal & gold', 'main' => '#26262b', 'second' => '#b08d57', 'row' => '#f8f5ef', 'layout' => 'center'],
-        11 => ['name' => 'Royal blue', 'main' => '#1d4ed8', 'second' => '#1e3a8a', 'row' => '#eff4ff', 'layout' => 'band'],
+        8 => ['name' => 'Blue & orange split', 'main' => '#1f5a85', 'second' => '#eb6c03', 'row' => '#d9e2f3', 'layout' => 'split'],
+        9 => ['name' => 'Modern minimal', 'main' => '#0f766e', 'second' => '#14b8a6', 'row' => '#f0fdfa', 'layout' => 'minimal'],
+        10 => ['name' => 'Charcoal & gold', 'main' => '#26262b', 'second' => '#b08d57', 'row' => '#f8f5ef', 'layout' => 'elegant', 'font' => 'serif'],
+        11 => ['name' => 'Royal bold', 'main' => '#1d4ed8', 'second' => '#1e3a8a', 'row' => '#eff4ff', 'layout' => 'bold'],
     ];
 
     public const FONTS = [
@@ -206,7 +206,7 @@ class DocumentStyle
             $company = (object) ($company ? $company->getAttributes() : []);
             $company->logo = $settings->_logo;
         }
-        $fontKey = $st['font'] ?? 'sans';
+        $fontKey = $st['font'] ?? ($base['font'] ?? 'sans');
         $logoPx = ['s' => 70, 'm' => 105, 'l' => 150][$st['logo_size'] ?? 'm'];
         $blank = fn ($v) => isset($v) && trim((string) $v) !== '' ? trim((string) $v) : null;
 

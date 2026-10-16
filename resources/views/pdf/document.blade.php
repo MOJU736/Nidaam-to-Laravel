@@ -33,38 +33,34 @@
 @endphp
 <!doctype html>
 <html><head><meta charset="utf-8"><title>{{ $title }} {{ $d['number'] ?? '' }}</title>
+@php
+    $lay = $st['layout']; $side = $lay === 'sidebar'; $main = $st['main']; $second = $st['second']; $rowc = $st['row'];
+    $secText = $onColour($second);
+@endphp
 <style>
-    @page { margin: 34px 38px 74px 38px; }
+    @page { margin: 34px 38px 74px {{ $side ? 236 : 38 }}px; }
     body { font-family: {!! $st['font'] !!}; font-size: {{ $fs }}px; color: #232733; line-height: 1.5; margin: 0; }
     table { border-collapse: collapse; width: 100%; }
     .muted { color: #6a7180; } .r { text-align: right; white-space: nowrap; }
     .cap { font-size: {{ round($fs - 2.5, 1) }}px; text-transform: uppercase; letter-spacing: .09em; color: #7a8190; font-weight: bold; margin-bottom: 3px; }
-    .co { font-size: {{ $fs + 4 }}px; font-weight: bold; color: {{ $st['main'] }}; letter-spacing: .01em; }
+    .co { font-size: {{ $fs + 4 }}px; font-weight: bold; color: {{ $main }}; letter-spacing: .01em; }
     .coinfo { color: #5f6676; font-size: {{ round($fs - 1, 1) }}px; line-height: 1.45; margin-top: 2px; }
-    h1.title { font-size: {{ $fs + 13 }}px; letter-spacing: .08em; color: {{ $st['main'] }}; margin: 0; font-weight: bold; }
+    h1.title { font-size: {{ $fs + 13 }}px; letter-spacing: .08em; color: {{ $main }}; margin: 0; font-weight: bold; }
     .num { font-size: {{ $fs + 1 }}px; color: #5f6676; margin-top: 2px; }
     .logo { height: {{ $st['logo_px'] }}px; margin-bottom: 6px; }
     .head td { vertical-align: top; }
-    /* layouts */
-    .band { background: {{ $st['main'] }}; color: {{ $bandText }}; padding: 18px 22px; margin-bottom: 4px; }
-    .band .logo { background: #ffffff; padding: 6px 10px; border-radius: 6px; }
-    .band .co, .band h1.title, .band .num, .band .coinfo { color: {{ $bandText }}; } .band .coinfo, .band .num { opacity: .85; }
-    .center { text-align: center; padding-bottom: 12px; border-bottom: 3px solid {{ $st['second'] }}; }
-    .center h1.title { margin-top: 8px; }
-    .line { padding-bottom: 14px; border-bottom: 3px solid {{ $st['second'] }}; }
-    .stripe { border-left: 9px solid {{ $st['second'] }}; padding: 2px 0 2px 16px; }
     .meta td { padding: 3px 0; vertical-align: top; } .meta td.l { color: #6a7180; padding-right: 14px; white-space: nowrap; } .meta td.v { text-align: right; font-weight: bold; }
-    .panel { background: {{ $st['row'] }}; padding: 10px 16px; border-radius: 6px; }
+    .panel { background: {{ $rowc }}; padding: 10px 16px; border-radius: 6px; }
     .lines { margin-top: 20px; }
     .lines th { background: {{ $st['head'] }}; color: {{ $headText }}; padding: 8px 10px; font-size: {{ round($fs - 2, 1) }}px; text-transform: uppercase; letter-spacing: .06em; text-align: left; border: 1px solid {{ $st['head'] }}; }
     .lines th.r { text-align: right; }
     .lines td { padding: 9px 10px; border-bottom: 1px solid #e6e9ef; vertical-align: top; }
-    .lines tbody tr:nth-child(even) td { background: {{ $st['row'] }}; }
+    .lines tbody tr:nth-child(even) td { background: {{ $rowc }}; }
     .totals { margin-top: 12px; width: 44%; margin-left: 56%; } .totals td { padding: 5px 10px; color: #5f6676; }
     .totals td.r { color: #232733; }
     .totals tr.b td { font-weight: bold; color: #232733; border-top: 1px solid #cfd4de; }
-    .totals tr.last td { background: {{ $st['main'] }}; color: {{ $bandText }}; font-size: {{ $fs + 2 }}px; padding: 9px 10px; border: 1px solid {{ $st['main'] }}; }
-    .big { margin-top: 18px; border-left: 6px solid {{ $st['second'] }}; background: {{ $st['row'] }}; padding: 12px 16px; } .big td { padding: 2px 0; } .big .v { font-size: {{ $fs + 9 }}px; font-weight: bold; text-align: right; color: {{ $st['main'] }}; }
+    .totals tr.last td { background: {{ $main }}; color: {{ $bandText }}; font-size: {{ $fs + 2 }}px; padding: 9px 10px; border: 1px solid {{ $main }}; }
+    .big { margin-top: 18px; border-left: 6px solid {{ $second }}; background: {{ $rowc }}; padding: 12px 16px; } .big td { padding: 2px 0; } .big .v { font-size: {{ $fs + 9 }}px; font-weight: bold; text-align: right; color: {{ $main }}; }
     .words { margin-top: 10px; font-style: italic; color: #5f6676; }
     .box { vertical-align: top; padding: 10px 14px; border: 1px solid #e1e5ec; border-radius: 6px; }
     .sign td { vertical-align: bottom; padding-top: 22px; }
@@ -74,7 +70,84 @@
     .pg { text-align: right; font-size: {{ round($fs - 2, 1) }}px; color: #9aa1af; }
     .pg:after { content: "Page " counter(page); }
     .stamp { display: inline-block; border: 2px solid #b3261e; color: #b3261e; padding: 2px 12px; font-weight: bold; letter-spacing: .14em; margin-top: 8px; font-size: {{ $fs + 1 }}px; }
-    .band .stamp { border-color: {{ $bandText }}; color: {{ $bandText }}; }
+
+    /* ---- the eleven layouts: each one is its own arrangement, not just other colours ---- */
+    @if ($lay === 'classic')
+    .hd { padding-bottom: 14px; border-bottom: 3px solid {{ $second }}; }
+    @elseif ($lay === 'card')
+    .hd { padding-bottom: 12px; border-bottom: 1px solid #dfe3ea; }
+    h1.title { font-weight: normal; letter-spacing: .12em; }
+    .cardbox { border: 1px solid #d9dde6; border-radius: 10px; padding: 12px 16px; vertical-align: top; }
+    .lines { border: 1px solid #d9dde6; border-radius: 10px; }
+    .lines th { background: {{ $rowc }}; color: {{ $main }}; border: 0; border-bottom: 2px solid {{ $main }}; }
+    .lines tbody tr:nth-child(even) td { background: #fff; }
+    .totals tr.last td { border-radius: 0; }
+    @elseif ($lay === 'band')
+    .hd { background: {{ $main }}; color: {{ $bandText }}; padding: 18px 22px; }
+    .hd .logo { background: #ffffff; padding: 6px 10px; border-radius: 6px; }
+    .hd .co, .hd h1.title, .hd .num, .hd .coinfo { color: {{ $bandText }}; } .hd .coinfo, .hd .num { opacity: .85; }
+    .hd .stamp { border-color: {{ $bandText }}; color: {{ $bandText }}; }
+    @elseif ($lay === 'ledger')
+    body { color: #111; } .co, h1.title { color: #111; }
+    .hd { border: 2px solid #222; } .hd td { padding: 12px 16px; } .hd td.t { border-left: 2px solid #222; text-align: center; width: 36%; }
+    h1.title { letter-spacing: .1em; }
+    .ibox td { border: 1px solid #222; padding: 10px 14px; vertical-align: top; } .ibox .meta td { border: 0; }
+    .lines { border: 1px solid #222; } .lines th { border: 1px solid #222; background: {{ $st['head'] }}; } .lines td { border: 1px solid #555; }
+    .lines tbody tr:nth-child(even) td { background: #fff; }
+    .totals { border: 1px solid #222; } .totals td { border: 1px solid #555; color: #111; } .totals tr.last td { background: {{ $rowc }}; color: #111; border: 1px solid #222; font-weight: bold; }
+    .box { border: 1px solid #222; border-radius: 0; } .recv { border-radius: 0; border-color: #222; }
+    @elseif ($lay === 'center')
+    .hd { text-align: center; padding-bottom: 12px; border-bottom: 3px solid {{ $second }}; }
+    .hd h1.title { margin-top: 8px; }
+    @elseif ($lay === 'sidebar')
+    .strip { background: {{ $main }}; width: 196px; @if ($preview) position: absolute; left: 0; top: 0; bottom: 0; @else position: fixed; left: -236px; top: -34px; height: 1130px; @endif }
+    .sidebox { color: {{ $bandText }}; width: 168px; position: absolute; @if ($preview) left: 14px; top: 38px; @else left: -224px; top: 0; @endif }
+    .sidebox .logo { background: #fff; padding: 6px 8px; border-radius: 6px; width: 140px; height: auto; }
+    .sidebox .co { color: {{ $bandText }}; font-size: {{ $fs + 2 }}px; } .sidebox .coinfo, .sidebox .cap, .sidebox .muted, .sidebox .meta td.l { color: {{ $bandText }}; opacity: .78; }
+    .sidebox .meta td.v { color: {{ $bandText }}; text-align: left; display: block; } .sidebox .meta td { display: block; padding: 0; } .sidebox .meta td.l { padding: 8px 0 0; font-size: {{ round($fs - 2, 1) }}px; text-transform: uppercase; letter-spacing: .08em; }
+    .sidebox hr { border: 0; border-top: 1px solid rgba(255, 255, 255, .35); margin: 14px 0; }
+    .totals { width: 70%; margin-left: 30%; }
+    .foot { left: 0; }
+    @if ($preview) body { position: relative; padding-left: 236px !important; width: 478px !important; margin: 0 !important; } @endif
+    @elseif ($lay === 'stripe')
+    .hd { border-left: 10px solid {{ $second }}; padding: 2px 0 2px 16px; }
+    .vsplit { border-left: 1px solid #d5dae3; padding-left: 18px; vertical-align: top; }
+    .lines th { background: {{ $main }}; border-color: {{ $main }}; color: {{ $bandText }}; }
+    .lines td:first-child { border-left: 4px solid {{ $second }}; }
+    .lines tbody tr:nth-child(even) td { background: #fff; }
+    .totals tr.last td { background: {{ $second }}; color: {{ $secText }}; border-color: {{ $second }}; }
+    @elseif ($lay === 'split')
+    .splitl { background: {{ $main }}; color: {{ $bandText }}; padding: 18px 22px; width: 58%; } .splitr { background: {{ $second }}; color: {{ $secText }}; padding: 18px 22px; text-align: right; vertical-align: middle; }
+    .splitl .co, .splitl .coinfo { color: {{ $bandText }}; } .splitl .logo { background: #fff; padding: 6px 10px; border-radius: 6px; }
+    .splitr h1.title, .splitr .num { color: {{ $secText }}; } .splitr .stamp { border-color: {{ $secText }}; color: {{ $secText }}; }
+    .lines th { background: {{ $second }}; color: {{ $secText }}; border-color: {{ $second }}; }
+    .totals tr.last td { background: {{ $second }}; color: {{ $secText }}; border-color: {{ $second }}; }
+    @elseif ($lay === 'minimal')
+    h1.title { font-weight: normal; font-size: {{ $fs + 20 }}px; letter-spacing: .02em; }
+    .hd td.r2 { text-align: right; }
+    .panel { background: none; padding: 0; }
+    .lines th { background: none; color: {{ $main }}; border: 0; border-bottom: 2px solid {{ $main }}; padding-left: 4px; padding-right: 4px; }
+    .lines td { border-bottom: 1px solid #e3e6ec; padding-left: 4px; padding-right: 4px; } .lines tbody tr:nth-child(even) td { background: #fff; }
+    .totals td { padding-left: 4px; padding-right: 4px; } .totals tr.last td { background: none; color: {{ $main }}; border: 0; border-top: 2px solid {{ $main }}; border-bottom: 2px solid {{ $main }}; font-size: {{ $fs + 4 }}px; }
+    .box { border: 0; border-top: 1px solid #dfe3ea; border-radius: 0; padding-left: 0; }
+    @elseif ($lay === 'elegant')
+    body { color: #2a2620; } h1.title { font-weight: normal; letter-spacing: .28em; font-size: {{ $fs + 9 }}px; }
+    .hd { text-align: center; } .hd .co { text-transform: uppercase; letter-spacing: .22em; font-size: {{ $fs + 6 }}px; }
+    .ttl { margin-top: 14px; border-top: 3px double {{ $second }}; border-bottom: 3px double {{ $second }}; padding: 8px 0; text-align: center; }
+    .panel { background: none; padding: 0; }
+    .lines { border-top: 2px solid {{ $main }}; border-bottom: 2px solid {{ $main }}; }
+    .lines th { background: none; color: {{ $main }}; border: 0; border-bottom: 1px solid {{ $second }}; letter-spacing: .14em; }
+    .lines td { border-bottom: 1px dotted #c8c2b4; } .lines tbody tr:nth-child(even) td { background: #fff; }
+    .totals tr.last td { background: none; color: {{ $main }}; border: 0; border-top: 3px double {{ $second }}; font-style: italic; font-size: {{ $fs + 4 }}px; }
+    .box { border-radius: 0; border-color: {{ $second }}; }
+    @elseif ($lay === 'bold')
+    .topbar { height: 14px; background: {{ $main }}; margin-bottom: 14px; }
+    h1.title { font-size: {{ $fs + 30 }}px; letter-spacing: .01em; line-height: 1; }
+    .lines th { background: {{ $main }}; color: {{ $bandText }}; border-color: {{ $main }}; padding: 10px; font-size: {{ $fs - 1 }}px; }
+    .lines tbody tr:nth-child(even) td { background: {{ $rowc }}; } .lines td { font-weight: bold; } .lines td.r { font-weight: bold; }
+    .totals tr.last td { background: {{ $second }}; color: {{ $secText }}; border-color: {{ $second }}; font-size: {{ $fs + 6 }}px; padding: 12px 10px; }
+    .panel { border-left: 5px solid {{ $second }}; border-radius: 0; }
+    @endif
     @if ($preview)
     html { background: #e9e8f3; } body { width: 690px; margin: 0 auto; padding: 38px 40px 40px; background: #fff; min-height: 930px; box-shadow: 0 2px 14px rgba(40, 36, 90, .18); }
     @endif
@@ -87,39 +160,53 @@
         .(! empty($d['company']['address']) ? '<div class="coinfo">'.nl2br(e($d['company']['address'])).'</div>' : '')
         .(! empty($d['company']['email']) ? '<div class="coinfo">'.e($d['company']['email']).'</div>' : '');
     $stamp = ! empty($d['stamp']) ? '<div class="stamp">'.e($d['stamp']).'</div>' : '';
-    $titleBlock = '<h1 class="title">'.e($title).'</h1>'.(! empty($d['number']) ? '<div class="num">'.e($d['number']).'</div>' : '').$stamp;
+    $numHtml = ! empty($d['number']) ? '<div class="num">'.e($d['number']).'</div>' : '';
+    $titleBlock = '<h1 class="title">'.e($title).'</h1>'.$numHtml.$stamp;
+    $logoBlock = $logoImg ? '<div style="text-align:'.$logoAlign.'">'.$logoImg.'</div>' : '';
+    $p = $d['party'] ?? null;
+    $partyHtml = $p ? '<div class="cap">'.e($d['party_label']).'</div><div style="font-size:'.($fs + 2.5).'px"><strong>'.e($p['name']).'</strong></div>'
+        .(! empty($p['address']) ? '<div class="muted">'.nl2br(e($p['address'])).'</div>' : '').(! empty($p['phone']) ? '<div class="muted">'.e($p['phone']).'</div>' : '').(! empty($p['email']) ? '<div class="muted">'.e($p['email']).'</div>' : '') : '';
+    $metaHtml = '<table class="meta">'.collect($d['meta'])->map(fn ($m) => '<tr><td class="l">'.e($m[0]).'</td><td class="v">'.e($m[1]).'</td></tr>')->implode('').'</table>';
 @endphp
 
-@if ($st['layout'] === 'center')
-    <div class="center">
-        @if ($logoImg)<div style="text-align:{{ $logoAlign }}">{!! $logoImg !!}</div>@endif
-        {!! $companyBlock !!}{!! $titleBlock !!}
-    </div>
-@elseif ($st['layout'] === 'band')
-    <div class="band"><table class="head"><tr>
-        <td style="width:58%">@if ($logoImg)<div style="text-align:{{ $logoAlign }}">{!! $logoImg !!}</div>@endif {!! $companyBlock !!}</td>
-        <td style="text-align:right">{!! $titleBlock !!}</td>
-    </tr></table></div>
-@else
-    <div class="{{ $st['layout'] === 'stripe' ? 'stripe' : 'line' }}"><table class="head"><tr>
-        <td style="width:58%">@if ($logoImg)<div style="text-align:{{ $logoAlign }}">{!! $logoImg !!}</div>@endif {!! $companyBlock !!}</td>
-        <td style="text-align:right">{!! $titleBlock !!}</td>
-    </tr></table></div>
+{{-- header --}}
+@if ($lay === 'card')
+    <div class="hd"><table class="head"><tr><td style="width:58%">{!! $logoBlock !!}{!! $companyBlock !!}</td><td style="text-align:right">{!! $titleBlock !!}</td></tr></table></div>
+@elseif ($lay === 'ledger')
+    <table class="hd head"><tr><td>{!! $logoBlock !!}{!! $companyBlock !!}</td><td class="t">{!! $titleBlock !!}</td></tr></table>
+@elseif ($lay === 'center')
+    <div class="hd">{!! $logoBlock !!}{!! $companyBlock !!}{!! $titleBlock !!}</div>
+@elseif ($lay === 'sidebar')
+    <div class="strip"></div>
+    <div class="sidebox">{!! $logoImg !!}{!! $companyBlock !!}<hr>{!! $partyHtml !!}<hr>{!! $metaHtml !!}</div>
+    <div style="padding-bottom:10px;border-bottom:3px solid {{ $second }}">{!! $titleBlock !!}</div>
+@elseif ($lay === 'split')
+    <table class="head" style="border-collapse:collapse"><tr><td class="splitl">{!! $logoBlock !!}{!! $companyBlock !!}</td><td class="splitr">{!! $titleBlock !!}</td></tr></table>
+@elseif ($lay === 'minimal')
+    <table class="hd head"><tr><td>{!! $titleBlock !!}</td><td class="r2" style="text-align:right">{!! $logoImg ? '<div>'.$logoImg.'</div>' : '' !!}{!! $companyBlock !!}</td></tr></table>
+@elseif ($lay === 'elegant')
+    <div class="hd">{!! $logoBlock !!}{!! $companyBlock !!}</div>
+    <div class="ttl">{!! '<h1 class="title">'.e($title).'</h1>'.$numHtml.$stamp !!}</div>
+@elseif ($lay === 'bold')
+    <div class="topbar"></div>
+    <table class="head"><tr><td style="width:55%">{!! $titleBlock !!}</td><td style="text-align:right">{!! $logoImg ? '<div>'.$logoImg.'</div>' : '' !!}{!! $companyBlock !!}</td></tr></table>
+@else {{-- classic, band, stripe --}}
+    <div class="hd"><table class="head"><tr><td style="width:58%">{!! $logoBlock !!}{!! $companyBlock !!}</td><td style="text-align:right">{!! $titleBlock !!}</td></tr></table></div>
 @endif
 
-<table class="head" style="margin-top:22px"><tr>
-    <td style="width:52%; padding-right:20px">
-        @if (! empty($d['party']))<div class="cap">{{ $d['party_label'] }}</div><div style="font-size:{{ $fs + 2.5 }}px"><strong>{{ $d['party']['name'] }}</strong></div>
-            @if (! empty($d['party']['address']))<div class="muted">{!! nl2br(e($d['party']['address'])) !!}</div>@endif
-            @if (! empty($d['party']['phone']))<div class="muted">{{ $d['party']['phone'] }}</div>@endif
-            @if (! empty($d['party']['email']))<div class="muted">{{ $d['party']['email'] }}</div>@endif
-        @endif
-    </td>
-    <td><div class="panel"><table class="meta">@foreach ($d['meta'] as [$l, $v])<tr><td class="l">{{ $l }}</td><td class="v">{{ $v }}</td></tr>@endforeach</table></div></td>
-</tr></table>
-
-@if (! empty($d['big']))
-    <div class="big"><table>@foreach ($d['big'] as [$l, $v, $isBig])<tr><td class="{{ $isBig ? '' : 'muted' }}">{{ $l }}</td><td class="{{ $isBig ? 'v' : 'r' }}">{{ $v }}</td></tr>@endforeach</table></div>
+{{-- who it is for, and the document's details --}}
+@if ($lay === 'sidebar')
+    {{-- already in the coloured side column --}}
+@elseif ($lay === 'card')
+    <table style="margin-top:20px;border-collapse:separate;border-spacing:0"><tr><td class="cardbox" style="width:50%">{!! $partyHtml !!}</td><td style="width:14px"></td><td class="cardbox">{!! $metaHtml !!}</td></tr></table>
+@elseif ($lay === 'ledger')
+    <table class="ibox" style="margin-top:12px"><tr><td style="width:50%">{!! $partyHtml !!}</td><td>{!! $metaHtml !!}</td></tr></table>
+@elseif ($lay === 'stripe')
+    <table class="head" style="margin-top:22px"><tr><td style="width:50%;padding-right:20px">{!! $partyHtml !!}</td><td class="vsplit">{!! $metaHtml !!}</td></tr></table>
+@elseif ($lay === 'elegant')
+    <table class="head" style="margin-top:18px"><tr><td style="width:52%;padding-right:20px">{!! $partyHtml !!}</td><td><div class="panel">{!! $metaHtml !!}</div></td></tr></table>
+@else
+    <table class="head" style="margin-top:22px"><tr><td style="width:52%;padding-right:20px">{!! $partyHtml !!}</td><td><div class="panel">{!! $metaHtml !!}</div></td></tr></table>
 @endif
 
 @if ($columns)
