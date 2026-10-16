@@ -1,4 +1,4 @@
-﻿@extends('layouts.main')
+@extends('layouts.main')
 @php
     use App\Support\Money;
     $isInv = $kind === 'invoice';

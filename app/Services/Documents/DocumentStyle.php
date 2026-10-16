@@ -34,6 +34,7 @@ class DocumentStyle
     public const FONTS = [
         'sans' => ['Clean (sans-serif)', "'DejaVu Sans', sans-serif"],
         'serif' => ['Classic (serif)', "'DejaVu Serif', serif"],
+        'modern' => ['Modern (Helvetica; Latin letters only)', "Helvetica, 'DejaVu Sans', sans-serif"],
         'mono' => ['Typewriter', "'DejaVu Sans Mono', monospace"],
     ];
 

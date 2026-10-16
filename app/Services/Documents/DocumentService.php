@@ -138,7 +138,7 @@ class DocumentService
         return ['to' => (string) $email, 'subject' => trim("$title $label")." from $co", 'message' => "Hello $name,\n\nPlease find attached $extra.\n\nThank you,\n$co", 'party_table' => $table, 'party_id' => $partyId, 'has_email' => (bool) $email];
     }
 
-    /** The custom fields (Settings → Templates) set to print on this kind of document and filled in on it, as meta rows. */
+    /** The custom fields (Settings â†’ Templates) set to print on this kind of document and filled in on it, as meta rows. */
     protected function customMeta(object $doc, string $kind): array
     {
         $rows = [];
@@ -381,6 +381,7 @@ class DocumentService
     /** A table of rows (the same rows a report downloads as CSV) as a PDF. First cells of single-cell rows are headings. */
     public function tablePdf(array $rows, string $orientation = 'portrait'): string
     {
-        return $this->pdf->fromHtml(view('pdf.table', ['rows' => $rows])->render(), 'a4', $orientation);
+        return $this->pdf->fromHtml(view('pdf.table', ['rows' => $rows, 'st' => app(DocumentStyle::class)->resolve()])->render(), 'a4', $orientation);
     }
 }
+
