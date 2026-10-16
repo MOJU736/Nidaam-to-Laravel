@@ -3,23 +3,23 @@
 @section('content')
 @php use App\Support\Money; $names = ['draft' => 'Draft', 'approved' => 'Approved', 'part' => 'Part paid', 'paid' => 'Paid', 'void' => 'Void']; @endphp
 @include('payroll._tabs', ['active' => 'index'])
-<div class="grid" style="margin-bottom:16px">
-    <div class="stat"><b>{{ $f['employee_count'] }}</b><span class="muted">active employee{{ $f['employee_count'] === 1 ? '' : 's' }}</span></div>
-    <div class="stat"><b>{{ Money::format($f['monthly']) }}</b><span class="muted">salaries a month</span></div>
-    <div class="stat"><b @style(['color:var(--danger)' => Money::positive($f['unpaid'])])>{{ Money::format($f['unpaid']) }}</b><span class="muted">approved, not paid yet</span></div>
-    <div class="stat"><b>{{ Money::format($f['owed']) }}</b><span class="muted">owed in advances &amp; loans</span></div>
+<div class="bar">
+    <div><h1>Pay runs</h1><div class="muted">Salaries, month by month</div></div>
+    @if ($f['employee_count'])
+        <form method="POST" action="{{ route('payroll.runs.store') }}" class="pform">@csrf
+            <div><label for="period" style="margin-top:0">Month</label><input type="month" id="period" name="period" value="{{ $f['next'] }}" required></div>
+            <div><label for="date" style="margin-top:0">Pay date</label><input type="date" id="date" name="date" value="{{ date('Y-m-t', strtotime($f['next'].'-01')) }}" required></div>
+            <div><button>New pay run</button></div>
+        </form>
+    @endif
+</div>
+<div class="tiles">
+    <div class="tile"><small>Employees</small><b>{{ $f['employee_count'] }}</b><span>active</span></div>
+    <div class="tile"><small>Salaries a month</small><b>{{ Money::format($f['monthly']) }}</b><span>before extras</span></div>
+    <div class="tile {{ Money::positive($f['unpaid']) ? 'bad' : '' }}"><small>Approved, not paid</small><b>{{ Money::format($f['unpaid']) }}</b><span>still to pay out</span></div>
+    <div class="tile"><small>Advances &amp; loans</small><b>{{ Money::format($f['owed']) }}</b><span>owed back to you</span></div>
 </div>
 <div class="card">
-    <div class="bar">
-        <h1 style="margin:0">Pay runs</h1>
-        @if ($f['employee_count'])
-            <form method="POST" action="{{ route('payroll.runs.store') }}" class="pform">@csrf
-                <div><label for="period">Month</label><input type="month" id="period" name="period" value="{{ $f['next'] }}" required></div>
-                <div><label for="date">Pay date</label><input type="date" id="date" name="date" value="{{ date('Y-m-t', strtotime($f['next'].'-01')) }}" required></div>
-                <div><button>New pay run</button></div>
-            </form>
-        @endif
-    </div>
     @if (! $f['employee_count'])
         <p class="muted">Add your employees and their monthly salaries first. <a class="btn sm" href="{{ route('payroll.employees') }}">Add employees</a></p>
     @elseif ($f['runs']->isEmpty())

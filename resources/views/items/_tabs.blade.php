@@ -3,8 +3,8 @@
     if (\App\Support\Money::vehiclesEnabled() && auth()->user()->isAdmin()) { $tabs[] = ['items.vehicles', 'Vehicle pricing', ['items.vehicles', 'items.vehicles.*']]; }
     if (auth()->user()->isAdmin()) { $tabs[] = ['items.settings', 'Settings', ['items.settings']]; }
 @endphp
-<div class="actions" style="margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:8px">
+<nav class="subnav" aria-label="Items sections">
     @foreach ($tabs as [$route, $label, $match])
-        <a class="btn sm {{ request()->routeIs(...$match) ? '' : 'ghost' }}" href="{{ route($route) }}">{{ $label }}</a>
+        <a class="{{ request()->routeIs(...$match) ? 'on' : '' }}" href="{{ route($route) }}">{{ $label }}</a>
     @endforeach
-</div>
+</nav>

@@ -3,8 +3,10 @@
 @section('content')
 @php use App\Support\Money; $e = $edit; $v = fn ($k, $d = '') => old($k, $e->$k ?? $d); @endphp
 @include('payroll._tabs', ['active' => 'employees'])
-<div class="card" style="margin-bottom:16px">
-    <h1 style="margin:0 0 8px">{{ $e ? 'Change '.$e->name : 'Add an employee' }}</h1>
+<div class="bar"><div><h1>Employees</h1><div class="muted">{{ count($employees) }} on the books</div></div></div>
+<details class="sec" @if ($e || $errors->any() || $employees->isEmpty()) open @endif>
+    <summary><span class="n">+</span> {{ $e ? 'Change '.$e->name : 'Add an employee' }}</summary>
+    <div>
     <form method="POST" action="{{ $e ? route('payroll.employees.update', $e->id) : route('payroll.employees.store') }}">@csrf @if ($e) @method('PUT') @endif
         <div class="row2">
             <div><label for="name">Name</label><input id="name" name="name" maxlength="150" value="{{ $v('name') }}" required></div>
@@ -24,7 +26,8 @@
         <label for="notes">Notes</label><textarea id="notes" name="notes" rows="2" maxlength="500">{{ $v('notes') }}</textarea>
         <div class="actions" style="margin-top:12px"><button>{{ $e ? 'Save changes' : 'Add employee' }}</button>@if ($e)<a class="btn ghost" href="{{ route('payroll.employees') }}">Cancel</a>@endif</div>
     </form>
-</div>
+    </div>
+</details>
 <div class="card">
     @if ($employees->isEmpty())
         <p class="muted" style="margin:0">No employees yet.</p>
@@ -34,7 +37,7 @@
             <tbody>
             @foreach ($employees as $x)
                 <tr @style(['opacity:.55' => $x->status !== 'active'])>
-                    <td><a href="{{ route('payroll.employees.show', $x->id) }}"><strong>{{ $x->name }}</strong></a>@if ($x->status !== 'active') <span class="pill">inactive</span>@endif<span class="psub">{{ $x->phone }}{{ $x->phone && $x->email ? ' · ' : '' }}{{ $x->email }}</span></td>
+                    <td><a class="who" href="{{ route('payroll.employees.show', $x->id) }}"><span class="avs">{{ mb_strtoupper(mb_substr(trim($x->name), 0, 1)) }}</span><span><strong>{{ $x->name }}</strong>@if ($x->status !== 'active') <span class="pill">inactive</span>@endif<span class="psub">{{ $x->phone }}{{ $x->phone && $x->email ? ' · ' : '' }}{{ $x->email }}</span></span></a></td>
                     <td>{{ $x->position }}<span class="psub">{{ $x->department }}</span></td>
                     <td>{{ $methods[$x->method] ?? '' }}<span class="psub">{{ $x->pay_account }}</span></td>
                     <td class="num">{{ Money::format($x->salary) }}</td>

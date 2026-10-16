@@ -286,6 +286,7 @@ label.chk { display: flex; align-items: center; gap: 8px; font-weight: 400; marg
 .savebar { position: sticky; bottom: 0; display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 0; background: linear-gradient(transparent, var(--bg) 30%); z-index: 5; }
 
 .avs { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--brand-soft); color: var(--brand-dark); font: 700 13px var(--font-num); flex: none; }
+.avs.sq { border-radius: 9px; }
 .avs.lg { width: 44px; height: 44px; font-size: 18px; }
 a.who { display: inline-flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; } a.who:hover { color: var(--brand-strong); }
 
