@@ -2,7 +2,7 @@
 @section('title', 'Purchase settings')
 @section('content')
 @include('purchases._tabs')
-<div class="bar"><h1 style="margin:0">Purchase settings</h1></div>
+<div class="bar"><h1>Purchase settings</h1></div>
 <form class="card" method="POST" action="{{ route('purchases.settings') }}" style="max-width:700px">
     @csrf @method('PUT')
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach

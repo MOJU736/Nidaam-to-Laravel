@@ -7,7 +7,8 @@
     $poolN = S::qcmp($pool, 0) > 0 ? $pool : '0.000';
 @endphp
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">{{ $item->name }} — batches</h1><a class="muted" href="{{ route('items.edit', $item->id) }}">&larr; Item</a></div>
+<a class="back" href="{{ route('items.edit', $item->id) }}">&larr; Item</a>
+<div class="bar"><h1>{{ $item->name }} — batches</h1></div>
 
 @unless ($item->track_batches)
     <div class="flash bad">Batch tracking is off for this item. Switch on "Track batches and expiry dates" on the <a href="{{ route('items.edit', $item->id) }}">item</a> so sales take the earliest expiry and expired batches can't be sold.</div>

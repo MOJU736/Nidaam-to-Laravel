@@ -4,7 +4,7 @@
 @include('construction._tabs')
 @php use App\Support\Money; $q = fn ($v) => rtrim(rtrim((string) $v, '0'), '.') ?: '0'; @endphp
 @foreach ($errors->all() as $er)<div class="flash bad">{{ $er }}</div>@endforeach
-<div class="bar"><h1 style="margin:0">Site stock</h1></div>
+<div class="bar"><h1>Site stock</h1></div>
 <p class="muted" style="margin-top:0;max-width:760px">The main store holds whatever the sites don't. <strong>Move</strong> stock between stores (nothing is posted), or <strong>issue</strong> it on a project: it leaves the store and the item, and the cost (at the item's cost) is posted to Site Materials Used as a Materials cost of the project.</p>
 <div class="card tbl" style="margin-bottom:16px">
     <table>

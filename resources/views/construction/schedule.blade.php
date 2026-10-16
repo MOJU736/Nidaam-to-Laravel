@@ -5,7 +5,7 @@
 @include('construction._ptabs', ['p' => $p, 'on' => 'schedule'])
 @php use App\Support\Money; $behind = $progress['planned'] !== null && $progress['actual'] < $progress['planned'] - 5; @endphp
 @foreach ($errors->all() as $er)<div class="flash bad">{{ $er }}</div>@endforeach
-<div class="bar"><h1 style="margin:0">Schedule</h1></div>
+<div class="bar"><h1>Schedule</h1></div>
 @if ($progress['planned'] !== null)
 <div class="card" style="margin-bottom:14px;max-width:640px">
     <div class="row2">

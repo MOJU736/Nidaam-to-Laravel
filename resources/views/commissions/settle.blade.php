@@ -2,7 +2,7 @@
 @section('title', 'Settle '.$t['label'])
 @section('content')
 @php $m = fn ($v) => \App\Support\Money::format($v); @endphp
-<div class="bar"><div><h1 style="margin:0">Settle {{ $t['label'] }}</h1><div class="muted">{{ $t['party_name'] }} · received {{ \App\Support\Money::date($t['date']) }} · {{ $m($t['received_amount']) }}</div></div><a class="btn ghost" href="{{ route('commissions.index') }}">Back</a></div>
+<div class="bar"><div><h1>Settle {{ $t['label'] }}</h1><div class="muted">{{ $t['party_name'] }} · received {{ \App\Support\Money::date($t['date']) }} · {{ $m($t['received_amount']) }}</div></div><a class="btn ghost" href="{{ route('commissions.index') }}">Back</a></div>
 <form class="card" method="POST" action="{{ route('commissions.settle', $t['id']) }}" style="max-width:640px" id="sf">@csrf
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach
     <div class="row2">

@@ -2,7 +2,7 @@
 @section('title', 'Books Health Check')
 @section('content')
 @php use App\Support\Money; $levels = ['problem' => ['Needs fixing', 'var(--danger)'], 'warning' => ['Worth a look', '#b7791f'], 'info' => ['For your information', 'var(--muted)']]; @endphp
-<div class="bar"><div><h1 style="margin:0">Books Health Check</h1><div class="muted">Looks for what makes a report look wrong, and says what to do. Checked {{ $checkedAt }}.</div></div><a class="btn ghost" href="{{ route('reports.index') }}">All reports</a></div>
+<div class="bar"><div><h1>Books Health Check</h1><div class="muted">Looks for what makes a report look wrong, and says what to do. Checked {{ $checkedAt }}.</div></div><a class="btn ghost" href="{{ route('reports.index') }}">All reports</a></div>
 @if (! $findings)<div class="card" style="color:#1d9650"><strong>✓ The books look healthy.</strong> <span class="muted">Nothing to fix or look at.</span></div>@endif
 @foreach (['problem', 'warning', 'info'] as $lv)
     @php $list = array_values(array_filter($findings, fn ($f) => $f['level'] === $lv)); @endphp

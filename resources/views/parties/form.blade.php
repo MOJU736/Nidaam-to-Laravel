@@ -5,9 +5,10 @@
     $isAr = $cfg['side'] === 'ar';
     $v = fn ($f) => old($f, $party->{$f} ?? '');
 @endphp
-<div class="bar"><h1 style="margin:0">{{ $party ? 'Edit '.$cfg['one'] : 'Add '.$cfg['one'] }}</h1></div>
+<a class="back" href="{{ $party ? route($cfg['route'].'.show', $party->id) : route($cfg['route'].'.index') }}">&larr; {{ $party ? $party->name : $cfg['many'] }}</a>
+<div class="bar"><h1>{{ $party ? 'Edit '.$cfg['one'] : 'Add '.$cfg['one'] }}</h1></div>
 
-<form class="card" method="POST" action="{{ $party ? route($cfg['route'].'.update', $party->id) : route($cfg['route'].'.store') }}">
+<form class="card" style="max-width:820px" method="POST" action="{{ $party ? route($cfg['route'].'.update', $party->id) : route($cfg['route'].'.store') }}">
     @csrf
     @if ($party) @method('PUT') @endif
 

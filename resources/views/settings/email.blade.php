@@ -2,7 +2,7 @@
 @section('title', 'Email settings')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Email settings</h1></div>
+<div class="bar"><h1>Email settings</h1></div>
 <form class="card" method="POST" action="{{ route('settings.email') }}" style="max-width:720px" autocomplete="off">
     @csrf @method('PUT')
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach

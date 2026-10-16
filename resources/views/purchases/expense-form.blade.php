@@ -2,7 +2,8 @@
 @section('title', 'New expense')
 @section('content')
 @include('purchases._tabs')
-<div class="bar"><h1 style="margin:0">New expense <span class="muted" style="font-size:15px">{{ $next }}</span></h1><a class="muted" href="{{ route('expenses.index') }}">&larr; Quick expenses</a></div>
+<a class="back" href="{{ route('expenses.index') }}">&larr; Quick expenses</a>
+<div class="bar"><h1>New expense <span class="muted" style="font-size:15px">{{ $next }}</span></h1></div>
 <form class="card" method="POST" action="{{ route('expenses.store') }}" style="max-width:700px">
     @csrf
     <p class="muted" style="margin-top:0">Money paid out at once with no vendor. Buying stock goes through a bill instead, so quantity and cost update.</p>

@@ -2,7 +2,7 @@
 @section('title', 'Tags')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Tags</h1></div>
+<div class="bar"><h1>Tags</h1></div>
 @if ($locked)<div class="flash bad">This company is locked, so tags cannot be changed.</div>@endif
 <p class="muted" style="margin-top:0;max-width:720px">Labels for journal entries. A tag can be put on an entry and used to filter the Entries list. A tag that is on entries cannot be deleted (rename it instead).</p>
 <form class="card" method="POST" action="{{ route('settings.tags') }}" style="margin-bottom:16px">

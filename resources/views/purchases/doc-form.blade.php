@@ -28,7 +28,8 @@
 @section('title', ($editing ? 'Edit ' : 'New ').$word)
 @section('content')
 @include('purchases._tabs')
-<div class="bar"><h1 style="margin:0">{{ $editing ? 'Edit '.$word.' '.$label : 'New '.strtolower($word) }}</h1><a class="muted" href="{{ route($route.'.index') }}">&larr; Back</a></div>
+<a class="back" href="{{ route($route.'.index') }}">&larr; Back</a>
+<div class="bar"><h1>{{ $editing ? 'Edit '.$word.' '.$label : 'New '.strtolower($word) }}</h1></div>
 
 <form class="card" method="POST" id="docForm" action="{{ $editing ? route($route.'.update', $doc->id) : route($route.'.store') }}">
     @csrf

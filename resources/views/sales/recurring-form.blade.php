@@ -9,7 +9,8 @@
 @section('title', $isEdit ? 'Edit recurring invoice' : 'Make recurring')
 @section('content')
 @include('sales._tabs')
-<div class="bar"><h1 style="margin:0">{{ $isEdit ? 'Edit recurring invoice' : 'Make recurring' }}</h1><a class="muted" href="{{ route('recurring.index') }}">&larr; Recurring</a></div>
+<a class="back" href="{{ route('recurring.index') }}">&larr; Recurring</a>
+<div class="bar"><h1>{{ $isEdit ? 'Edit recurring invoice' : 'Make recurring' }}</h1></div>
 <form class="card" method="POST" action="{{ $isEdit ? route('recurring.update', $tpl->id) : route('recurring.store') }}">
     @csrf
     @if ($isEdit) @method('PUT') @endif

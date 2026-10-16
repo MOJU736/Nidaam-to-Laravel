@@ -2,7 +2,7 @@
 @section('title', 'Entry types')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Entry types</h1></div>
+<div class="bar"><h1>Entry types</h1></div>
 @if ($locked)<div class="flash bad">This company is locked, so entry types cannot be changed.</div>@endif
 <p class="muted" style="margin-top:0;max-width:760px">Each kind of journal entry has its own number sequence. The number is written as <strong>prefix + number (padded with zeros) + suffix</strong>, so prefix "JV-", padding 4 gives JV-0007. The account rule decides which accounts an entry of that type may use. Types the app posts to itself (marked <span class="pill">system</span>) can be edited but not renamed or deleted.</p>
 <div class="card" style="margin-bottom:16px">

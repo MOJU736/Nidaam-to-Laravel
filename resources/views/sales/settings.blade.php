@@ -2,7 +2,7 @@
 @section('title', 'Sales settings')
 @section('content')
 @include('sales._tabs')
-<div class="bar"><h1 style="margin:0">Sales settings</h1></div>
+<div class="bar"><h1>Sales settings</h1></div>
 <form class="card" method="POST" action="{{ route('sales.settings') }}" style="max-width:720px">
     @csrf @method('PUT')
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach

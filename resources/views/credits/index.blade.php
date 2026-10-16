@@ -3,7 +3,7 @@
 @section('content')
 @php use App\Support\Money; @endphp
 @include('credits._tabs')
-<div class="bar"><h1 style="margin:0">{{ $ui['names'] }}</h1><a class="btn" href="{{ route($ui['route'].'.create') }}">+ New {{ strtolower($ui['name']) }}</a></div>
+<div class="bar"><h1>{{ $ui['names'] }}</h1><a class="btn" href="{{ route($ui['route'].'.create') }}">+ New {{ strtolower($ui['name']) }}</a></div>
 <p class="muted" style="margin-top:0">{{ $ui['side'] === 'ar' ? 'Money given back to a customer: returned goods, a price correction or goodwill. A bad-debt write-off also shows here (WO-).' : 'Money a supplier gives back: goods returned to them, or an overcharge.' }}</p>
 <div class="card tbl"><table>
     <thead><tr><th>No.</th><th>Date</th><th>{{ ucfirst($ui['party_word']) }}</th><th>Status</th><th class="num">Total</th><th class="num">Left to use</th></tr></thead>

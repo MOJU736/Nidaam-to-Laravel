@@ -2,7 +2,7 @@
 @section('title', 'Company settings')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Company settings</h1></div>
+<div class="bar"><h1>Company settings</h1></div>
 @php
     $logoFile = $s->logo && is_file(public_path('branding/logo/'.$s->logo)) ? asset('branding/logo/'.$s->logo) : null;
     $cur = old('currency_symbol', $s->currency_symbol);

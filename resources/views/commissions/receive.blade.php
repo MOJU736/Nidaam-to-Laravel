@@ -1,7 +1,7 @@
 @extends('layouts.main')
 @section('title', 'Receive money for a client')
 @section('content')
-<div class="bar"><h1 style="margin:0">Receive money for a client</h1><a class="btn ghost" href="{{ route('commissions.index') }}">Back</a></div>
+<div class="bar"><h1>Receive money for a client</h1><a class="btn ghost" href="{{ route('commissions.index') }}">Back</a></div>
 <form class="card" method="POST" action="{{ route('commissions.store') }}" style="max-width:640px">@csrf
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach
     <p class="muted" style="margin-top:0">The money goes into your bank or cash account and is held as "Due to Client" until you settle it (you keep your commission, the rest goes to the client).</p>

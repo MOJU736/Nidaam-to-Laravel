@@ -2,7 +2,7 @@
 @section('title', 'Item settings')
 @section('content')
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">Item settings</h1></div>
+<div class="bar"><h1>Item settings</h1></div>
 <form class="card" method="POST" action="{{ route('items.settings') }}" style="max-width:640px">
     @csrf @method('PUT')
     <p class="muted" style="margin-top:0">The accounts stock is posted to. Set once.</p>

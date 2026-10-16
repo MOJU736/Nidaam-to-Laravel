@@ -19,7 +19,7 @@
 @include('payroll._tabs', ['active' => 'index'])
 <div class="bar">
     <div>
-        <h1 style="margin:0">Payroll - {{ $month }} <span class="pstat is-{{ $statusCls }}">{{ $statusName[$r->status] }}</span></h1>
+        <h1>Payroll - {{ $month }} <span class="pstat is-{{ $statusCls }}">{{ $statusName[$r->status] }}</span></h1>
         <div class="muted">{{ count($r->lines) }} employee{{ count($r->lines) === 1 ? '' : 's' }} · pay date {{ Money::date($r->date) }}{{ $r->created_by ? ' · made by '.$r->created_by : '' }}</div>
     </div>
     @if (! $draft)

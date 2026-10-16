@@ -9,7 +9,7 @@
     $margin = Money::positive($p->billed) ? round((float) $p->profit / (float) $p->billed * 100) : null;
 @endphp
 <div class="bar">
-    <div><h1 style="margin:0">#{{ $p->number }} {{ $p->name }} <span class="pill">{{ C::STATUSES[$p->status] ?? $p->status }}</span></h1>
+    <div><h1>#{{ $p->number }} {{ $p->name }} <span class="pill">{{ C::STATUSES[$p->status] ?? $p->status }}</span></h1>
         <div class="muted">Client: <a href="{{ route('customers.show', $p->customer_id) }}">{{ $p->customer_name }}</a>@if ($p->site) · Site: {{ $p->site }}@endif @if ($p->start_date) · {{ Money::date($p->start_date) }}@if ($p->end_date) – {{ Money::date($p->end_date) }}@endif @endif</div></div>
     <div class="actions">
         <a class="btn sm ghost" href="{{ route('invoices.create', ['customer_id' => $p->customer_id, 'project' => $p->id]) }}">New invoice</a>

@@ -6,7 +6,8 @@
     $catalog = $items->map(fn ($i) => ['id' => $i->id, 'name' => $i->name.($i->sku ? " ({$i->sku})" : ''), 'qty' => (string) $i->quantity_on_hand, 'cost' => (string) $i->purchase_cost])->values();
 @endphp
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">New stock adjustment</h1><a class="muted" href="{{ route('items.adjustments') }}">&larr; Stock adjustments</a></div>
+<a class="back" href="{{ route('items.adjustments') }}">&larr; Stock adjustments</a>
+<div class="bar"><h1>New stock adjustment</h1></div>
 
 @if ($items->isEmpty())
     <div class="flash bad">There are no Inventory items yet. Only items of type Inventory have stock to adjust.</div>

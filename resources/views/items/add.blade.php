@@ -2,7 +2,8 @@
 @section('title', 'Add items')
 @section('content')
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">Add items</h1><a class="muted" href="{{ route('items.index') }}">&larr; Items</a></div>
+<a class="back" href="{{ route('items.index') }}">&larr; Items</a>
+<div class="bar"><h1>Add items</h1></div>
 
 <form class="card" method="POST" action="{{ route('items.store') }}">
     @csrf

@@ -3,7 +3,7 @@
 @section('content')
 @include('construction._tabs')
 @php use App\Support\Money; use App\Services\Construction\ConstructionService as C; @endphp
-<div class="bar"><h1 style="margin:0">Rate list</h1></div>
+<div class="bar"><h1>Rate list</h1></div>
 <p class="muted" style="margin-top:0;max-width:720px">Descriptions with a unit, rate and cost type. Typing one of these on an estimate line fills the rest in. Estimates can add new descriptions here when you save them.</p>
 <form class="card" method="POST" action="{{ $edit ? route('construction.rates.update', $edit->id) : route('construction.rates.store') }}" style="margin-bottom:16px">
     @csrf @if ($edit) @method('PUT') @endif

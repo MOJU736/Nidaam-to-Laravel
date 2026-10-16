@@ -8,7 +8,7 @@
     $nIn = count(array_filter($lines, fn ($x) => $x['in'] !== null)); $nOut = count($lines) - $nIn;
     $zero = Money::isZero($totals['difference']);
 @endphp
-<div class="bar"><div><h1 style="margin:0">{{ $ledger->name }}</h1><div class="muted">Statement ending {{ Money::date($rec->statement_date) }} · <a href="{{ route('banking.reconcile', $ledger->id) }}?edit=1">Change statement details</a></div></div><a class="muted" href="{{ route('banking.index') }}">&larr; Reconcile</a></div>
+<div class="bar"><div><h1>{{ $ledger->name }}</h1><div class="muted">Statement ending {{ Money::date($rec->statement_date) }} · <a href="{{ route('banking.reconcile', $ledger->id) }}?edit=1">Change statement details</a></div></div><a class="muted" href="{{ route('banking.index') }}">&larr; Reconcile</a></div>
 <form method="POST" action="{{ route('banking.rec', $rec->id) }}" id="recForm">
     @csrf
     <div class="card" id="recSum" data-begin="{{ $cents($rec->begin_balance) }}" data-statement="{{ $cents($rec->statement_balance) }}" style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:14px">

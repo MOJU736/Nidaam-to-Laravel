@@ -2,7 +2,8 @@
 @section('title', 'Reconcile '.$ledger->name)
 @section('content')
 @php use App\Support\Money; @endphp
-<div class="bar"><h1 style="margin:0">Reconcile {{ $ledger->name }}</h1><a class="muted" href="{{ route('banking.index') }}">&larr; Reconcile</a></div>
+<a class="back" href="{{ route('banking.index') }}">&larr; Reconcile</a>
+<div class="bar"><h1>Reconcile {{ $ledger->name }}</h1></div>
 <form class="card" method="POST" action="{{ route('banking.reconcile', $ledger->id) }}" style="max-width:640px" autocomplete="off">
     @csrf
     <p style="margin-top:0">Take the bank statement for this account and enter what it says at the end.</p>

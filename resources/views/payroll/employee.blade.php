@@ -4,7 +4,7 @@
 @php use App\Support\Money; @endphp
 @include('payroll._tabs', ['active' => 'employees'])
 <div class="bar">
-    <div><h1 style="margin:0">{{ $e->name }}@if ($e->status !== 'active') <span class="pill">inactive</span>@endif</h1>
+    <div><h1>{{ $e->name }}@if ($e->status !== 'active') <span class="pill">inactive</span>@endif</h1>
         <div class="muted">{{ $e->position }}{{ $e->position && $e->department ? ' · ' : '' }}{{ $e->department }}</div></div>
     <div class="actions"><a class="btn ghost" href="{{ route('payroll.employees', ['edit' => $e->id]) }}">Edit</a><a class="btn ghost" href="{{ route('payroll.advances', ['employee' => $e->id]) }}">Give an advance or loan</a></div>
 </div>

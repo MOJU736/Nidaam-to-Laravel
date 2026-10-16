@@ -4,7 +4,7 @@
 @php use App\Support\Money; $company = (string) app(\App\Tenancy\TenantManager::class)->current()?->name; @endphp
 @include('payroll._tabs', ['active' => 'reports'])
 <div class="bar">
-    <div><h1 style="margin:0">{{ $r['title'] }}</h1>
+    <div><h1>{{ $r['title'] }}</h1>
         <div class="muted">{{ $company }} · {{ $view === 'advances' ? 'today' : date('F Y', strtotime($from.'-01')).' to '.date('F Y', strtotime($to.'-01')) }}</div></div>
     <div class="actions noprint">
         <button type="button" class="ghost" onclick="window.print()">Print</button>

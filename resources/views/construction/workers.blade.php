@@ -3,7 +3,7 @@
 @section('content')
 @include('construction._tabs')
 @php use App\Support\Money; @endphp
-<div class="bar"><h1 style="margin:0">Site workers</h1></div>
+<div class="bar"><h1>Site workers</h1></div>
 <form class="card" method="POST" action="{{ $edit ? route('construction.workers.update', $edit->id) : route('construction.workers.store') }}" style="margin-bottom:16px">
     @csrf @if ($edit) @method('PUT') @endif
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach

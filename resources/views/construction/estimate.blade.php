@@ -21,7 +21,7 @@
     </div>
 @else
     <div class="bar">
-        <div><h1 style="margin:0">Estimate {{ $e->number }} <span class="pill">{{ ['draft' => 'Draft', 'approved' => 'Approved', 'replaced' => 'Replaced'][$e->status] ?? $e->status }}</span></h1>
+        <div><h1>Estimate {{ $e->number }} <span class="pill">{{ ['draft' => 'Draft', 'approved' => 'Approved', 'replaced' => 'Replaced'][$e->status] ?? $e->status }}</span></h1>
             @if ($e->approved_at)<div class="muted">Approved {{ Money::date($e->approved_at) }}{{ $e->approved_by ? ' by '.$e->approved_by : '' }} · the contract and budgets were set from it</div>@endif</div>
         <div class="actions">
             @foreach ($history as $h)@if ($h->id !== $e->id)<a class="btn sm ghost" href="{{ route('projects.estimate', $p->id) }}?e={{ $h->id }}">Estimate {{ $h->number }} ({{ $h->status }})</a>@endif @endforeach

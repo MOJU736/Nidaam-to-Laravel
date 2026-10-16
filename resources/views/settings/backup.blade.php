@@ -2,7 +2,7 @@
 @section('title', 'Backup')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Backup</h1></div>
+<div class="bar"><h1>Backup</h1></div>
 <div class="card" style="max-width:760px;margin-bottom:16px">
     <p style="margin-top:0">Download a complete copy of <strong>{{ $company }}</strong>'s books: every account, customer, vendor, invoice, bill, payment, item, entry and setting. Keep it somewhere safe off this computer.</p>
     <p class="muted" style="font-size:13px">The file is a standard MySQL backup (<code>.sql.gz</code>). To restore it, import it into an empty database with phpMyAdmin or <code>mysql dbname &lt; file.sql</code>. It contains everything in the company, payroll and the email password included, so treat it as confidential.</p>

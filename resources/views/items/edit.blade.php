@@ -8,7 +8,8 @@
     $v = fn ($f, $d = '') => old($f, $item->{$f} ?? $d);
 @endphp
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">Edit item</h1><a class="muted" href="{{ route('items.index') }}">&larr; Items</a></div>
+<a class="back" href="{{ route('items.index') }}">&larr; Items</a>
+<div class="bar"><h1>Edit item</h1></div>
 
 <form class="card" method="POST" action="{{ route('items.update', $item->id) }}" style="max-width:760px">
     @csrf @method('PUT')

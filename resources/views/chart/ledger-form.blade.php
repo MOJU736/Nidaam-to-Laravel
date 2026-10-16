@@ -15,7 +15,8 @@
         'Expense' => 'Expenses are the costs of running the business: rent, salaries, fuel, bank charges.',
     ];
 @endphp
-<div class="bar"><h1 style="margin:0">{{ $editing ? 'Edit account' : 'New account' }}</h1><a class="muted" href="{{ route('chart') }}">&larr; Chart of Accounts</a></div>
+<a class="back" href="{{ route('chart') }}">&larr; Chart of Accounts</a>
+<div class="bar"><h1>{{ $editing ? 'Edit account' : 'New account' }}</h1></div>
 
 <div class="row2" style="grid-template-columns:{{ $editing ? '2fr 1fr' : '1fr' }};align-items:start">
 <form class="card" method="POST" action="{{ $editing ? route('ledgers.update', $ledger->id) : route('ledgers.store') }}">

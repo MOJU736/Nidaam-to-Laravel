@@ -4,7 +4,7 @@
 @php use App\Support\Money; $wo = $cn->kind === 'writeoff'; $word = $wo ? 'Write-off' : $ui['name']; @endphp
 @include('credits._tabs')
 <div class="bar">
-    <div><h1 style="margin:0">{{ $word }} {{ $cn->label }} <span class="pill {{ $cn->status === 'void' ? 'overdue' : '' }}">{{ ucfirst($cn->status) }}</span></h1><a class="muted" href="{{ route($ui['route'].'.index') }}">&larr; {{ $ui['names'] }}</a></div>
+    <div><h1>{{ $word }} {{ $cn->label }} <span class="pill {{ $cn->status === 'void' ? 'overdue' : '' }}">{{ ucfirst($cn->status) }}</span></h1><a class="muted" href="{{ route($ui['route'].'.index') }}">&larr; {{ $ui['names'] }}</a></div>
     <div class="actions">
         @include('documents._actions', ['type' => $ui['side'] === 'ar' ? 'credit-note' : 'supplier-credit', 'id' => $cn->id])
         @if ($cn->status === 'draft')

@@ -4,7 +4,7 @@
 @php use App\Support\Money; $l = $line; @endphp
 <p class="noprint"><a href="{{ route('payroll.runs.show', $run->id) }}">&larr; {{ $month }} pay run</a></p>
 <div class="bar">
-    <div><h1 style="margin:0">Payslip - {{ $l->name }}</h1><div class="muted">{{ $month }}{{ $l->position ? ' · '.$l->position : '' }}{{ $l->department ? ' · '.$l->department : '' }}</div></div>
+    <div><h1>Payslip - {{ $l->name }}</h1><div class="muted">{{ $month }}{{ $l->position ? ' · '.$l->position : '' }}{{ $l->department ? ' · '.$l->department : '' }}</div></div>
     <div class="actions noprint">
         <a class="btn ghost" href="{{ route('payroll.payslip.pdf', $l->id) }}" target="_blank">PDF</a>
         <a class="btn ghost" href="{{ route('payroll.payslip.pdf', ['lineId' => $l->id, 'download' => 1]) }}">Download</a>

@@ -2,7 +2,7 @@
 @section('title', 'Vehicle pricing')
 @section('content')
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">Vehicle pricing</h1></div>
+<div class="bar"><h1>Vehicle pricing</h1></div>
 <p class="muted" style="margin-top:0">Vehicle models (Prado, Hilux ...) each item can carry a special price for. A customer's vehicle is tagged with a model so invoices pick the right price.</p>
 <form class="card" method="POST" action="{{ route('items.vehicles') }}" style="margin-bottom:16px">
     @csrf

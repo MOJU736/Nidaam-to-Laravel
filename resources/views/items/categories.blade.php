@@ -2,7 +2,7 @@
 @section('title', 'Item categories')
 @section('content')
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">Categories</h1></div>
+<div class="bar"><h1>Categories</h1></div>
 <form class="card" method="POST" action="{{ route('items.categories') }}" style="margin-bottom:16px">
     @csrf
     <div class="actions" style="align-items:end"><div style="flex:1;max-width:360px"><label for="name" style="margin-top:0">New category</label><input id="name" name="name" maxlength="255" required placeholder="e.g. Renewal services"></div><button>Add</button></div>

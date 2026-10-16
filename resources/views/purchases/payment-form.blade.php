@@ -7,7 +7,8 @@
 @section('title', $editing ? 'Edit payment' : 'Pay vendor')
 @section('content')
 @include('purchases._tabs')
-<div class="bar"><h1 style="margin:0">{{ $editing ? 'Edit payment '.\App\Services\Sales\Allocations::docLabel('', $payment->number) : 'Pay vendor' }}</h1><a class="muted" href="{{ $editing ? route('vendor-payments.show', $payment->id) : route('vendor-payments.index') }}">&larr; Back</a></div>
+<a class="back" href="{{ $editing ? route('vendor-payments.show', $payment->id) : route('vendor-payments.index') }}">&larr; Back</a>
+<div class="bar"><h1>{{ $editing ? 'Edit payment '.\App\Services\Sales\Allocations::docLabel('', $payment->number) : 'Pay vendor' }}</h1></div>
 
 <form class="card" method="POST" action="{{ $editing ? route('vendor-payments.update', $payment->id) : route('vendor-payments.store') }}" style="max-width:860px">
     @csrf

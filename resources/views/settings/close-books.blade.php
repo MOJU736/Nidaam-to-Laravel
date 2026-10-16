@@ -2,7 +2,7 @@
 @section('title', 'Close books')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Close books</h1></div>
+<div class="bar"><h1>Close books</h1></div>
 <div class="card" style="max-width:720px">
     @if ($lock)
         <div class="flash ok">The books are closed through <strong>{{ \App\Support\Money::date($lock) }}</strong>. Nothing dated on or before then can be added, changed, voided or deleted.</div>

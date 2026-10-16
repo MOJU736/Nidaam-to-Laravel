@@ -7,7 +7,8 @@
     $v = fn ($k, $d = '') => old($k, $project->{$k} ?? $d);
     $num = fn ($x) => $x === null || $x === '' ? '' : rtrim(rtrim((string) $x, '0'), '.');
 @endphp
-<div class="bar"><h1 style="margin:0">{{ $project ? 'Edit project #'.$project->number : 'New project #'.$next }}</h1><a class="muted" href="{{ $project ? route('projects.show', $project->id) : route('projects.index') }}">&larr; Back</a></div>
+<a class="back" href="{{ $project ? route('projects.show', $project->id) : route('projects.index') }}">&larr; Back</a>
+<div class="bar"><h1>{{ $project ? 'Edit project #'.$project->number : 'New project #'.$next }}</h1></div>
 <form class="card" method="POST" action="{{ $project ? route('projects.update', $project->id) : route('projects.store') }}" style="max-width:800px">
     @csrf @if ($project) @method('PUT') @endif
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach

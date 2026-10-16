@@ -5,7 +5,7 @@
 @include('construction._ptabs', ['p' => $p, 'on' => 'reports'])
 @php use App\Support\Money; @endphp
 @foreach ($errors->all() as $er)<div class="flash bad">{{ $er }}</div>@endforeach
-<div class="bar"><h1 style="margin:0">Weekly site reports</h1></div>
+<div class="bar"><h1>Weekly site reports</h1></div>
 <form class="card" method="POST" action="{{ route('projects.reports.store', $p->id) }}" style="margin-bottom:14px;max-width:620px">
     @csrf <div class="actions" style="align-items:end"><div><label style="margin-top:0">Week containing</label><input type="date" name="week" value="{{ now()->toDateString() }}"></div><button>New report</button></div>
     <p class="muted" style="font-size:13px;margin:6px 0 0">Progress, manpower, materials used and the week's costs fill in by themselves from the schedule, wage sheets, site stock and the books.</p>

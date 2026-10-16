@@ -7,7 +7,7 @@
     use App\Support\Money;
     $loss = Money::cmp($ye['profit'], 0) < 0;
 @endphp
-<div class="bar"><h1 style="margin:0">Year-end close</h1></div>
+<div class="bar"><h1>Year-end close</h1></div>
 <div class="row2" style="grid-template-columns:2fr 1fr;align-items:start">
     <div class="card">
         <div class="actions" style="justify-content:space-between;align-items:flex-start">

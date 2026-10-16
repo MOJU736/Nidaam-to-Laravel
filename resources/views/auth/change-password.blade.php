@@ -1,7 +1,7 @@
 @extends('layouts.main')
 @section('title', 'Change password')
 @section('content')
-<div class="bar"><h1 style="margin:0">Change your password</h1></div>
+<div class="bar"><h1>Change your password</h1></div>
 <form class="card" method="POST" action="{{ route('password.change.save') }}" style="max-width:480px" autocomplete="off">
     @csrf
     @foreach ($errors->all() as $error)<p class="error">{{ $error }}</p>@endforeach

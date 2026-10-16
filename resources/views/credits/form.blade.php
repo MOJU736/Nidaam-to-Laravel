@@ -8,7 +8,8 @@
 @section('title', ($editing ? 'Edit ' : 'New ').$ui['name'])
 @section('content')
 @include('credits._tabs')
-<div class="bar"><h1 style="margin:0">{{ $editing ? 'Edit '.$ui['name'].' '.$cn->label : 'New '.strtolower($ui['name']) }}</h1><a class="muted" href="{{ route($ui['route'].'.index') }}">&larr; Back</a></div>
+<a class="back" href="{{ route($ui['route'].'.index') }}">&larr; Back</a>
+<div class="bar"><h1>{{ $editing ? 'Edit '.$ui['name'].' '.$cn->label : 'New '.strtolower($ui['name']) }}</h1></div>
 
 <form class="card" method="POST" id="creditForm" action="{{ $editing ? route($ui['route'].'.update', $cn->id) : route($ui['route'].'.store') }}">
     @csrf

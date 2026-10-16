@@ -3,7 +3,8 @@
 @section('content')
 @php use App\Support\Money; @endphp
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">{{ $model->name }} — item prices</h1><a class="muted" href="{{ route('items.vehicles') }}">&larr; Vehicle models</a></div>
+<a class="back" href="{{ route('items.vehicles') }}">&larr; Vehicle models</a>
+<div class="bar"><h1>{{ $model->name }} — item prices</h1></div>
 <p class="muted" style="margin-top:0">Leave a price blank to use the item's normal sales price.</p>
 <form method="POST" action="{{ route('items.vehicles.prices', $model->id) }}" class="card tbl">
     @csrf @method('PUT')

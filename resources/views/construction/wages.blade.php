@@ -3,7 +3,7 @@
 @section('content')
 @include('construction._tabs')
 @php use App\Support\Money; @endphp
-<div class="bar"><h1 style="margin:0">Wage sheets</h1><a class="btn" href="{{ route('construction.wages.create') }}">New wage sheet</a></div>
+<div class="bar"><h1>Wage sheets</h1><a class="btn" href="{{ route('construction.wages.create') }}">New wage sheet</a></div>
 <div class="card tbl">
     <table>
         <thead><tr><th>Sheet</th><th>Period</th><th>Date</th><th>Status</th><th class="num">Total</th></tr></thead>

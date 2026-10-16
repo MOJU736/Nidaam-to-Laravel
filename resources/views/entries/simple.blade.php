@@ -2,7 +2,8 @@
 @section('title', $direction === 'in' ? 'Money In' : 'Money Out')
 @section('content')
 @php $in = $direction === 'in'; @endphp
-<div class="bar"><h1 style="margin:0">{{ $in ? 'Money In' : 'Money Out' }}</h1><a class="muted" href="{{ route('entries.index') }}">&larr; Journal Entries</a></div>
+<a class="back" href="{{ route('entries.index') }}">&larr; Journal Entries</a>
+<div class="bar"><h1>{{ $in ? 'Money In' : 'Money Out' }}</h1></div>
 <form class="card" method="POST" action="{{ route('entries.simple', $direction) }}" style="max-width:640px">
     @csrf
     <p class="muted" style="margin-top:0">{{ $in ? 'Money received into a bank or cash account - income, a loan, capital put in.' : 'Money paid out of a bank or cash account - an expense, a loan repayment, drawings.' }}</p>

@@ -3,7 +3,8 @@
 @section('content')
 @php use App\Support\Money; @endphp
 @include('sales._tabs')
-<div class="bar"><h1 style="margin:0">Invoice {{ $sales->label('invoice', $inv->number) }} - due date and notes</h1><a class="muted" href="{{ route('invoices.show', $inv->id) }}">&larr; Invoice</a></div>
+<a class="back" href="{{ route('invoices.show', $inv->id) }}">&larr; Invoice</a>
+<div class="bar"><h1>Invoice {{ $sales->label('invoice', $inv->number) }} - due date and notes</h1></div>
 <form class="card" method="POST" action="{{ route('invoices.update', $inv->id) }}" style="max-width:560px">
     @csrf @method('PUT')
     <p class="muted" style="margin-top:0">This invoice is issued, so its lines and amounts are locked - they are what was posted to the books. To change them, revert it to draft (or void it and make a new one).</p>

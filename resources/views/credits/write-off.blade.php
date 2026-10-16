@@ -3,7 +3,8 @@
 @section('content')
 @php use App\Support\Money; @endphp
 @include('sales._tabs')
-<div class="bar"><h1 style="margin:0">Write off {{ $label }}</h1><a class="muted" href="{{ route('invoices.show', $inv->id) }}">&larr; Invoice</a></div>
+<a class="back" href="{{ route('invoices.show', $inv->id) }}">&larr; Invoice</a>
+<div class="bar"><h1>Write off {{ $label }}</h1></div>
 <form class="card" method="POST" action="{{ route('invoices.write-off', $inv->id) }}" style="max-width:640px" onsubmit="return confirm('Write this off as a bad debt? It posts to the books.')">
     @csrf
     @foreach (['amount', 'date', 'reason'] as $k)@if ($errors->has($k))<p class="error">{{ $errors->first($k) }}</p>@endif @endforeach

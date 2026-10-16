@@ -1,7 +1,8 @@
 @extends('layouts.main')
 @section('title', $group ? 'Edit group' : 'New group')
 @section('content')
-<div class="bar"><h1 style="margin:0">{{ $group ? 'Edit group' : 'New group' }}</h1><a class="muted" href="{{ route('chart') }}">&larr; Chart of Accounts</a></div>
+<a class="back" href="{{ route('chart') }}">&larr; Chart of Accounts</a>
+<div class="bar"><h1>{{ $group ? 'Edit group' : 'New group' }}</h1></div>
 
 <form class="card" method="POST" action="{{ $group ? route('groups.update', $group->id) : route('groups.store') }}" style="max-width:640px">
     @csrf

@@ -3,7 +3,7 @@
 @section('content')
 @include('settings._tabs')
 @php $m = fn ($v) => (\App\Support\Money::cmp($v, '0') < 0 ? '-' : '').\App\Support\Money::format(\App\Support\Money::cmp($v, '0') < 0 ? \App\Support\Money::neg($v) : $v); @endphp
-<div class="bar"><div><h1 style="margin:0">Move from QuickBooks</h1><div class="muted">Bring a QuickBooks company's opening balances, unpaid invoices, unpaid bills and stock into this company in one go.</div></div></div>
+<div class="bar"><div><h1>Move from QuickBooks</h1><div class="muted">Bring a QuickBooks company's opening balances, unpaid invoices, unpaid bills and stock into this company in one go.</div></div></div>
 @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach
 
 @if ($done)

@@ -4,7 +4,7 @@
 @php use App\Services\Inventory\StockService as S; use App\Support\Money; @endphp
 @include('items._tabs')
 <div class="bar">
-    <div><h1 style="margin:0">Stock adjustment {{ $adj->label }} <span class="pill {{ $adj->status === 'void' ? 'overdue' : '' }}">{{ $adj->status === 'void' ? 'Void' : 'Posted' }}</span></h1><a class="muted" href="{{ route('items.adjustments') }}">&larr; Stock adjustments</a></div>
+    <div><h1>Stock adjustment {{ $adj->label }} <span class="pill {{ $adj->status === 'void' ? 'overdue' : '' }}">{{ $adj->status === 'void' ? 'Void' : 'Posted' }}</span></h1><a class="muted" href="{{ route('items.adjustments') }}">&larr; Stock adjustments</a></div>
     @if ($adj->status === 'posted')
         <form class="inline" method="POST" action="{{ route('items.adjustments.void', $adj->id) }}" onsubmit="return confirm('Void this adjustment? Each item\'s quantity moves back by what it changed, and its journal entry is removed.')">@csrf<button class="danger">Void</button></form>
     @endif

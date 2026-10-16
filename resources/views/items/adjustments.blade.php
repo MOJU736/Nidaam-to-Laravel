@@ -3,7 +3,7 @@
 @section('content')
 @php use App\Support\Money; @endphp
 @include('items._tabs')
-<div class="bar"><h1 style="margin:0">Stock adjustments</h1><a class="btn" href="{{ route('items.adjustments.create') }}">+ New adjustment</a></div>
+<div class="bar"><h1>Stock adjustments</h1><a class="btn" href="{{ route('items.adjustments.create') }}">+ New adjustment</a></div>
 <div class="card tbl">
     <table>
         <thead><tr><th>No.</th><th>Date</th><th>Reason</th><th class="num">Items</th><th class="num">Value</th><th>Status</th></tr></thead>

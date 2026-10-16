@@ -3,7 +3,8 @@
 @section('content')
 @include('construction._tabs')
 @php use App\Support\Money; @endphp
-<div class="bar"><h1 style="margin:0">Wage sheet {{ $s->number }} <span class="pill">{{ ['paid' => 'Paid', 'unpaid' => 'Not paid yet', 'void' => 'Void'][$s->status] ?? $s->status }}</span></h1><a class="muted" href="{{ route('construction.wages') }}">&larr; Back</a></div>
+<a class="back" href="{{ route('construction.wages') }}">&larr; Back</a>
+<div class="bar"><h1>Wage sheet {{ $s->number }} <span class="pill">{{ ['paid' => 'Paid', 'unpaid' => 'Not paid yet', 'void' => 'Void'][$s->status] ?? $s->status }}</span></h1></div>
 @foreach ($errors->all() as $e)<div class="flash bad">{{ $e }}</div>@endforeach
 <div class="card" style="margin-bottom:16px">
     <div class="muted">Period {{ Money::date($s->date_from) }} – {{ Money::date($s->date_to) }} · posted {{ Money::date($s->date) }}@if ($s->paid_date) · paid {{ Money::date($s->paid_date) }} from {{ $s->paid_ledger_name }}@endif</div>

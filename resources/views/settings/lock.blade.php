@@ -2,7 +2,7 @@
 @section('title', 'Lock company')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Lock company</h1></div>
+<div class="bar"><h1>Lock company</h1></div>
 <div class="card" style="max-width:720px">
     @if ($locked)
         <div class="flash bad">This company is <strong>locked</strong>. Nothing can be added, changed, voided or deleted until it is unlocked.</div>

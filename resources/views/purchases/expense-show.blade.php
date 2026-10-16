@@ -4,7 +4,7 @@
 @php use App\Support\Money; @endphp
 @include('purchases._tabs')
 <div class="bar">
-    <div><h1 style="margin:0">Expense {{ $purchases->expenseLabel($e->number) }} <span class="pill {{ $e->status === 'void' ? 'overdue' : '' }}">{{ $e->status === 'void' ? 'Void' : 'Paid' }}</span></h1><a class="muted" href="{{ route('expenses.index') }}">&larr; Quick expenses</a></div>
+    <div><h1>Expense {{ $purchases->expenseLabel($e->number) }} <span class="pill {{ $e->status === 'void' ? 'overdue' : '' }}">{{ $e->status === 'void' ? 'Void' : 'Paid' }}</span></h1><a class="muted" href="{{ route('expenses.index') }}">&larr; Quick expenses</a></div>
     <div class="actions">
         @if ($e->status === 'paid')
             <form class="inline" method="POST" action="{{ route('expenses.void', $e->id) }}" onsubmit="return confirm('Void this expense? Its journal entry is reversed.')">@csrf<button class="danger">Void</button></form>

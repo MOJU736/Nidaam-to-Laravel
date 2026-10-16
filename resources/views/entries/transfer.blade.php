@@ -1,7 +1,8 @@
 @extends('layouts.main')
 @section('title', 'Transfer')
 @section('content')
-<div class="bar"><h1 style="margin:0">Transfer</h1><a class="muted" href="{{ route('entries.index') }}">&larr; Journal Entries</a></div>
+<a class="back" href="{{ route('entries.index') }}">&larr; Journal Entries</a>
+<div class="bar"><h1>Transfer</h1></div>
 <form class="card" method="POST" action="{{ route('entries.transfer') }}" style="max-width:640px">
     @csrf
     <p class="muted" style="margin-top:0">Move money between two of your own bank or cash accounts.</p>

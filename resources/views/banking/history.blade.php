@@ -2,7 +2,7 @@
 @section('title', 'Reconciliation history')
 @section('content')
 @php use App\Support\Money; @endphp
-<div class="bar"><div><h1 style="margin:0">Reconciliation history</h1><div class="muted">{{ $ledger->name }}</div></div>
+<div class="bar"><div><h1>Reconciliation history</h1><div class="muted">{{ $ledger->name }}</div></div>
     <div class="actions">@if ($draft)<a class="btn" href="{{ route('banking.rec', $draft->id) }}">Continue reconciling</a>@else<a class="btn" href="{{ route('banking.reconcile', $ledger->id) }}">Reconcile</a>@endif<a class="btn ghost" href="{{ route('banking.index') }}">All accounts</a></div></div>
 <div class="card tbl"><table>
     <thead><tr><th>Statement date</th><th class="num">Statement balance</th><th>Finished</th><th>By</th><th>Status</th><th></th></tr></thead>

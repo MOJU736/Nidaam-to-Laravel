@@ -2,7 +2,7 @@
 @section('title', 'Tax rates')
 @section('content')
 @include('settings._tabs')
-<div class="bar"><h1 style="margin:0">Tax rates</h1></div>
+<div class="bar"><h1>Tax rates</h1></div>
 @if ($locked)<div class="flash bad">This company is locked, so tax rates cannot be changed.</div>@endif
 <p class="muted" style="margin-top:0;max-width:720px">Named rates you can pick on invoices, quotations, bills, purchase orders and credit notes. Picking one fills in the tax % on the document; a document still has one tax % for the whole document. The one marked default is picked automatically on new documents.</p>
 <form class="card" method="POST" action="{{ route('settings.tax-rates') }}" style="margin-bottom:16px">

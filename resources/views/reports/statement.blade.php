@@ -5,7 +5,7 @@
 @if ($ledger)
     @include('reports._head', ['title' => 'Account Statement', 'subtitle' => $ledger->name.' · '.$reports->longDate($from).' through '.$reports->longDate($to), 'mode' => 'range', 'noFilter' => true])
 @else
-    <div class="bar"><div><h1 style="margin:0">Account Statement</h1><div class="muted">Every movement in one account, with a running balance</div></div><a class="btn ghost" href="{{ route('reports.index') }}">All reports</a></div>
+    <div class="bar"><div><h1>Account Statement</h1><div class="muted">Every movement in one account, with a running balance</div></div><a class="btn ghost" href="{{ route('reports.index') }}">All reports</a></div>
 @endif
 <form class="card noprint" method="GET" action="{{ route('reports.statement') }}" style="margin-bottom:16px">
     <div class="rfilter">

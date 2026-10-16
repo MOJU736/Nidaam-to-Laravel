@@ -3,7 +3,8 @@
 @section('content')
 @include('construction._tabs')
 @php use App\Support\Money; @endphp
-<div class="bar"><h1 style="margin:0">New wage sheet #{{ $next }}</h1><a class="muted" href="{{ route('construction.wages') }}">&larr; Back</a></div>
+<a class="back" href="{{ route('construction.wages') }}">&larr; Back</a>
+<div class="bar"><h1>New wage sheet #{{ $next }}</h1></div>
 <form class="card" method="POST" action="{{ route('construction.wages.store') }}">
     @csrf
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach

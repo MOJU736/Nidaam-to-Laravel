@@ -5,7 +5,7 @@
 @include('construction._ptabs', ['p' => $p, 'on' => 'reports'])
 @php use App\Support\Money; $a = $r->auto ?: []; $locked = $r->status === 'approved'; @endphp
 @foreach ($errors->all() as $er)<div class="flash bad">{{ $er }}</div>@endforeach
-<div class="bar"><div><h1 style="margin:0">Site report {{ $r->number }} <span class="pill">{{ $statuses[$r->status] ?? $r->status }}</span></h1>
+<div class="bar"><div><h1>Site report {{ $r->number }} <span class="pill">{{ $statuses[$r->status] ?? $r->status }}</span></h1>
     <div class="muted">{{ Money::date($r->week_start) }} – {{ Money::date($r->week_end) }} · prepared by {{ $r->prepared_by }}@if ($r->approved_at) · approved by {{ $r->approved_by }} {{ Money::date($r->approved_at) }}@endif</div></div>
     <div class="actions"><a class="btn sm ghost" href="{{ route('projects.report.pdf', $r->id) }}" target="_blank">PDF</a>@if ($whatsapp)<a class="btn sm ghost" href="{{ $whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>@endif<a class="btn sm ghost" href="{{ route('projects.reports', $p->id) }}">All reports</a></div></div>
 @if ($r->return_note)<div class="flash bad"><strong>Returned for changes:</strong> {{ $r->return_note }}</div>@endif

@@ -1,7 +1,7 @@
 @extends('layouts.main')
 @section('title', 'Commission settings')
 @section('content')
-<div class="bar"><h1 style="margin:0">Commission settings</h1><a class="btn ghost" href="{{ route('commissions.index') }}">Back</a></div>
+<div class="bar"><h1>Commission settings</h1><a class="btn ghost" href="{{ route('commissions.index') }}">Back</a></div>
 <form class="card" method="POST" action="{{ route('commissions.settings.save') }}" style="max-width:700px">@csrf
     @foreach ($errors->all() as $e)<p class="error">{{ $e }}</p>@endforeach
     <p class="muted" style="margin-top:0">Choose the accounts commissions post to. Leave one empty and it is found by name (or made) the first time it is needed.</p>

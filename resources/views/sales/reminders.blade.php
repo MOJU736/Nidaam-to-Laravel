@@ -3,7 +3,8 @@
 @section('content')
 @php use App\Support\Money; $cutoff = strtotime('-'.$recentDays.' days'); @endphp
 @include('sales._tabs')
-<div class="bar"><h1 style="margin:0">Payment reminders</h1><a class="muted" href="{{ route('customers.index') }}">&larr; Customers</a></div>
+<a class="back" href="{{ route('customers.index') }}">&larr; Customers</a>
+<div class="bar"><h1>Payment reminders</h1></div>
 
 @if ($results)
     <div class="card" style="margin-bottom:14px">

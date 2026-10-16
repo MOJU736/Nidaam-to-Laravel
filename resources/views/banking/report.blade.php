@@ -9,7 +9,7 @@
     $nIn = count(array_filter($cleared, fn ($c) => $c['in'] !== null)); $nOut = count($cleared) - $nIn;
 @endphp
 <style>@media print { nav.top, .noprint { display:none !important } .wide { padding:0 !important; max-width:none !important } }</style>
-<div class="bar"><div><h1 style="margin:0">Reconciliation report</h1><div class="muted">{{ app(\App\Tenancy\TenantManager::class)->current()?->name }} · {{ $ledger->name }} · statement ending {{ Money::date($rec->statement_date) }}@if ($rec->status === 'undone') · <strong style="color:#b3261e">undone</strong>@endif</div></div>
+<div class="bar"><div><h1>Reconciliation report</h1><div class="muted">{{ app(\App\Tenancy\TenantManager::class)->current()?->name }} · {{ $ledger->name }} · statement ending {{ Money::date($rec->statement_date) }}@if ($rec->status === 'undone') · <strong style="color:#b3261e">undone</strong>@endif</div></div>
     <div class="actions noprint"><button type="button" class="ghost" onclick="window.print()">Print</button><a class="btn ghost" href="{{ route('banking.history', $ledger->id) }}">History</a></div></div>
 <div class="card" style="margin-bottom:16px"><table class="qbr" style="max-width:560px;border-collapse:collapse;width:100%">
     <tr><td>Beginning balance</td><td class="num">{{ Money::format($rec->begin_balance) }}</td></tr>
