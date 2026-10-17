@@ -56,6 +56,16 @@ class PrefixAwareConnection extends MySqlConnection
         // a table written after FROM or JOIN in a raw sub-query
         $sql = preg_replace('/\b(FROM|JOIN)(\s+)('.$alt.')\b(?![`\w.])/i', '$1$2'.$p.'$3', $sql);
 
+        // the same, with the table name in backticks
+        $sql = preg_replace('/\b(FROM|JOIN|INTO|UPDATE)(\s+)`('.$alt.')`/i', '$1$2`'.$p.'$3`', $sql);
+
+        // Laravel puts the prefix on a table's nickname too ("invoice_items as ii" becomes "... as chetravel_ii"), so a raw "ii.amount" needs it as well
+        if (preg_match_all('/\bas\s+`'.preg_quote($p, '/').'(\w+)`/i', $sql, $m)) {
+            foreach (array_unique($m[1]) as $alias) {
+                $sql = preg_replace('/(?<![\w`.$])'.preg_quote($alias, '/').'\.(?=[\w*`])/', $p.$alias.'.', $sql);
+            }
+        }
+
         return $sql;
     }
 }
